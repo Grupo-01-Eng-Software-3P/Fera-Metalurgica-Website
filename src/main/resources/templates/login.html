@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Login - Fera</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-body">
+
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <div class="login-left">
+      <div class="login-form-container">
+        <h1 class="login-logo">FERA</h1>
+
+        <form action="/" method="get">
+          <div class="input-group">
+            <label>E-mail:</label>
+            <input type="email" name="email" class="login-input" required>
+          </div>
+
+          <div class="input-group">
+            <label>Senha:</label>
+            <input type="password" name="senha" class="login-input" required>
+          </div>
+
+          <div class="forgot-password">
+            <a href="#">Esqueci minha senha</a>
+          </div>
+
+          <div class="login-buttons">
+            <button type="button" class="btn-registro">Registro</button>
+            <button type="submit" class="btn-entrar">Entrar</button>
+          </div>
+          <p class="no-account">Ainda não tem uma conta?</p>
+        </form>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <h2>Bem Vindo!</h2>
+      <p>Do sonho à solda,<br>da ideia à estrutura.</p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

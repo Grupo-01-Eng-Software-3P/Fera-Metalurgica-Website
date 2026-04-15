@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Solicitar Orçamento - Fera Metalúrgica</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background-color: var(--bg-beige);">
+
+<nav class="top-nav" style="background-color: var(--fera-dark); padding: 15px 50px;">
+    <div class="logo">
+        <h2 style="color: var(--fera-orange);">FERA</h2>
+    </div>
+    <div class="nav-links">
+        <a href="/" style="color: var(--white); font-weight: normal;"><i class="fas fa-arrow-left"></i> Voltar ao Início</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="form-container-center">
+        <h2 style="color: var(--fera-orange); margin-bottom: 10px; text-align: center;">Solicitar Orçamento</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">Detalhe a sua ideia para que possamos transformá-la em realidade.</p>
+
+        <form action="/orcamento" method="post">
+
+            <div class="input-group">
+                <label>Nome Completo:</label>
+                <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" required>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>Material Desejado:</label>
+                    <select name="material" class="input-field" style="cursor: pointer;">
+                        <option value="Aço Carbono">Aço Carbono</option>
+                        <option value="Aço Inox">Aço Inox</option>
+                        <option value="Ferro e Madeira">Ferro e Madeira</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="flex: 1;">
+                    <label>Medidas (Aprox.):</label>
+                    <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Descrição do Projeto:</label>
+                <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva como você imagina o móvel, onde será usado, cor, etc." required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Anexar Referência (Imagem/Desenho):</label>
+                <input type="file" name="arquivo" class="input-field" style="background: transparent; padding: 10px 0; cursor: pointer;">
+                <small style="color: #888; font-size: 12px;">Formatos aceitos: JPG, PNG, PDF</small>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; font-size: 18px;">
+                <i class="fas fa-paper-plane"></i> Enviar Solicitação
+            </button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

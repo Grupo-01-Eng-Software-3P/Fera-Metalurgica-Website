@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home - Fera Metalúrgica</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="hero-section" style="background-image: url('/imagens/hero-bg.png');">
+    <nav class="top-nav">
+        <div class="logo">
+            <h2 style="color: var(--fera-orange);">FERA</h2>
+        </div>
+        <div class="nav-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="/orcamento" class="btn-outline">Meus Orçamentos</a>
+            <a href="/login"><i class="fas fa-user-circle"></i> Perfil</a>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <h1>Soluções Customizadas<br>com design e funcionalidade<br>para todos os ambientes</h1>
+        <a href="/orcamento" class="btn-white">Inspire-se</a>
+    </div>
+</header>
+
+<section class="benefits-section">
+    <div class="benefits-header">
+        <h2>Por que escolher<br><strong>FERA?</strong></h2>
+    </div>
+
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <div class="icon-circle"><i class="fas fa-ruler-combined"></i></div>
+            <p>Projetos sob<br>medida</p>
+        </div>
+        <div class="benefit-card">
+            <div class="icon-circle"><i class="fas fa-dumbbell"></i></div>
+            <p>Alta resistência e<br>durabilidade</p>
+        </div>
+        <div class="benefit-card">
+            <div class="icon-circle"><i class="fas fa-shield-alt"></i></div>
+            <p>Acabamento<br>profissional</p>
+        </div>
+        <div class="benefit-card">
+            <div class="icon-circle"><i class="fas fa-truck"></i></div>
+            <p>Entrega super<br>rápida</p>
+        </div>
+    </div>
+</section>
+
+<section class="steps-section">
+    <h2 class="section-title">Veja como é SIMPLES</h2>
+
+    <div class="steps-container">
+        <div class="step">
+            <div class="step-icon"><i class="fas fa-phone-volume"></i></div>
+            <p><span>1.</span> Contato</p>
+        </div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+
+        <div class="step">
+            <div class="step-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <p><span>2.</span> Orçamento</p>
+        </div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+
+        <div class="step">
+            <div class="step-icon"><i class="fas fa-industry"></i></div>
+            <p><span>3.</span> Produção</p>
+        </div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+
+        <div class="step">
+            <div class="step-icon"><i class="fas fa-truck-loading"></i></div>
+            <p><span>4.</span> Entrega</p>
+        </div>
+    </div>
+</section>
+
+<section class="gallery-section">
+    <h2 class="section-title">Galeria de Projetos</h2>
+
+    <div class="gallery-container">
+        <button class="nav-btn"><i class="fas fa-arrow-left"></i></button>
+        <div class="gallery-images">
+            <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Projeto 1" onclick="abrirModal(this)">
+            <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Projeto 2" onclick="abrirModal(this)">
+            <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Projeto 3" onclick="abrirModal(this)">
+        </div>
+        <button class="nav-btn"><i class="fas fa-arrow-right"></i></button>
+    </div>
+</section>
+
+<div id="modalGaleria" class="modal">
+    <span class="fechar-modal" onclick="fecharModal()">&times;</span>
+    <img class="modal-conteudo" id="imagemExpandida">
+</div>
+
+<section class="cta-section">
+    <div class="cta-text">
+        <h2>Fera Metalurgica</h2>
+        <hr>
+        <p>Sua casa está pronta para receber os amigos, ver a família crescer e presenciar momentos inesquecíveis? Temos soluções ideais para deixar a sua casa ou o seu apartamento prontos para tudo! Móveis planejados sob medida para os seus ambientes e estilo de vida. Com aproveitamento inteligente de espaços, materiais da melhor qualidade e acabamentos que são referência no mercado. Faça seu projeto e deixe-nos surpreender você!</p>
+        <a href="/orcamento" class="btn-white-solid">Faça seu orçamento</a>
+    </div>
+    <div class="cta-image">
+        <img src="/imagens/hero-bg.png" alt="Fera Metalúrgica Ambiente">
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-left">
+        <h3>Fera Metalurgica</h3>
+        <p>Fera Metalúrgica é sinônimo de força, precisão e qualidade. Especializada em soluções metálicas sob medida, unimos tecnologia, experiência e dedicação para entregar resultados resistentes, confiáveis e feitos para durar. Mais do que metal, entregamos confiança em cada projeto.</p>
+        <div class="social-icons-footer">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+    </div>
+
+    <div class="footer-links-container">
+        <div class="footer-column">
+            <h4>Veja mais</h4>
+            <ul>
+                <li><a href="#">Catálogo</a></li>
+                <li><a href="/orcamento">Orçamento</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Suporte</h4>
+            <ul>
+                <li><a href="#">Contato</a></li>
+                <li><a href="#">Suporte</a></li>
+                <li><a href="#">Diretrizes</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+<script>
+    function abrirModal(elementoImg) {
+        var modal = document.getElementById("modalGaleria");
+        var imagemExpandida = document.getElementById("imagemExpandida");
+
+        modal.style.display = "block";
+        // Copia o 'src' da imagem pequena clicada para a imagem grande
+        imagemExpandida.src = elementoImg.src;
+    }
+
+    function fecharModal() {
+        var modal = document.getElementById("modalGaleria");
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("modalGaleria");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
+

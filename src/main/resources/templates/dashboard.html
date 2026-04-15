@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - Fera</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <h2>Fera</h2>
+        <p style="font-size: 12px;">Metalúrgica & Móveis</p>
+
+        <ul>
+            <li><a href="/">Início</a></li>
+            <li><a href="#">Agenda</a></li>
+            <li><a href="#">Estoque</a></li>
+            <li><a href="/orcamento">Orçamentos</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h2 style="color: var(--fera-orange);">Início</h2>
+            <button class="btn-primary" onclick="abrirModalAtividade()">+ Nova Atividade</button>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div>
+                    <h3>28</h3>
+                    <p>Orçamentos este mês</p>
+                </div>
+            </div>
+            <div class="card">
+                <div>
+                    <h3>11</h3>
+                    <p>Projetos Concluídos</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #666;">Atividades recentes</h3>
+                <a href="#" style="font-weight: bold;">Ver Tudo</a>
+            </div>
+
+            <ul class="atividade-list">
+                <li th:each="a : ${atividades}">
+                    <div class="atividade-left">
+                        <span class="dot-orange"></span>
+                        <span th:text="${a.descricao}"></span>
+                    </div>
+                    <span class="atividade-time" th:text="${a.tempo}"></span>
+                </li>
+            </ul>
+        </div>
+    </main>
+</div>
+
+<div id="modalAtividade" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Adicionar Nova Atividade</h3>
+
+        <form action="/nova-atividade" method="post">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Descrição da Atividade:</label>
+            <textarea name="descricao" class="input-field" rows="4" placeholder="Ex: Ligar para o fornecedor de aço inox..." required></textarea>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalAtividade()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar Atividade</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalAtividade() {
+        document.getElementById("modalAtividade").style.display = "flex";
+    }
+
+    function fecharModalAtividade() {
+        document.getElementById("modalAtividade").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("modalAtividade");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

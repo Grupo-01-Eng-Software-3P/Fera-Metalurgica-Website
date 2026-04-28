@@ -3,20 +3,26 @@
 <head>
     <title>Dashboard - Fera</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
-        <p style="font-size: 12px;">Metalúrgica & Móveis</p>
+        <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
 
-        <ul>
-            <li><a href="/">Início</a></li>
-            <li><a href="#">Agenda</a></li>
-            <li><a href="#">Estoque</a></li>
-            <li><a href="/orcamento">Orçamentos</a></li>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="#"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+            <li><a href="#"><i class="fas fa-image"></i> Mídia</a></li>
+            <li><a href="/orcamento"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
+            <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
+
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+        </div>
     </aside>
 
     <main class="main-content">

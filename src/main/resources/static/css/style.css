@@ -431,7 +431,7 @@ a {
 /* Página Inicial Admin */
 
 .dashboard-layout { display: flex; height: 100vh; }
-.sidebar { width: 250px; background-color: var(--fera-dark); color: var(--white); padding: 30px 20px; }
+.sidebar { width: 250px; background-color: var(--fera-dark); color: var(--white); padding: 30px 20px; position: relative; }
 .sidebar h2 { color: var(--fera-orange); margin-bottom: 5px; }
 .sidebar ul { list-style: none; margin-top: 40px; }
 .sidebar ul li { margin-bottom: 20px; }
@@ -665,4 +665,146 @@ textarea.input-field {
     font-size: 12px;
     font-weight: bold;
     color: #666;
+}
+
+/* ==========================================================================
+   PÁGINA: USUÁRIOS (Admin)
+   ========================================================================== */
+
+/* Ajustes na Sidebar para igualar ao protótipo */
+.sidebar-menu { list-style: none; margin-top: 30px; padding: 0; }
+.sidebar-menu li { margin-bottom: 5px; }
+.sidebar-menu li a {
+    display: block;
+    color: var(--white);
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    opacity: 0.8;
+}
+.sidebar-menu li a i { margin-right: 10px; width: 20px; }
+.sidebar-menu li.active a {
+    background-color: var(--fera-orange);
+    opacity: 1;
+    font-weight: bold;
+}
+.sidebar-user {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    color: var(--white);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.config-icon { margin-left: 20px; cursor: pointer; }
+
+/* Cabeçalho da página */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.page-title { color: var(--fera-orange); font-size: 24px; }
+.header-actions { display: flex; gap: 15px; align-items: center; }
+
+/* Caixa de Busca */
+.search-box {
+    position: relative;
+    background-color: #EAE3D9; /* Bege mais escuro do protótipo */
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+}
+.search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding-right: 10px;
+    width: 200px;
+    color: var(--fera-dark);
+}
+.search-box i { color: #A09A92; font-size: 14px; }
+
+/* Botões do Topo */
+.btn-brown {
+    background-color: #6C4424; /* Marrom do protótipo */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px; /* Formato pílula */
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Filtro "Todos" */
+.filter-container { margin-bottom: 15px; }
+.filter-pill {
+    background-color: #B37D56; /* Marrom claro do filtro */
+    color: white;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Tabela de Usuários */
+.users-table-container {
+    background-color: var(--white);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.users-table { width: 100%; border-collapse: collapse; }
+.users-table th {
+    color: #A09A92;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;
+    padding: 15px;
+}
+.users-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f9f9f9;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+.users-table tbody tr:hover { background-color: #fcfcfc; }
+
+/* Modal Específico de Usuário */
+.modal-usuario { max-width: 450px; border-radius: 15px; position: relative; }
+.modal-usuario h3 { font-size: 22px; color: black; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+.fechar-modal-x {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #ff4d4d;
+    font-size: 20px;
+    font-weight: normal;
+    cursor: pointer;
+}
+.input-gray {
+    width: 100%;
+    padding: 12px;
+    background-color: #E2E2E2; /* Cinza dos inputs do protótipo */
+    border: none;
+    border-radius: 8px;
+    margin-top: 5px;
+    font-size: 14px;
+    outline: none;
+}
+.date-short { width: 50%; } /* Data de nascimento é menorzinho */
+.btn-black-pill {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
 }

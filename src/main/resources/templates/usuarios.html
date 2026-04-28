@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Usuários - Fera</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <h2>Fera</h2>
+        <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
+
+        <ul class="sidebar-menu">
+            <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="#"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+            <li><a href="#"><i class="fas fa-image"></i> Mídia</a></li>
+            <li><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
+            <li class="active"><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
+        </ul>
+
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title">Usuário</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="text" id="inputPesquisa" onkeyup="filtrarUsuarios()" placeholder="Buscar Usuário...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="btn-brown" onclick="abrirModalUsuario()">+ Criar Usuário</button>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <span class="filter-pill">Todos</span>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Usuário</th>
+                    <th>Cargo</th>
+                    <th>Data de Cadastro</th>
+                    <th>Data de Nascimento</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td th:text="${u.id}" style="font-weight: bold; color: #666;"></td>
+                    <td th:text="${u.nome}"></td>
+                    <td th:text="${u.cargo}"></td>
+                    <td th:text="${u.dataCadastro}"></td>
+                    <td th:text="${u.dataNascimento}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div id="modalCadastroUsuario" class="modal-form-overlay">
+    <div class="modal-form-content modal-usuario">
+        <span class="fechar-modal-x" onclick="fecharModalUsuario()">&times;</span>
+
+        <h3><i class="fas fa-user"></i> Cadastro de Funcionário</h3>
+
+        <form action="/novo-usuario" method="post">
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" class="input-gray" required>
+            </div>
+
+            <div class="input-group">
+                <label>Cargo:</label>
+                <select name="cargo" class="input-gray" style="cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; padding-right: 40px;" required>
+                    <option value="" disabled selected>Selecione um cargo</option>
+                    <option value="Gerente">Gerente</option>
+                    <option value="Atendente">Atendente</option>
+                    <option value="Marceneiro">Marceneiro</option>
+                    <option value="Marketing">Marketing</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Data de Nascimento:</label>
+                <input type="date" name="dataNascimento" class="input-gray date-short" required>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="submit" class="btn-black-pill">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalUsuario() {
+        document.getElementById("modalCadastroUsuario").style.display = "flex";
+    }
+
+    function fecharModalUsuario() {
+        document.getElementById("modalCadastroUsuario").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("modalCadastroUsuario");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // --- FUNÇÃO DE PESQUISA EM TEMPO REAL ---
+    function filtrarUsuarios() {
+        // Pega o que o usuário digitou e transforma em letras minúsculas
+        var input = document.getElementById("inputPesquisa");
+        var filtro = input.value.toLowerCase();
+
+        // Pega a tabela e todas as linhas do corpo (tbody)
+        var tabela = document.querySelector(".users-table tbody");
+        var linhas = tabela.getElementsByTagName("tr");
+
+        // Passa por todas as linhas da tabela escondendo as que não combinam com a pesquisa
+        for (var i = 0; i < linhas.length; i++) {
+            // Pega as colunas de Nome (índice 1) e Cargo (índice 2)
+            var colunaNome = linhas[i].getElementsByTagName("td")[1];
+            var colunaCargo = linhas[i].getElementsByTagName("td")[2];
+
+            if (colunaNome || colunaCargo) {
+                var textoNome = colunaNome.textContent || colunaNome.innerText;
+                var textoCargo = colunaCargo.textContent || colunaCargo.innerText;
+
+                // Se o texto digitado estiver no nome OU no cargo, mostra a linha. Se não, esconde.
+                if (textoNome.toLowerCase().indexOf(filtro) > -1 || textoCargo.toLowerCase().indexOf(filtro) > -1) {
+                    linhas[i].style.display = "";
+                } else {
+                    linhas[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

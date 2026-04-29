@@ -1,0 +1,29 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-title { color: var(--fera-orange); font-size: 24px; }
+.header-actions { display: flex; gap: 15px; align-items: center; }
+
+/* Busca e Botões */
+.search-box { position: relative; background-color: #EAE3D9; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; }
+.search-box input { border: none; background: transparent; outline: none; padding-right: 10px; width: 200px; color: var(--fera-dark); }
+.search-box i { color: #A09A92; font-size: 14px; }
+
+.btn-brown { background-color: #6C4424; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; }
+
+/* Filtro */
+.filter-container { margin-bottom: 15px; }
+.filter-pill { background-color: #B37D56; color: white; padding: 5px 15px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+
+/* Tabela de Usuários */
+.users-table-container { background-color: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.users-table { width: 100%; border-collapse: collapse; }
+.users-table th { color: #A09A92; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #eee; padding: 15px; }
+.users-table td { padding: 15px; border-bottom: 1px solid #f9f9f9; font-size: 14px; color: var(--text-dark); }
+.users-table tbody tr:hover { background-color: #fcfcfc; }
+
+/* Modal Usuário */
+.modal-usuario { max-width: 450px; border-radius: 15px; position: relative; }
+.modal-usuario h3 { font-size: 22px; color: black; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+.fechar-modal-x { position: absolute; top: 15px; right: 20px; color: #ff4d4d; font-size: 20px; font-weight: normal; cursor: pointer; }
+.input-gray { width: 100%; padding: 12px; background-color: #E2E2E2; border: none; border-radius: 8px; margin-top: 5px; font-size: 14px; outline: none; }
+.date-short { width: 50%; }
+.btn-black-pill { background-color: black; color: white; border: none; padding: 12px 40px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; }

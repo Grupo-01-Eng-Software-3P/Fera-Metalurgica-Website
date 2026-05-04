@@ -297,3 +297,24 @@
     background-color: var(--fera-dark);
     transform: scale(1.02);
 }
+
+/* Limite de altura para muitos compromissos (Scroll elegante) */
+.compromissos-list {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Responsividade  */
+@media (max-width: 992px) {
+    .agenda-wrapper {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .appointments-section {
+        border-left: none;
+        border-top: 2px solid #F4EBE1;
+        padding-left: 0;
+        padding-top: 30px;
+    }
+}

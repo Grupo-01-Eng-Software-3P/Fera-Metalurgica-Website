@@ -103,4 +103,9 @@ public class SistemaController {
 
         return "redirect:/usuarios";
     }
+
+    @GetMapping("/agenda")
+    public String agenda() {
+        return "agenda";
+    }
 }

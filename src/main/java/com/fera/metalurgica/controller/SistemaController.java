@@ -48,6 +48,21 @@ public class SistemaController {
         return "login";
     }
 
+    @PostMapping("/login")
+    public String fazerLogin(@RequestParam String email,
+                             @RequestParam String senha,
+                             Model model) {
+
+        boolean autorizado = service.autenticarAdmin(email, senha);
+
+        if (autorizado) {
+            return "redirect:/dashboard";
+        } else {
+            model.addAttribute("erro", "E-mail ou senha incorretos. Tente novamente.");
+            return "login";
+        }
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("orcamentos", service.listarOrcamentos());
@@ -70,36 +85,25 @@ public class SistemaController {
     @PostMapping("/novo-usuario")
     public String salvarUsuario(@RequestParam String nome,
                                 @RequestParam String cargo,
-                                @RequestParam String dataNascimento) {
+                                @RequestParam String dataNascimento,
+                                @RequestParam(required = false) String email,
+                                @RequestParam(required = false) String senha) {
 
-        // --- LÓGICA DE ID SEQUENCIAL ---
         List<Usuario> usuariosAtuais = service.listarUsuarios();
-        int proximoNumero = 1; // Caso a lista esteja vazia, começa no 1
+        Long proximoNumero = 1L;
 
         if (!usuariosAtuais.isEmpty()) {
-            // Pega o último usuário cadastrado na lista
             Usuario ultimoUsuario = usuariosAtuais.get(usuariosAtuais.size() - 1);
-
-            // Pega a string do ID (ex: "#08"), tira o "#" e transforma em número inteiro (8)
-            int ultimoNumero = Integer.parseInt(ultimoUsuario.getId().replace("#", ""));
-
-            // Soma 1 para o novo usuário
-            proximoNumero = ultimoNumero + 1;
+            proximoNumero = ultimoUsuario.getId() + 1L;
         }
 
-        // Monta a string de volta com a hashtag e zero à esquerda (ex: #09, #10, #11)
-        String idGerado = String.format("#%02d", proximoNumero);
-        // ---------------------------------
-
-        // Pega a data de hoje para o cadastro
         String dataHoje = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-        // Formata a data de nascimento (YYYY-MM-DD para DD/MM/YYYY)
         String[] partesData = dataNascimento.split("-");
         String dataNascFormatada = partesData.length == 3 ? partesData[2] + "/" + partesData[1] + "/" + partesData[0] : dataNascimento;
 
-        // Salva o usuário com o novo ID sequencial
-        service.adicionarUsuario(new Usuario(idGerado, nome, cargo, dataHoje, dataNascFormatada));
+        // Salva o usuário com o novo ID Long, e os novos campos email e senha
+        service.adicionarUsuario(new Usuario(proximoNumero, nome, cargo, dataHoje, dataNascFormatada, email, senha));
 
         return "redirect:/usuarios";
     }

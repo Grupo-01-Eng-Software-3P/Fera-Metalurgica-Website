@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -48,21 +49,6 @@ public class SistemaController {
         return "login";
     }
 
-    @PostMapping("/login")
-    public String fazerLogin(@RequestParam String email,
-                             @RequestParam String senha,
-                             Model model) {
-
-        boolean autorizado = service.autenticarAdmin(email, senha);
-
-        if (autorizado) {
-            return "redirect:/dashboard";
-        } else {
-            model.addAttribute("erro", "E-mail ou senha incorretos. Tente novamente.");
-            return "login";
-        }
-    }
-
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("orcamentos", service.listarOrcamentos());
@@ -86,24 +72,15 @@ public class SistemaController {
     public String salvarUsuario(@RequestParam String nome,
                                 @RequestParam String cargo,
                                 @RequestParam String dataNascimento,
-                                @RequestParam(required = false) String email,
-                                @RequestParam(required = false) String senha) {
+                                @RequestParam String email,
+                                @RequestParam String senha) {
 
-        List<Usuario> usuariosAtuais = service.listarUsuarios();
-        Long proximoNumero = 1L;
+        LocalDate dataConvertida = LocalDate.parse(dataNascimento);
 
-        if (!usuariosAtuais.isEmpty()) {
-            Usuario ultimoUsuario = usuariosAtuais.get(usuariosAtuais.size() - 1);
-            proximoNumero = ultimoUsuario.getId() + 1L;
-        }
+        Usuario usuario = new Usuario(
+                null, nome, cargo, dataConvertida, email, senha);
 
-        String dataHoje = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-        String[] partesData = dataNascimento.split("-");
-        String dataNascFormatada = partesData.length == 3 ? partesData[2] + "/" + partesData[1] + "/" + partesData[0] : dataNascimento;
-
-        // Salva o usuário com o novo ID Long, e os novos campos email e senha
-        service.adicionarUsuario(new Usuario(proximoNumero, nome, cargo, dataHoje, dataNascFormatada, email, senha));
+        service.adicionarUsuario(usuario);
 
         return "redirect:/usuarios";
     }

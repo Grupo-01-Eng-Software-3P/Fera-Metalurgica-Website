@@ -1,14 +1,21 @@
 package com.fera.metalurgica.model;
+import java.time.LocalDate;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "usuario")
 public class Usuario {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Mudado para Long para usarmos Auto-Incremento (1, 2, 3...)
+
     private String nome;
     private String cargo;
-    private String dataCadastro; // Adicionado para guardar o que vem do seu construtor
-    private String dataNascimento;
+    private LocalDate dataNascimento;
 
     // Nossos novos campos de Login
+    @Column(unique = true)
     private String email;
     private String senha;
 
@@ -18,11 +25,10 @@ public class Usuario {
 
     // 2. Construtor Completo (Arrumado com todos os parâmetros)
     // O erro acontece se estiver faltando este bloco aqui:
-    public Usuario(Long id, String nome, String cargo, String dataCadastro, String dataNascimento, String email, String senha) {
+    public Usuario(Long id, String nome, String cargo, LocalDate dataNascimento, String email, String senha) {
         this.id = id;
         this.nome = nome;
         this.cargo = cargo;
-        this.dataCadastro = dataCadastro;
         this.dataNascimento = dataNascimento;
         this.email = email;
         this.senha = senha;
@@ -54,19 +60,11 @@ public class Usuario {
         this.cargo = cargo;
     }
 
-    public String getDataCadastro() {
-        return dataCadastro;
-    }
-
-    public void setDataCadastro(String dataCadastro) {
-        this.dataCadastro = dataCadastro;
-    }
-
-    public String getDataNascimento() {
+    public LocalDate getDataNascimento() {
         return dataNascimento;
     }
 
-    public void setDataNascimento(String dataNascimento) {
+    public void setDataNascimento(LocalDate dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 

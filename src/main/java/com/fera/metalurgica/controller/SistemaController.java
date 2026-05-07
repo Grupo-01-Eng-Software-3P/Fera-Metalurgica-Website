@@ -55,6 +55,11 @@ public class SistemaController {
         return "dashboard";
     }
 
+    @GetMapping("/midia")
+    public String midia(Model model) {
+        return "midia";
+    }
+
     @PostMapping("/nova-atividade")
     public String salvarAtividade(@RequestParam String descricao) {
         service.adicionarAtividade(new Atividade(descricao, "Agora"));

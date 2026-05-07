@@ -1,6 +1,20 @@
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-title { color: var(--fera-orange); font-size: 24px; }
-.header-actions { display: flex; gap: 15px; align-items: center; }
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    color: var(--fera-orange);
+    font-size: 24px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
 
 /* Busca e Botões */
 .search-box { position: relative; background-color: #EAE3D9; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; }
@@ -16,8 +30,11 @@
 /* Tabela de Usuários */
 .users-table-container { background-color: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .users-table { width: 100%; border-collapse: collapse; }
-.users-table th { color: #A09A92; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #eee; padding: 15px; }
-.users-table td { padding: 15px; border-bottom: 1px solid #f9f9f9; font-size: 14px; color: var(--text-dark); }
+
+/* Adicionado: text-align e vertical-align para centralizar */
+.users-table th { color: #A09A92; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #eee; padding: 15px; text-align: center; vertical-align: middle; }
+.users-table td { padding: 15px; border-bottom: 1px solid #f9f9f9; font-size: 14px; color: var(--text-dark); text-align: center; vertical-align: middle; }
+
 .users-table tbody tr:hover { background-color: #fcfcfc; }
 
 /* Modal Usuário */

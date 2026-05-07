@@ -15,26 +15,23 @@
       <div class="login-form-container">
         <h1 class="login-logo">FERA</h1>
 
-        <form action="/" method="get">
-          <div class="input-group">
-            <label>E-mail:</label>
-            <input type="email" name="email" class="login-input" required>
+        <form action="/login" method="POST">
+
+          <div th:if="${erro}" style="background-color: #ffcccc; color: #cc0000; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            <span th:text="${erro}"></span>
           </div>
 
           <div class="input-group">
-            <label>Senha:</label>
-            <input type="password" name="senha" class="login-input" required>
+            <label>E-mail Corporativo</label>
+            <input type="email" name="email" class="input-gray" placeholder="admin@fera.com" required>
           </div>
 
-          <div class="forgot-password">
-            <a href="#">Esqueci minha senha</a>
+          <div class="input-group">
+            <label>Senha de Acesso</label>
+            <input type="password" name="senha" class="input-gray" required>
           </div>
 
-          <div class="login-buttons">
-            <button type="button" class="btn-registro">Registro</button>
-            <button type="submit" class="btn-entrar">Entrar</button>
-          </div>
-          <p class="no-account">Ainda não tem uma conta?</p>
+          <button type="submit" class="btn-black-pill" style="width: 100%; margin-top: 20px;">Entrar no Sistema</button>
         </form>
       </div>
     </div>

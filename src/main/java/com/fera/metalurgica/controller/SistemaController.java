@@ -112,4 +112,11 @@ public class SistemaController {
     public String agenda() {
         return "agenda";
     }
+
+    @GetMapping("/catalogo")
+    public String catalogo(Model model) {
+    model.addAttribute("produtos", service.listarProdutos());
+    return "catalogo";
+
+    }
 }

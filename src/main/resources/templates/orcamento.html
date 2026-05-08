@@ -23,33 +23,45 @@
         <h2 style="color: var(--fera-orange); margin-bottom: 10px; text-align: center;">Solicitar Orçamento</h2>
         <p style="text-align: center; color: #666; margin-bottom: 30px;">Detalhe a sua ideia para que possamos transformá-la em realidade.</p>
 
-        <form action="/orcamento" method="post">
+        <!-- Exibe mensagem de erro do backend caso o CPF seja inválido -->
+        <div th:if="${erroCpf}" style="background-color: #ffcccc; color: #cc0000; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            <span th:text="${erroCpf}"></span>
+        </div>
+
+        <form action="/pedido" method="post" onsubmit="return validarFormulario()">
 
             <div class="input-group">
                 <label>Nome Completo:</label>
-                <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" required>
+                <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" th:value="${clientePreenchido}" required>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>Telefone:</label>
+                    <input type="text" name="telefone" id="telefone" class="input-field" placeholder="(00) 00000-0000" th:value="${telefonePreenchido}" required>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>CPF:</label>
+                    <input type="text" name="cpf" id="cpf" class="input-field" placeholder="000.000.000-00" th:value="${cpfPreenchido}" oninput="mascaraCPF(this)" maxlength="14" required>
+                    <small id="cpf-error" style="color: red; display: none; margin-top: 5px;">CPF Inválido!</small>
+                </div>
             </div>
 
             <div style="display: flex; gap: 15px;">
                 <div class="input-group" style="flex: 1;">
                     <label>Material Desejado:</label>
-                    <select name="material" class="input-field" style="cursor: pointer;">
-                        <option value="Aço Carbono">Aço Carbono</option>
-                        <option value="Aço Inox">Aço Inox</option>
-                        <option value="Ferro e Madeira">Ferro e Madeira</option>
-                        <option value="Outro">Outro</option>
-                    </select>
+                    <input type="text" name="material" class="input-field" placeholder="Ex: Madeira, Ferro e Vidro..." th:value="${materialPreenchido}" required>
                 </div>
 
                 <div class="input-group" style="flex: 1;">
                     <label>Medidas (Aprox.):</label>
-                    <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m">
+                    <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m" th:value="${medidasPreenchido}">
                 </div>
             </div>
 
             <div class="input-group">
                 <label>Descrição do Projeto:</label>
-                <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva como você imagina o móvel, onde será usado, cor, etc." required></textarea>
+                <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva como você imagina o móvel, onde será usado, cor, etc." required th:text="${descricaoPreenchido}"></textarea>
             </div>
 
             <div class="input-group">
@@ -64,6 +76,91 @@
         </form>
     </div>
 </div>
+
+<script>
+    // Máscara para formatar o CPF enquanto digita (000.000.000-00)
+    function mascaraCPF(input) {
+        let valor = input.value.replace(/\D/g, ''); // Tira tudo que não for número
+
+        if (valor.length > 11) valor = valor.substring(0, 11);
+
+        if (valor.length > 9) {
+            valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        } else if (valor.length > 6) {
+            valor = valor.replace(/(\d{3})(\d{3})(\d{3})/, "$1.$2.$3");
+        } else if (valor.length > 3) {
+            valor = valor.replace(/(\d{3})(\d{3})/, "$1.$2");
+        }
+
+        input.value = valor;
+
+        // Se estiver com 14 caracteres (completo com máscara), já valida
+        if(input.value.length === 14) {
+            validarCPFInput(input.value);
+        } else {
+            document.getElementById('cpf-error').style.display = 'none';
+        }
+    }
+
+    // Função de validação matemática do CPF no Javascript
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/[^\d]+/g, '');
+        if (cpf == '') return false;
+
+        if (cpf.length != 11 ||
+            cpf == "00000000000" || cpf == "11111111111" ||
+            cpf == "22222222222" || cpf == "33333333333" ||
+            cpf == "44444444444" || cpf == "55555555555" ||
+            cpf == "66666666666" || cpf == "77777777777" ||
+            cpf == "88888888888" || cpf == "99999999999")
+            return false;
+
+        // Valida 1o digito
+        var add = 0;
+        for (var i = 0; i < 9; i++)
+            add += parseInt(cpf.charAt(i)) * (10 - i);
+        var rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11)
+            rev = 0;
+        if (rev != parseInt(cpf.charAt(9)))
+            return false;
+
+        // Valida 2o digito
+        add = 0;
+        for (var i = 0; i < 10; i++)
+            add += parseInt(cpf.charAt(i)) * (11 - i);
+        rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11)
+            rev = 0;
+        if (rev != parseInt(cpf.charAt(10)))
+            return false;
+
+        return true;
+    }
+
+    // Atualiza a interface (mostra/esconde o erro vermelho)
+    function validarCPFInput(cpfValue) {
+        const errorSpan = document.getElementById('cpf-error');
+        if (!validarCPF(cpfValue)) {
+            errorSpan.style.display = 'block';
+            return false;
+        } else {
+            errorSpan.style.display = 'none';
+            return true;
+        }
+    }
+
+    // Impede o envio do formulário se o CPF estiver incorreto
+    function validarFormulario() {
+        const cpfInput = document.getElementById('cpf').value;
+        if (!validarCPFInput(cpfInput)) {
+            alert("O CPF informado é inválido. Por favor, corrija antes de enviar.");
+            document.getElementById('cpf').focus();
+            return false; // Bloqueia o submit
+        }
+        return true; // Permite o submit
+    }
+</script>
 
 </body>
 </html>

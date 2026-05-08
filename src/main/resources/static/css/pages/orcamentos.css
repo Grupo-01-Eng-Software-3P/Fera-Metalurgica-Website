@@ -1,0 +1,339 @@
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-title {
+    color: var(--fera-orange, #C06014);
+    font-size: 28px;
+}
+
+.btn-brown {
+    background-color: #5C3817;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.btn-brown:hover {
+    background-color: #C06014;
+}
+
+/* QUADRO KANBAN */
+.kanban-board {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.kanban-column {
+    background-color: #F8F8F8;
+    border-radius: 16px;
+    min-width: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 180px);
+}
+
+.kanban-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #EAE3D9;
+}
+
+.kanban-header h3 {
+    font-size: 16px;
+    color: var(--text-dark, #333);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.count {
+    background-color: #EAE3D9;
+    color: #5C3817;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Bolinhas de Status */
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot.pendente { background-color: #f39c12; }
+.dot.aprovado { background-color: #3498db; }
+.dot.finalizado { background-color: #2ecc71; }
+
+/* CARDS */
+.kanban-cards {
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.orcamento-card {
+    background-color: var(--white, #FFFFFF);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    border: 1px solid #EAE3D9;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.orcamento-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: #C06014;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.id-pedido { color: #C06014; }
+.data { color: #A09A92; }
+
+.cliente-nome {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.descricao-resumo {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limita a 2 linhas e bota 3 pontinhos */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #F0F0F0;
+    padding-top: 15px;
+}
+
+.tag.material {
+    background-color: #F4EBE1;
+    color: #5C3817;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #A09A92;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.btn-icon:hover { color: #C06014; }
+
+.empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #A09A92;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* Modal Content Base */
+.modal-orcamento-content {
+    background-color: var(--white);
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: absolute;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Modal Fechar X */
+.fechar-modal-x {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: #ff4d4d;
+    font-size: 24px;
+    font-weight: normal;
+    cursor: pointer;
+    transition: 0.2s;
+    z-index: 10;
+}
+
+.fechar-modal-x:hover {
+    color: #cc0000;
+}
+
+/* Cabeçalho */
+.orc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.orc-header h2 { font-size: 36px; font-weight: 800; color: #333; margin: 0; }
+.orc-numero { color: #666 !important; font-size: 28px !important; }
+
+/* Info Empresa */
+.orc-company-info {
+    background-color: #F8F5F2; /* Fundo bege clarinho do design */
+    border-radius: 12px;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.orc-company-text { font-size: 13px; color: #333; line-height: 1.6; }
+
+/* Títulos Marrons */
+.orc-section-title {
+    background-color: #5C3817;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+/* Tabela de Valores */
+.orc-section { margin-bottom: 25px; }
+.orc-table { width: 100%; border-collapse: collapse; }
+.orc-table th { padding: 12px; color: #333; font-weight: 600; font-size: 14px; border-bottom: 2px solid #5C3817; }
+.orc-table td { padding: 8px 5px; border-bottom: 1px solid #CCC; }
+.orc-table input { width: 100%; border: none; outline: none; padding: 10px 8px; font-size: 14px; text-align: center; background-color: #f7f7f7; border-radius: 6px; }
+.orc-table input:focus { background-color: #f0f0f0; border: 1px solid #CCC; }
+.orc-table td:nth-child(2) input { text-align: left; } /* Alinha material a esquerda */
+
+/* Split Adicionais e Obs */
+.orc-split-sections { display: flex; gap: 20px; margin-bottom: 30px; }
+.orc-adicionais { flex: 1; }
+.orc-observacao { flex: 1; display: flex; flex-direction: column; }
+
+/* Linhas dos Adicionais */
+.orc-add-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px; }
+.label-box { background-color: #F0EAE1; padding: 10px; border-radius: 8px; flex: 2; text-align: center; font-size: 14px; color: #333; font-weight: 500;}
+.label-box-input { flex: 2; text-align: center; }
+.input-box { background-color: #F8F8F8; border: 1px solid #DDD; padding: 10px; border-radius: 8px; flex: 1; outline: none; text-align: center; }
+.input-box:focus { border-color: #C06014; }
+
+/* Caixa de Observação */
+.obs-textarea { background-color: #F8F8F8; border: 1px solid #DDD; padding: 10px; border-radius: 8px; resize: none; flex: 1; height: 100%; font-family: inherit; font-size: 14px; outline: none; }
+.obs-textarea:focus { border-color: #C06014; }
+
+/* Totais */
+.orc-totais { border: 2px solid #EAE3D9; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background-color: white; }
+.orc-total-item { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; color: #333; }
+.orc-total-item input { width: 100px; background-color: #f7f7f7; border: 1px solid #EAE3D9; border-radius: 6px; padding: 8px; text-align: center; }
+.orc-total-item input:focus { border-color: #C06014; }
+
+/* Botão Salvar Gigante */
+.orc-footer { display: flex; justify-content: center; margin-top: 20px; gap: 15px;}
+.btn-salvar-orcamento { background-color: #5C3817; color: white; border: none; padding: 15px 60px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(92, 56, 23, 0.2); }
+.btn-salvar-orcamento:hover { background-color: #C06014; transform: scale(1.05); }
+
+/* FLIP CARD CSS */
+.flip-card {
+    background-color: transparent;
+    width: 100%;
+    max-width: 850px;
+    height: 90vh;
+    perspective: 1000px;
+    margin: 0 auto;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+/* Classe adicionada via JS para girar */
+.flip-card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+/* Frente e Verso */
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    /* ADICIONADO PARA CORRIGIR O ERRO DE LAYOUT */
+    background-color: var(--white);
+}
+
+.flip-card-front {
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+/* Estilos adicionais para o form da frente */
+#formPedidoCliente { text-align: left; margin-top: 20px; }
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+.input-field { width: 100%; padding: 12px; border: 1px solid #CCC; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+.input-field:disabled { background-color: #f0f0f0; cursor: not-allowed; }
+
+.btn-flip {
+    background-color: transparent;
+    color: #5C3817;
+    border: 2px solid #5C3817;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-flip:hover {
+    background-color: #5C3817;
+    color: white;
+}

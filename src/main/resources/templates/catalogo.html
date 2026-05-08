@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Catálogo - Fera Metalúrgica</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/catalogo.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="catalogo-page">
+ 
+<!-- NAV igual o home.html -->
+<nav class="top-nav top-nav--overlay">
+    <div class="logo">
+        <h2 style="color: var(--fera-orange);">FERA</h2>
+    </div>
+    <div class="nav-links">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="/orcamento" class="btn-outline">Meus Orçamentos</a>
+        <a href="/login"><i class="fas fa-user-circle"></i> Perfil</a>
+    </div>
+</nav>
+ 
+<!-- SPLIT SCREEN PRINCIPAL -->
+<main class="catalogo-split">
+ 
+    <!-- PAINEL ESQUERDO: laranja -->
+    <aside class="painel-esquerdo">
+        <div class="painel-label">
+            <span class="label-barra">|</span>
+            <span class="label-texto">Ambientes</span>
+        </div>
+        <!-- "F" grande decorativo no fundo -->
+        <div class="letra-decorativa-wrapper">
+            <span class="letra-decorativa">F</span>
+        </div>
+    </aside>
+ 
+    <!-- PAINEL DIREITO: foto de fundo + lista de ambientes -->
+    <section class="painel-direito" style="background-image: url('/imagens/hero-bg.png');">
+        <div class="painel-direito-overlay"></div>
+        <nav class="ambiente-lista">
+ 
+            <!-- Thymeleaf: lista dinâmica (quando ligar ao back-end) -->
+            <a th:each="ambiente : ${ambientes}"
+               th:href="@{'/catalogo/' + ${ambiente.slug}}"
+               th:text="${ambiente.nome}"
+               class="ambiente-item">
+            </a>
+ 
+            <!-- MOCK estático — remova quando ligar ao back-end -->
+            <a href="/catalogo/adega"              class="ambiente-item">Adega</a>
+            <a href="/catalogo/banheiro"            class="ambiente-item">Banheiro</a>
+            <a href="/catalogo/biblioteca"          class="ambiente-item">Biblioteca</a>
+            <a href="/catalogo/closet"              class="ambiente-item">Closet</a>
+            <a href="/catalogo/cozinha"             class="ambiente-item">Cozinha</a>
+            <a href="/catalogo/corporativo"         class="ambiente-item">Corporativo</a>
+            <a href="/catalogo/dormitorio"          class="ambiente-item">Dormitório</a>
+            <a href="/catalogo/espacos-comerciais"  class="ambiente-item">Espaços Comerciais</a>
+            <a href="/catalogo/lavanderia"          class="ambiente-item">Lavanderia</a>
+            <a href="/catalogo/studio"              class="ambiente-item">Studio</a>
+            <a href="/catalogo/suite"               class="ambiente-item">Suíte</a>
+ 
+        </nav>
+    </section>
+    
+ 
+</main>
+ 
+</body>
+</html>

@@ -134,6 +134,11 @@ public class SistemaController {
         return "dashboard";
     }
 
+    @GetMapping("/midia")
+    public String midia(Model model) {
+        return "midia";
+    }
+
     @PostMapping("/nova-atividade")
     public String salvarAtividade(@RequestParam String descricao) {
         service.adicionarAtividade(new Atividade(descricao, "Agora"));
@@ -175,5 +180,12 @@ public class SistemaController {
     @GetMapping("/agenda")
     public String agenda() {
         return "agenda";
+    }
+
+    @GetMapping("/catalogo")
+    public String catalogo(Model model) {
+    model.addAttribute("produtos", service.listarProdutos());
+    return "catalogo";
+
     }
 }

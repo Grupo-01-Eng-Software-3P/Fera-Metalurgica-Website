@@ -75,6 +75,13 @@ public class SistemaController {
         return "midia";
     }
 
+    @GetMapping("/midia/{slug}")
+    public String midiaCategoria(@PathVariable String slug, Model model) {
+        // Temporário até ter banco de dados
+        model.addAttribute("categoria", new com.fera.metalurgica.model.Categoria(slug, "Descrição da categoria " + slug, "5MB · faz 2 dias"));
+        return "midia-categoria";
+    }
+
     @PostMapping("/nova-atividade")
     public String salvarAtividade(@RequestParam String descricao) {
         service.adicionarAtividade(new Atividade(descricao, "Agora"));

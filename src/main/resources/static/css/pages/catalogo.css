@@ -1,0 +1,165 @@
+/* =============================================
+   catalogo.css — Fera Metalúrgica
+   Coloque em: src/main/resources/static/css/pages/
+   ============================================= */
+ 
+/* Sobrescreve o background bege do global.css */
+body.catalogo-page {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a !important; /* sobrescreve var(--bg-beige) */
+}
+ 
+/* NAV sobreposta (transparente) */
+.top-nav--overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    background: transparent;
+}
+ 
+/* ---- SPLIT SCREEN ---- */
+.catalogo-split {
+    display: flex;
+    flex: 1;
+    height: 100vh;
+}
+ 
+/* ---- PAINEL ESQUERDO (laranja) ---- */
+.painel-esquerdo {
+    width: 38%;
+    background-color: #E8731A; /* laranja Fera */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 40px;
+    overflow: hidden;
+}
+ 
+/* Label "| Ambientes" no topo esquerdo */
+.painel-label {
+    position: absolute;
+    top: 90px; /* abaixo da nav */
+    left: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    z-index: 2;
+}
+ 
+.label-barra {
+    font-size: 1.6rem;
+    font-weight: 300;
+    opacity: 0.9;
+}
+ 
+.label-texto {
+    letter-spacing: 0.02em;
+}
+ 
+/* "F" decorativo grande no fundo */
+.letra-decorativa-wrapper {
+    position: absolute;
+    bottom: -30px;
+    left: -20px;
+    z-index: 1;
+    pointer-events: none;
+}
+ 
+.letra-decorativa {
+    font-size: 260px;  /* era 320px */
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.12);
+    line-height: 1;
+    user-select: none;
+    font-family: 'Arial Black', sans-serif;
+}
+ 
+/* ---- PAINEL DIREITO (foto + lista) ---- */
+.painel-direito {
+    width: 62%;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+}
+ 
+/* Escurecimento sobre a foto */
+.painel-direito-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52);
+}
+ 
+/* ---- LISTA DE AMBIENTES ---- */
+.ambiente-lista {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 100px 60px 40px;
+    gap: 2px;
+}
+ 
+.ambiente-item {
+    color: #fff !important; /* sobrescreve a { color: var(--fera-orange) } do global.css */
+    text-decoration: none !important;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    transition: color 0.15s ease, padding-left 0.15s ease;
+    font-family: 'Georgia', serif;
+}
+ 
+.ambiente-item:hover {
+    color: #E8731A;
+    padding-left: 10px;
+}
+ 
+/* ---- RESPONSIVO ---- */
+@media (max-width: 768px) {
+    .catalogo-page {
+        height: auto;
+        overflow: auto;
+    }
+ 
+    .catalogo-split {
+        flex-direction: column;
+        height: auto;
+    }
+ 
+    .painel-esquerdo {
+        width: 100%;
+        min-height: 140px;
+        padding: 80px 30px 30px;
+    }
+ 
+    .letra-decorativa {
+        font-size: 180px;
+    }
+ 
+    .painel-direito {
+        width: 100%;
+        min-height: 100vh;
+    }
+ 
+    .ambiente-lista {
+        padding: 40px 30px;
+    }
+ 
+    .ambiente-item {
+        font-size: 1.3rem;
+    }
+}

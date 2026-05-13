@@ -15,10 +15,12 @@
       <div class="login-form-container">
         <h1 class="login-logo">FERA</h1>
 
-        <form action="/login" method="POST">
+        <form th:action="@{/login}" method="POST">
 
-          <div th:if="${erro}" style="background-color: #ffcccc; color: #cc0000; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
-            <span th:text="${erro}"></span>
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+          <div th:if="${param.error}" style="background-color: #ffcccc; color: #cc0000; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            <span>E-mail ou senha inválidos</span>
           </div>
 
           <div class="input-group">
@@ -28,10 +30,10 @@
 
           <div class="input-group">
             <label>Senha de Acesso</label>
-            <input type="password" name="senha" class="input-gray" required>
+            <input type="password" name="password" class="input-gray" required>
           </div>
 
-          <button type="submit" class="btn-black-pill" style="width: 100%; margin-top: 20px;">Entrar no Sistema</button>
+          <button type="submit" class="btn-black-pill" style="width: 100%; margin-top: 20px;">Entrar no sistema</button>
         </form>
       </div>
     </div>

@@ -188,4 +188,9 @@ public class SistemaController {
     return "catalogo";
 
     }
+
+    @GetMapping("/catalogo/adega")
+    public String adega(Model model) {
+    return "ambientes/adega";
+    }
 }

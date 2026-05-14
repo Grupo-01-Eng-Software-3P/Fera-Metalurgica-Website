@@ -20,11 +20,43 @@ public class SistemaService {
     private Long proximoIdUsuario = 1L;
 
     public SistemaService() {
+
+        // =========================
+        // PRODUTOS (mock)
+        // =========================
         produtos.add(new Produto(1L, "Mesa de Ferro", "Mesas"));
         produtos.add(new Produto(2L, "Estante de Metal", "Estantes"));
-        atividades.add(new Atividade("Aço 2mm está fora de estoque!", "Há 17h"));
-        atividades.add(new Atividade("Reunião marcada para amanhã às 9:00.", "Ontem"));
 
+        // =========================
+        // AGENDA (ATIVIDADES - COM DATA REAL)
+        // =========================
+        atividades.add(new Atividade(
+                "Entrega de móvel",
+                "Instalação completa no cliente",
+                "Casa do Cliente",
+                "2026-05-14",
+                "08:00 - 09:30"
+        ));
+
+        atividades.add(new Atividade(
+                "Reunião equipe",
+                "Planejamento semanal da produção",
+                "Escritório",
+                "2026-05-14",
+                "09:00 - 10:00"
+        ));
+
+        atividades.add(new Atividade(
+                "Visita técnica",
+                "Medir espaço para projeto novo",
+                "Cliente externo",
+                "2026-05-15",
+                "14:00 - 15:00"
+        ));
+
+        // =========================
+        // USUÁRIO ADMIN PADRÃO
+        // =========================
         Usuario adminMestre = new Usuario();
         adminMestre.setId(proximoIdUsuario++);
         adminMestre.setNome("Lucas Stibbe");
@@ -36,6 +68,9 @@ public class SistemaService {
         usuarios.add(adminMestre);
     }
 
+    // =========================
+    // USUÁRIOS
+    // =========================
     public List<Usuario> listarUsuarios() {
         return usuarios;
     }
@@ -44,29 +79,55 @@ public class SistemaService {
         usuarios.add(u);
     }
 
+    // =========================
+    // PRODUTOS
+    // =========================
     public List<Produto> listarProdutos() {
         return produtos;
     }
 
+    // =========================
+    // ORÇAMENTOS
+    // =========================
     public List<Orcamento> listarOrcamentos() {
         return orcamentos;
-    }
-
-    public List<Atividade> listarAtividades() {
-        return atividades;
     }
 
     public void adicionarOrcamento(Orcamento o) {
         orcamentos.add(o);
     }
 
-    public void adicionarAtividade(Atividade a) {
-        atividades.add(0, a);
+    // =========================
+    // AGENDA (ATIVIDADES)
+    // =========================
+    public List<Atividade> listarAtividades() {
+        return atividades;
     }
 
+    public Atividade adicionarAtividade(Atividade a) {
+        atividades.add(0, a);
+        return a;
+    }
+
+    // (OPCIONAL) filtrar por data se quiser evoluir depois
+    public List<Atividade> listarPorData(String data) {
+        List<Atividade> filtradas = new ArrayList<>();
+
+        for (Atividade a : atividades) {
+            if (a.getData() != null && a.getData().equals(data)) {
+                filtradas.add(a);
+            }
+        }
+        return filtradas;
+    }
+
+    // =========================
+    // LOGIN ADMIN
+    // =========================
     public boolean autenticarAdmin(String email, String senha) {
         for (Usuario u : usuarios) {
-            if (email != null && email.equals(u.getEmail()) && senha != null && senha.equals(u.getSenha())) {
+            if (email != null && email.equals(u.getEmail())
+                    && senha != null && senha.equals(u.getSenha())) {
                 return true;
             }
         }

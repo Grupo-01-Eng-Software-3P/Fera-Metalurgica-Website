@@ -33,12 +33,17 @@ public class SistemaController {
     @PostMapping("/orcamento")
     public String salvarOrcamento(@RequestParam String cliente,
                                   @RequestParam String material,
-                                  @RequestParam String medidas,
+                                  @RequestParam(required = false) String medidas,
                                   @RequestParam String descricao) {
 
-        service.adicionarOrcamento(
-                new Orcamento((long)(Math.random()*1000), cliente, material, medidas, descricao)
-        );
+        Orcamento novoOrcamento = new Orcamento();
+
+        novoOrcamento.setCliente(cliente);
+        novoOrcamento.setMaterial(material);
+        novoOrcamento.setMedidas(medidas);
+        novoOrcamento.setDescricao(descricao);
+
+        service.adicionarOrcamento(novoOrcamento);
 
         return "redirect:/";
     }
@@ -82,10 +87,22 @@ public class SistemaController {
         return "midia-categoria";
     }
 
-    @PostMapping("/nova-atividade")
-    public String salvarAtividade(@RequestParam String descricao) {
-        service.adicionarAtividade(new Atividade(descricao, "Agora"));
-        return "redirect:/dashboard";
+    @GetMapping("/agenda")
+    public String agenda() {
+        return "agenda";
+    }
+
+    @GetMapping("/agenda/dados")
+    @ResponseBody
+    public List<Atividade> listarAgenda() {
+        return service.listarAtividades();
+    }
+
+    @PostMapping("/agenda")
+    @ResponseBody
+    public Atividade salvarAgenda(@RequestBody Atividade atividade) {
+        service.adicionarAtividade(atividade);
+        return atividade;
     }
 
     @GetMapping("/usuarios")
@@ -118,11 +135,6 @@ public class SistemaController {
         service.adicionarUsuario(new Usuario(proximoNumero, nome, cargo, dataHoje, dataNascFormatada, email, senha));
 
         return "redirect:/usuarios";
-    }
-
-    @GetMapping("/agenda")
-    public String agenda() {
-        return "agenda";
     }
 
     @GetMapping("/catalogo")

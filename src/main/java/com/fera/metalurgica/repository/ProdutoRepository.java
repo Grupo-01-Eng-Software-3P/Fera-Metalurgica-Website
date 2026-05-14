@@ -1,4 +1,6 @@
 package com.fera.metalurgica.repository;
+import com.fera.metalurgica.model.Produto;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class ProdutoRepository {
+public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 }

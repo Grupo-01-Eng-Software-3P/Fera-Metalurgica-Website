@@ -28,7 +28,10 @@
             <span th:text="${erroCpf}"></span>
         </div>
 
-        <form action="/pedido" method="post" onsubmit="return validarFormulario()">
+        <form th:action="@{/orcamento}" method="post" onsubmit="return validarFormulario()">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
 
             <div class="input-group">
                 <label>Nome Completo:</label>

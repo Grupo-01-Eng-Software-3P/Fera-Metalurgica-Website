@@ -22,7 +22,19 @@
         </ul>
 
         <div class="sidebar-user">
-            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+            <i class="fas fa-user-circle"></i>
+            Lucas Stibbe
+            <form th:action="@{/logout}" method="POST">
+
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <button type="submit">
+                    <i class="fas fa-cog config-icon"></i>
+                </button>
+
+            </form>
         </div>
     </aside>
 

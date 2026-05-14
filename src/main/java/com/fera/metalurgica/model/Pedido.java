@@ -3,7 +3,7 @@ package com.fera.metalurgica.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class Orcamento {
+public class Pedido {
 
     // Parte 1: Pedido do Cliente
     private Long id;
@@ -23,7 +23,7 @@ public class Orcamento {
     private String observacoesAdmin;
 
     // Construtor para o Pedido do Cliente
-    public Orcamento(Long id, String cliente, String telefone, String cpf, String material, String medidas, String descricao, String criadoPor) {
+    public Pedido(Long id, String cliente, String telefone, String cpf, String material, String medidas, String descricao, String criadoPor) {
         this.id = id;
         this.cliente = cliente;
         this.telefone = telefone;

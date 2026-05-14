@@ -1,7 +1,7 @@
 package com.fera.metalurgica.controller;
 
 import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.Orcamento;
+import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Usuario;
 import com.fera.metalurgica.service.SistemaService;
 import org.springframework.stereotype.Controller;
@@ -33,8 +33,7 @@ public class SistemaController {
 
     @GetMapping("/pedido")
     public String pedidoForm(Model model) {
-        // Se vier algum erro no redirecionamento, a tela vai mostrar
-        return "orcamento"; // Reaproveitando o formulário de pedido do cliente
+        return "pedido"; // Reaproveitando o formulário de pedido do clienteiente
     }
 
     @PostMapping("/pedido")
@@ -57,12 +56,12 @@ public class SistemaController {
             model.addAttribute("medidasPreenchido", medidas);
             model.addAttribute("descricaoPreenchido", descricao);
             
-            return "orcamento";
+            return "pedido";
         }
 
         // Cria o pedido definindo "CLIENTE" como criador
         service.adicionarOrcamento(
-                new Orcamento((long)(Math.random()*1000), cliente, telefone, cpf, material, medidas, descricao, "CLIENTE")
+                new Pedido((long)(Math.random()*1000), cliente, telefone, cpf, material, medidas, descricao, "CLIENTE")
         );
 
         return "redirect:/";

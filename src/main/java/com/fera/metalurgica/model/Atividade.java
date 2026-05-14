@@ -1,12 +1,20 @@
 package com.fera.metalurgica.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "atividade")
 public class Atividade {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String titulo;
     private String descricao;
     private String evento;
-    private String data;     // yyyy-MM-dd
-    private String horario;  // "08:00 - 09:00"
+    private String data;
+    private String horario;
 
     public Atividade() {}
 
@@ -18,6 +26,7 @@ public class Atividade {
         this.horario = horario;
     }
 
+    public Long getId() { return id; }
     public String getTitulo() { return titulo; }
     public String getDescricao() { return descricao; }
     public String getEvento() { return evento; }

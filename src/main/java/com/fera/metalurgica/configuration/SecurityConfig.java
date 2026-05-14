@@ -21,16 +21,26 @@ public class SecurityConfig {
                                 "/",
                                 "/js/**",
                                 "/imagens/**",
-                                "/orcamento"
+                                "/orcamento",
+                                "/catalogo",
+                                "/pedido"
+
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(
+                                "/dashboard",
+                                "/midia",
+                                "/orcamentos",
+                                "/usuarios",
+                                "/agenda"
+                                ).authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .defaultSuccessUrl("/dashboard", false)
                         .permitAll()
                 )
 

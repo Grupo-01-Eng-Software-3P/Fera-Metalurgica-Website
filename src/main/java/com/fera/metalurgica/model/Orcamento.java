@@ -1,12 +1,20 @@
 package com.fera.metalurgica.model;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "orcamento")
 public class Orcamento {
 
     // Parte 1: Pedido do Cliente
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String cliente;
     private String telefone; // Novo
     private String cpf;      // Novo
@@ -16,11 +24,20 @@ public class Orcamento {
     private String criadoPor; // "CLIENTE" ou "ADMIN"
 
     // Parte 2: Orçamento do Admin
-    private List<ItemOrcamento> itens;
+    @OneToMany(
+            mappedBy = "orcamento", //FK está em item_orcamento
+            cascade = CascadeType.ALL, //quando salvar orçamento salva em item_orcamento também
+            orphanRemoval = true, //ao remover item da lista também remove do banco
+            fetch = FetchType.EAGER
+    )
+    private List<ItemOrcamento> itens = new ArrayList<>();
     private BigDecimal valorTotalMateriais;
     private BigDecimal valorAdicionais;
     private BigDecimal valorTotal;
     private String observacoesAdmin;
+
+    public Orcamento(){
+    }
 
     // Construtor para o Pedido do Cliente
     public Orcamento(Long id, String cliente, String telefone, String cpf, String material, String medidas, String descricao, String criadoPor) {
@@ -105,19 +122,45 @@ public class Orcamento {
     }
 
     public void setItens(List<ItemOrcamento> itens) {
-        this.itens = itens;
+
+        this.itens.clear();
+
+        for (ItemOrcamento item : itens) {
+
+            adicionarItem(item);
+        }
+
+        calcularTotais();
     }
 
     public BigDecimal getValorTotalMateriais() {
         return valorTotalMateriais;
     }
 
-    public void setValorTotalMateriais(BigDecimal valorTotalMateriais) {
-        this.valorTotalMateriais = valorTotalMateriais;
-    }
-
     public BigDecimal getValorAdicionais() {
         return valorAdicionais;
+    }
+
+    public void calcularTotais() {
+
+        BigDecimal totalMateriais = BigDecimal.ZERO;
+        if (itens != null) {
+            for (ItemOrcamento item : itens) {
+                totalMateriais =
+                        totalMateriais.add(
+                                item.getSubtotal()
+                        );
+            }
+        }
+
+        this.valorTotalMateriais = totalMateriais;
+
+        if (valorAdicionais != null) {
+            this.valorTotal =
+                    totalMateriais.add(valorAdicionais);
+        } else {
+            this.valorTotal = totalMateriais;
+        }
     }
 
     public void setValorAdicionais(BigDecimal valorAdicionais) {
@@ -128,15 +171,29 @@ public class Orcamento {
         return valorTotal;
     }
 
-    public void setValorTotal(BigDecimal valorTotal) {
-        this.valorTotal = valorTotal;
-    }
-
     public String getObservacoesAdmin() {
         return observacoesAdmin;
     }
 
     public void setObservacoesAdmin(String observacoesAdmin) {
         this.observacoesAdmin = observacoesAdmin;
+    }
+
+    public void adicionarItem(ItemOrcamento item) {
+
+        itens.add(item);
+
+        item.setOrcamento(this);
+
+        calcularTotais();
+    }
+
+    public void removerItem(ItemOrcamento item) {
+
+        itens.remove(item);
+
+        item.setOrcamento(null);
+
+        calcularTotais();
     }
 }

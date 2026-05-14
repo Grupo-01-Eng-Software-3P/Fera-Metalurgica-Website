@@ -5,7 +5,7 @@ import com.fera.metalurgica.model.Orcamento;
 import com.fera.metalurgica.model.Atividade;
 import com.fera.metalurgica.model.Usuario;
 
-import com.fera.metalurgica.repository.UsuarioRepository;
+import com.fera.metalurgica.repository.*;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +13,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class SistemaService {
 
-    private List<Produto> produtos = new ArrayList<>();
-    private List<Orcamento> orcamentos = new ArrayList<>();
-    private List<Atividade> atividades = new ArrayList<>();
+    @Autowired
+    private ProdutoRepository produtoRepository;
+    @Autowired
+    private OrcamentoRepository orcamentoRepository;
+    @Autowired
+    private AtividadeRepository atividadeRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -29,12 +31,45 @@ public class SistemaService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public SistemaService() {
-        produtos.add(new Produto(1L, "Mesa de Ferro", "Mesas"));
-        produtos.add(new Produto(2L, "Estante de Metal", "Estantes"));
-        atividades.add(new Atividade("Aço 2mm está fora de estoque!", "Há 17h"));
-        atividades.add(new Atividade("Reunião marcada para amanhã às 9:00.", "Ontem"));
+    @PostConstruct
+    public void criarAtividadesIniciais() {
 
+        if (atividadeRepository.count() == 0) {
+            atividadeRepository.save(
+                    new Atividade(
+                            "Aço 2mm está fora de estoque!",
+                            "Há 17h"
+                    )
+            );
+            atividadeRepository.save(
+                    new Atividade(
+                            "Reunião marcada para amanhã às 9:00.",
+                            "Ontem"
+                    )
+            );
+        }
+
+    }
+
+    @PostConstruct
+    public void criarProdutosIniciais() {
+
+        if (produtoRepository.count() == 0) {
+            produtoRepository.save(
+                    new Produto(
+                            null,
+                            "Mesa de Ferro",
+                            "Mesas"
+                    )
+            );
+            produtoRepository.save(
+                    new Produto(
+                            null,
+                            "Estante de Metal",
+                            "Estantes"
+                    )
+            );
+        }
     }
 
     @PostConstruct
@@ -74,22 +109,35 @@ public class SistemaService {
     }
 
     public List<Produto> listarProdutos() {
-        return produtos;
+        return produtoRepository.findAll();
     }
 
     public List<Orcamento> listarOrcamentos() {
-        return orcamentos;
+        return orcamentoRepository.findAll();
     }
 
     public List<Atividade> listarAtividades() {
-        return atividades;
+
+        return atividadeRepository.findAllByOrderByIdDesc();
     }
 
-    public void adicionarOrcamento(Orcamento o) {
-        orcamentos.add(o);
+    public void adicionarProduto(Produto produto) {
+        produtoRepository.save(produto);
     }
 
-    public void adicionarAtividade(Atividade a) {
-        atividades.add(0, a);
+    public void adicionarOrcamento(Orcamento orcamento) {
+        if (orcamento.getItens() != null) {
+
+            for (var item : orcamento.getItens()) {
+
+                item.setOrcamento(orcamento);
+            }
+        }
+        orcamento.calcularTotais();
+        orcamentoRepository.save(orcamento);
+    }
+
+    public void adicionarAtividade(Atividade atividade) {
+        atividadeRepository.save(atividade);
     }
 }

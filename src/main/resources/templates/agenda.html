@@ -16,7 +16,7 @@
         <ul class="sidebar-menu">
             <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
             <li class="active"><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
-            <li><a href="#"><i class="fas fa-image"></i> Mídia</a></li>
+            <li><a href="/midia"><i class="fas fa-image"></i> Mídia</a></li>
             <li><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
@@ -159,6 +159,15 @@
 
 
     // =====================
+    // HELPER — evita bug de UTC
+    // =====================
+    function parsarData(dataStr) {
+        const [ano, mes, dia] = dataStr.split("-").map(Number);
+        return new Date(ano, mes - 1, dia);
+    }
+
+
+    // =====================
     // CARREGAR DO BACKEND
     // =====================
     async function carregarAgenda() {
@@ -192,7 +201,7 @@
             let classe = (i === diaSelecionado) ? "day active" : "day";
 
             let tem = compromissos.some(c => {
-                const d = new Date(c.data);
+                const d = parsarData(c.data);
                 return d.getDate() === i &&
                        d.getMonth() === mesAtual &&
                        d.getFullYear() === anoAtual;
@@ -222,6 +231,18 @@
 
 
     // =====================
+    // MUDAR MÊS
+    // =====================
+    function mudarMes(direcao) {
+        mesAtual += direcao;
+        if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
+        if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
+        diaSelecionado = 1;
+        renderizarCalendario();
+    }
+
+
+    // =====================
     // PAINEL LATERAL
     // =====================
     function atualizarPainel(dia) {
@@ -238,7 +259,7 @@
         lista.innerHTML = "";
 
         let doDia = compromissos.filter(c => {
-            const d = new Date(c.data);
+            const d = parsarData(c.data);
             return d.getDate() === dia &&
                    d.getMonth() === mesAtual &&
                    d.getFullYear() === anoAtual;
@@ -251,7 +272,7 @@
 
         doDia.forEach(c => {
             lista.innerHTML += `
-                <li class="compromisso-card">
+                <li class="compromisso-card" onclick="abrirDetalhes(${JSON.stringify(c).replace(/"/g, '&quot;')})">
                     <div>
                         <strong>${c.titulo}</strong><br>
                         <small>${c.horario}</small><br>
@@ -264,21 +285,42 @@
 
 
     // =====================
+    // DETALHES DO COMPROMISSO
+    // =====================
+    function abrirDetalhes(c) {
+        document.getElementById("detalheTitulo").innerText   = c.titulo;
+        document.getElementById("detalheHorario").innerText  = c.horario;
+        document.getElementById("detalheEvento").innerText   = c.evento;
+        document.getElementById("detalheDescricao").innerText = c.descricao || "—";
+
+        const d = parsarData(c.data);
+        document.getElementById("detalheData").innerText =
+            `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+
+        document.getElementById("modalDetalhes").style.display = "flex";
+    }
+
+    function fecharDetalhes() {
+        document.getElementById("modalDetalhes").style.display = "none";
+    }
+
+
+    // =====================
     // SALVAR NO BACKEND
     // =====================
     function salvarAgendamento(event) {
         event.preventDefault();
 
-        const titulo = document.getElementById("inputTitulo").value;
+        const titulo    = document.getElementById("inputTitulo").value;
         const descricao = document.getElementById("inputDescricao").value;
-        const evento = document.getElementById("inputEvento").value;
-        const data = document.getElementById("inputData").value;
-        const h1 = document.getElementById("inputHoraInicio").value;
-        const h2 = document.getElementById("inputHoraFim").value;
+        const evento    = document.getElementById("inputEvento").value;
+        const data      = document.getElementById("inputData").value;
+        const h1        = document.getElementById("inputHoraInicio").value;
+        const h2        = document.getElementById("inputHoraFim").value;
 
         fetch("/agenda", {
             method: "POST",
-            headers: {"Content-Type":"application/json"},
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 titulo,
                 descricao,
@@ -295,14 +337,21 @@
 
 
     // =====================
-    // MODAL
+    // MODAL AGENDAMENTO
     // =====================
-    function abrirModalAgendamento(){
-        document.getElementById("modalAgendamento").style.display="flex";
+    function abrirModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "flex";
     }
-    function fecharModalAgendamento(){
-        document.getElementById("modalAgendamento").style.display="none";
+    function fecharModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "none";
     }
+
+    window.onclick = function(e) {
+        ["modalAgendamento", "modalDetalhes"].forEach(id => {
+            const m = document.getElementById(id);
+            if (e.target === m) m.style.display = "none";
+        });
+    };
 
 
     // =====================

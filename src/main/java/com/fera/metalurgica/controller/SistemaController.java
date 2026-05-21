@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.InputMismatchException;
+import java.util.List;
 
 @Controller
 public class SistemaController {
@@ -33,74 +34,67 @@ public class SistemaController {
 
     @GetMapping("/pedido")
     public String pedidoForm(Model model) {
-        // Se vier algum erro no redirecionamento, a tela vai mostrar
-        return "orcamento"; // Reaproveitando o formulário de pedido do cliente
+        return "orcamento";
     }
 
     @PostMapping("/pedido")
     public String salvarPedido(@RequestParam String cliente,
-                                  @RequestParam String telefone,
-                                  @RequestParam String cpf,
-                                  @RequestParam String material,
-                                  @RequestParam String medidas,
-                                  @RequestParam String descricao,
-                                  Model model) {
+                               @RequestParam String telefone,
+                               @RequestParam String cpf,
+                               @RequestParam String material,
+                               @RequestParam(required = false) String medidas,
+                               @RequestParam String descricao,
+                               Model model) {
 
         if (!isCPFValido(cpf)) {
             model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
 
-            // Para não perder os dados que o cliente já digitou ao dar erro
+            // Preserva os dados preenchidos em caso de erro
             model.addAttribute("clientePreenchido", cliente);
             model.addAttribute("telefonePreenchido", telefone);
             model.addAttribute("cpfPreenchido", cpf);
-            model.addAttribute("materialPreenchido", material); // NOVO
+            model.addAttribute("materialPreenchido", material);
             model.addAttribute("medidasPreenchido", medidas);
             model.addAttribute("descricaoPreenchido", descricao);
 
             return "orcamento";
         }
 
-        // Cria o pedido definindo "CLIENTE" como criador
-        service.adicionarOrcamento(
-                new Orcamento((long)(Math.random()*1000), cliente, telefone, cpf, material, medidas, descricao, "CLIENTE")
-        );
+        Orcamento novoOrcamento = new Orcamento();
+        novoOrcamento.setCliente(cliente);
+        novoOrcamento.setTelefone(telefone);
+        novoOrcamento.setCpf(cpf);
+        novoOrcamento.setMaterial(material);
+        novoOrcamento.setMedidas(medidas);
+        novoOrcamento.setDescricao(descricao);
+
+        service.adicionarOrcamento(novoOrcamento);
 
         return "redirect:/";
     }
 
-    // Função auxiliar para validar CPF
+    // Valida CPF com cálculo dos dígitos verificadores
     private boolean isCPFValido(String cpf) {
-        // Remove tudo que não for número (pontos e traços)
         cpf = cpf.replaceAll("[^0-9]", "");
 
-        // Verifica se tem 11 dígitos
         if (cpf.length() != 11) return false;
-
-        // Verifica se todos os números são iguais (ex: 111.111.111-11 é inválido mas passaria na conta)
         if (cpf.matches("(\\d)\\1{10}")) return false;
 
         try {
-            // Calculo do 1o Dígito Verificador
             int soma = 0, peso = 10;
             for (int i = 0; i < 9; i++) {
-                int num = (int) (cpf.charAt(i) - 48);
-                soma += (num * peso);
-                peso--;
+                soma += (cpf.charAt(i) - 48) * peso--;
             }
             int r = 11 - (soma % 11);
             char dig10 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
 
-            // Calculo do 2o Dígito Verificador
             soma = 0; peso = 11;
             for (int i = 0; i < 10; i++) {
-                int num = (int) (cpf.charAt(i) - 48);
-                soma += (num * peso);
-                peso--;
+                soma += (cpf.charAt(i) - 48) * peso--;
             }
             r = 11 - (soma % 11);
             char dig11 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
 
-            // Confere se os dígitos calculados batem com os que foram digitados
             return (dig10 == cpf.charAt(9)) && (dig11 == cpf.charAt(10));
         } catch (InputMismatchException e) {
             return false;
@@ -124,10 +118,29 @@ public class SistemaController {
         return "midia";
     }
 
-    @PostMapping("/nova-atividade")
-    public String salvarAtividade(@RequestParam String descricao) {
-        service.adicionarAtividade(new Atividade(descricao, "Agora"));
-        return "redirect:/dashboard";
+    @GetMapping("/midia/{slug}")
+    public String midiaCategoria(@PathVariable String slug, Model model) {
+        model.addAttribute("categoria", new com.fera.metalurgica.model.Categoria(
+                slug, "Descrição da categoria " + slug, "5MB · faz 2 dias"));
+        return "midia-categoria";
+    }
+
+    @GetMapping("/agenda")
+    public String agenda() {
+        return "agenda";
+    }
+
+    @GetMapping("/agenda/dados")
+    @ResponseBody
+    public List<Atividade> listarAgenda() {
+        return service.listarAtividades();
+    }
+
+    @PostMapping("/agenda")
+    @ResponseBody
+    public Atividade salvarAgenda(@RequestBody Atividade atividade) {
+        service.adicionarAtividade(atividade);
+        return atividade;
     }
 
     @GetMapping("/usuarios")
@@ -145,23 +158,15 @@ public class SistemaController {
 
         LocalDate dataConvertida = LocalDate.parse(dataNascimento);
 
-        Usuario usuario = new Usuario(
-                null, nome, cargo, dataConvertida, email, senha);
-
+        Usuario usuario = new Usuario(null, nome, cargo, dataConvertida, email, senha);
         service.adicionarUsuario(usuario);
 
         return "redirect:/usuarios";
     }
 
-    @GetMapping("/agenda")
-    public String agenda() {
-        return "agenda";
-    }
-
     @GetMapping("/catalogo")
     public String catalogo(Model model) {
-    model.addAttribute("produtos", service.listarProdutos());
-    return "catalogo";
-
+        model.addAttribute("produtos", service.listarProdutos());
+        return "catalogo";
     }
 }

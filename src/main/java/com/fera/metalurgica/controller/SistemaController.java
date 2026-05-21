@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.InputMismatchException;
 import java.util.List;
 
 @Controller
@@ -25,20 +27,43 @@ public class SistemaController {
         return "home";
     }
 
-    @GetMapping("/orcamento")
-    public String orcamentoForm() {
+    @GetMapping("/orcamentos")
+    public String orcamentos() {
+        return "orcamentos";
+    }
+
+    @GetMapping("/pedido")
+    public String pedidoForm(Model model) {
         return "orcamento";
     }
 
-    @PostMapping("/orcamento")
-    public String salvarOrcamento(@RequestParam String cliente,
-                                  @RequestParam String material,
-                                  @RequestParam(required = false) String medidas,
-                                  @RequestParam String descricao) {
+    @PostMapping("/pedido")
+    public String salvarPedido(@RequestParam String cliente,
+                               @RequestParam String telefone,
+                               @RequestParam String cpf,
+                               @RequestParam String material,
+                               @RequestParam(required = false) String medidas,
+                               @RequestParam String descricao,
+                               Model model) {
+
+        if (!isCPFValido(cpf)) {
+            model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
+
+            // Preserva os dados preenchidos em caso de erro
+            model.addAttribute("clientePreenchido", cliente);
+            model.addAttribute("telefonePreenchido", telefone);
+            model.addAttribute("cpfPreenchido", cpf);
+            model.addAttribute("materialPreenchido", material);
+            model.addAttribute("medidasPreenchido", medidas);
+            model.addAttribute("descricaoPreenchido", descricao);
+
+            return "orcamento";
+        }
 
         Orcamento novoOrcamento = new Orcamento();
-
         novoOrcamento.setCliente(cliente);
+        novoOrcamento.setTelefone(telefone);
+        novoOrcamento.setCpf(cpf);
         novoOrcamento.setMaterial(material);
         novoOrcamento.setMedidas(medidas);
         novoOrcamento.setDescricao(descricao);
@@ -48,24 +73,37 @@ public class SistemaController {
         return "redirect:/";
     }
 
+    // Valida CPF com cálculo dos dígitos verificadores
+    private boolean isCPFValido(String cpf) {
+        cpf = cpf.replaceAll("[^0-9]", "");
+
+        if (cpf.length() != 11) return false;
+        if (cpf.matches("(\\d)\\1{10}")) return false;
+
+        try {
+            int soma = 0, peso = 10;
+            for (int i = 0; i < 9; i++) {
+                soma += (cpf.charAt(i) - 48) * peso--;
+            }
+            int r = 11 - (soma % 11);
+            char dig10 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
+
+            soma = 0; peso = 11;
+            for (int i = 0; i < 10; i++) {
+                soma += (cpf.charAt(i) - 48) * peso--;
+            }
+            r = 11 - (soma % 11);
+            char dig11 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
+
+            return (dig10 == cpf.charAt(9)) && (dig11 == cpf.charAt(10));
+        } catch (InputMismatchException e) {
+            return false;
+        }
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
-    }
-
-    @PostMapping("/login")
-    public String fazerLogin(@RequestParam String email,
-                             @RequestParam String senha,
-                             Model model) {
-
-        boolean autorizado = service.autenticarAdmin(email, senha);
-
-        if (autorizado) {
-            return "redirect:/dashboard";
-        } else {
-            model.addAttribute("erro", "E-mail ou senha incorretos. Tente novamente.");
-            return "login";
-        }
     }
 
     @GetMapping("/dashboard")
@@ -82,8 +120,8 @@ public class SistemaController {
 
     @GetMapping("/midia/{slug}")
     public String midiaCategoria(@PathVariable String slug, Model model) {
-        // Temporário até ter banco de dados
-        model.addAttribute("categoria", new com.fera.metalurgica.model.Categoria(slug, "Descrição da categoria " + slug, "5MB · faz 2 dias"));
+        model.addAttribute("categoria", new com.fera.metalurgica.model.Categoria(
+                slug, "Descrição da categoria " + slug, "5MB · faz 2 dias"));
         return "midia-categoria";
     }
 
@@ -115,32 +153,20 @@ public class SistemaController {
     public String salvarUsuario(@RequestParam String nome,
                                 @RequestParam String cargo,
                                 @RequestParam String dataNascimento,
-                                @RequestParam(required = false) String email,
-                                @RequestParam(required = false) String senha) {
+                                @RequestParam String email,
+                                @RequestParam String senha) {
 
-        List<Usuario> usuariosAtuais = service.listarUsuarios();
-        Long proximoNumero = 1L;
+        LocalDate dataConvertida = LocalDate.parse(dataNascimento);
 
-        if (!usuariosAtuais.isEmpty()) {
-            Usuario ultimoUsuario = usuariosAtuais.get(usuariosAtuais.size() - 1);
-            proximoNumero = ultimoUsuario.getId() + 1L;
-        }
-
-        String dataHoje = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-        String[] partesData = dataNascimento.split("-");
-        String dataNascFormatada = partesData.length == 3 ? partesData[2] + "/" + partesData[1] + "/" + partesData[0] : dataNascimento;
-
-        // Salva o usuário com o novo ID Long, e os novos campos email e senha
-        service.adicionarUsuario(new Usuario(proximoNumero, nome, cargo, dataHoje, dataNascFormatada, email, senha));
+        Usuario usuario = new Usuario(null, nome, cargo, dataConvertida, email, senha);
+        service.adicionarUsuario(usuario);
 
         return "redirect:/usuarios";
     }
 
     @GetMapping("/catalogo")
     public String catalogo(Model model) {
-    model.addAttribute("produtos", service.listarProdutos());
-    return "catalogo";
-
+        model.addAttribute("produtos", service.listarProdutos());
+        return "catalogo";
     }
 }

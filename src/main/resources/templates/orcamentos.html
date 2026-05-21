@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Orçamentos - Fera</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/orcamentos.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <h2>Fera</h2>
+        <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
+        <ul class="sidebar-menu">
+            <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+            <li><a href="#"><i class="fas fa-image"></i> Mídia</a></li>
+            <li class="active"><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
+            <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
+        </ul>
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Gestão de Orçamentos</h2>
+                <p style="color: #A09A92; font-size: 14px; margin-top: 5px;">Acompanhe e gerencie os pedidos dos clientes.</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-brown" onclick="abrirModalNovoOrcamento(null)">+ Novo Orçamento</button>
+            </div>
+        </div>
+        <div class="kanban-board">
+            <!-- Colunas e cards do Kanban -->
+        </div>
+    </main>
+</div>
+
+<!-- Modal Flip Card -->
+<div id="modalOrcamento" class="modal-form-overlay">
+    <div class="flip-card">
+        <div class="flip-card-inner">
+            <!-- Frente do Card: Pedido do Cliente -->
+            <div class="flip-card-front">
+                <div class="modal-orcamento-content">
+                    <span class="fechar-modal-x" onclick="fecharModalOrcamento()">&times;</span>
+                    <div class="orc-header">
+                        <h2>Pedido do Cliente</h2>
+                        <h2 class="orc-numero" id="pedido-numero-front">Nº 01</h2>
+                    </div>
+                    <form id="formPedidoCliente">
+                        <div class="input-group">
+                            <label>Nome Completo:</label>
+                            <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" required>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Telefone:</label>
+                                <input type="text" name="telefone" class="input-field" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label>CPF:</label>
+                                <input type="text" name="cpf" class="input-field" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Material Desejado:</label>
+                            <input type="text" name="material" class="input-field" placeholder="Ex: Madeira, Ferro e Vidro...">
+                        </div>
+                        <div class="input-group">
+                            <label>Medidas (Aprox.):</label>
+                            <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m">
+                        </div>
+                        <div class="input-group">
+                            <label>Descrição do Projeto:</label>
+                            <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva a ideia do móvel..."></textarea>
+                        </div>
+                        <div class="orc-footer">
+                            <button type="button" class="btn-flip" onclick="flipCard()">Virar para Orçamento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Verso do Card: Orçamento do Admin -->
+            <div class="flip-card-back">
+                <div class="modal-orcamento-content">
+                    <span class="fechar-modal-x" onclick="fecharModalOrcamento()">&times;</span>
+                    <div class="orc-header">
+                        <h2>Orçamento</h2>
+                        <h2 class="orc-numero" id="orcamento-numero-back">Nº 01</h2>
+                    </div>
+                    <div class="orc-company-info">
+                        <div class="orc-company-text">
+                            <strong>Fera Metalúrgica e Móveis Industriais</strong><br>
+                            CNPJ: 52.829.207/0001-77<br>
+                            Endereço: Sítio São Marcos - Comunidade<br>
+                            São José, Nova Aurora - PR, 85410-000<br>
+                            Telefone: (45) 99947-4748
+                        </div>
+                        <div class="orc-company-logo">
+                            <h1 style="color:#C06014; margin:0; font-size: 38px; line-height: 1;"><i class="fas fa-hammer"></i> FERA</h1>
+                            <p style="font-size:9px; margin:0; color:#C06014; font-weight: bold; text-align: center;">METALÚRGICA E MÓVEIS</p>
+                        </div>
+                    </div>
+                    <div class="orc-section">
+                        <div class="orc-section-title">DESCRIÇÃO E VALORES</div>
+                        <table class="orc-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Qnt.</th>
+                                    <th style="width: 60%;">Material</th>
+                                    <th style="width: 25%;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
+                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
+                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="orc-split-sections">
+                        <div class="orc-adicionais">
+                            <div class="orc-section-title">ADICIONAIS</div>
+                            <div class="orc-add-row">
+                                <div class="label-box">Frete</div>
+                                <input type="text" class="input-box" placeholder="R$">
+                            </div>
+                            <div class="orc-add-row">
+                                <div class="label-box">Mão de Obra</div>
+                                <input type="text" class="input-box" placeholder="R$">
+                            </div>
+                        </div>
+                        <div class="orc-observacao">
+                            <div class="orc-section-title">OBSERVAÇÃO</div>
+                            <textarea class="obs-textarea" placeholder="Digite as observações..."></textarea>
+                        </div>
+                    </div>
+                    <div class="orc-totais">
+                         <div class="orc-total-item">
+                            <span>Valor Total:</span>
+                            <input type="text" class="input-box" placeholder="R$">
+                        </div>
+                    </div>
+                    <div class="orc-footer">
+                        <button type="button" class="btn-flip" onclick="flipCard()">Virar para Pedido</button>
+                        <button type="submit" class="btn-salvar-orcamento">Salvar Orçamento</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalNovoOrcamento(orcamento) {
+        const modal = document.getElementById("modalOrcamento");
+        const formCliente = document.getElementById('formPedidoCliente');
+        const card = document.querySelector('.flip-card-inner');
+
+        if (card.classList.contains('is-flipped')) {
+            card.classList.remove('is-flipped');
+        }
+
+        formCliente.reset();
+        // Limpar formulário do admin também
+
+        if (orcamento) {
+            formCliente.elements['cliente'].value = orcamento.cliente;
+            formCliente.elements['telefone'].value = orcamento.telefone;
+            formCliente.elements['cpf'].value = orcamento.cpf;
+            formCliente.elements['material'].value = orcamento.material;
+            formCliente.elements['medidas'].value = orcamento.medidas;
+            formCliente.elements['descricao'].value = orcamento.descricao;
+            document.getElementById('pedido-numero-front').innerText = `Nº ${orcamento.id}`;
+            document.getElementById('orcamento-numero-back').innerText = `Nº ${orcamento.id}`;
+
+            const isCriadoPorCliente = orcamento.criadoPor === 'CLIENTE';
+            Array.from(formCliente.elements).forEach(element => {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.disabled = isCriadoPorCliente;
+                }
+            });
+        } else {
+            Array.from(formCliente.elements).forEach(element => {
+                element.disabled = false;
+            });
+            document.getElementById('pedido-numero-front').innerText = 'Nº NOVO';
+            document.getElementById('orcamento-numero-back').innerText = 'Nº NOVO';
+        }
+
+        modal.style.display = "flex";
+    }
+
+    function fecharModalOrcamento() {
+        document.getElementById("modalOrcamento").style.display = "none";
+    }
+
+    function flipCard() {
+        document.querySelector('.flip-card-inner').classList.toggle('is-flipped');
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("modalOrcamento");
+        if (event.target == modal) {
+            fecharModalOrcamento();
+        }
+    }
+</script>
+</body>
+</html>

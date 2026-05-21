@@ -152,10 +152,10 @@
     let diaSelecionado = dataAtual.getDate();
 
     const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-    "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
     const diasSemana = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira",
-    "Quinta-feira","Sexta-feira","Sábado"];
+        "Quinta-feira","Sexta-feira","Sábado"];
 
 
     // =====================
@@ -203,8 +203,8 @@
             let tem = compromissos.some(c => {
                 const d = parsarData(c.data);
                 return d.getDate() === i &&
-                       d.getMonth() === mesAtual &&
-                       d.getFullYear() === anoAtual;
+                    d.getMonth() === mesAtual &&
+                    d.getFullYear() === anoAtual;
             });
 
             let dot = tem ? `<div style="width:6px;height:6px;background:var(--fera-orange);border-radius:50%;position:absolute;bottom:3px;"></div>` : "";
@@ -261,8 +261,8 @@
         let doDia = compromissos.filter(c => {
             const d = parsarData(c.data);
             return d.getDate() === dia &&
-                   d.getMonth() === mesAtual &&
-                   d.getFullYear() === anoAtual;
+                d.getMonth() === mesAtual &&
+                d.getFullYear() === anoAtual;
         });
 
         if (doDia.length === 0) {

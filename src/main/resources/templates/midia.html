@@ -27,139 +27,93 @@
         </div>
     </aside>
 
-    <!-- ÁREA CENTRAL: lista + painel lado a lado -->
-    <div class="midia-workspace">
+    <main class="main-content">
 
-        <!-- LISTA DE CATEGORIAS -->
-        <main class="main-content midia-lista" id="midiaLista">
-            <div class="page-header">
-                <h2 class="page-title">Mídia</h2>
-                <div class="header-actions">
-                    <div class="search-box">
-                        <input type="text" id="inputBusca" onkeyup="filtrarCategorias()" placeholder="Buscar mídia...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <button class="btn-brown" onclick="abrirModalCategoria()">+ Nova Categoria</button>
+        <div class="midia-header">
+            <h2 class="page-title">Mídia</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="text" id="inputBusca" onkeyup="filtrarCategorias()" placeholder="Buscar mídia...">
+                    <i class="fas fa-search"></i>
                 </div>
+                <button class="btn-nova-categoria" onclick="abrirModalCategoria()">+ Nova Categoria</button>
             </div>
+        </div>
 
-            <div class="filter-container">
-                <button class="filter-pill active" onclick="ativarFiltro(this)">Todas</button>
-                <button class="filter-pill" onclick="ativarFiltro(this)">Categorias</button>
-                <button class="filter-pill" onclick="ativarFiltro(this)">Produtos</button>
-                <button class="filter-pill" onclick="ativarFiltro(this)">Vídeos</button>
-            </div>
+        <div class="filter-container">
+            <button class="filter-pill active" onclick="ativarFiltro(this)">Todas</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Categorias</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Produtos</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Vídeos</button>
+        </div>
 
-            <div class="categorias-lista" id="categoriaLista">
+        <div class="categorias-lista" id="categoriaLista">
 
-                <!-- Cada categoria é gerada pelo Thymeleaf; aqui estão exemplos estáticos -->
-                <div class="categoria-item" onclick="abrirPainel(this)"
-                     data-nome="Adega"
-                     data-descricao="A Adega Bar Bélgica Pt 16 Garrafas Rede Móveis é perfeita para os amantes de vinho que desejam ter uma opção elegante e funcional para armazenar suas garrafas. Com um design moderno e sofisticado, esta adega é fabricada em MDF de alta qualidade, garantindo durabilidade e resistência."
-                     data-meta="5MB · faz 2 dias"
-                     data-imgs="/imagens/Projeto_Galeria_1.jpeg,/imagens/Projeto_Galeria_2.jpeg,/imagens/Projeto_Galeria_3.jpeg">
-                    <div class="categoria-carrossel-wrapper">
-                        <button class="carrossel-btn" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="carrossel-track">
-                            <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Adega 1">
-                            <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Adega 2">
-                            <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Adega 3">
-                        </div>
-                        <button class="carrossel-btn" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+            <a href="/midia/adega" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Adega 1">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Adega 2">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Adega 3">
                     </div>
-                    <div class="categoria-footer">
-                        <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Adega</span>
-                        <span class="categoria-meta">5MB · faz 2 dias</span>
-                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
-
-                <div class="categoria-item" onclick="abrirPainel(this)"
-                     data-nome="Banheiro"
-                     data-descricao="Móveis planejados para banheiro com acabamento premium em MDF revestido. Gabinetes, espelheiras e nichos desenvolvidos sob medida para aproveitar cada centímetro do espaço."
-                     data-meta="3MB · faz 2 dias"
-                     data-imgs="/imagens/Projeto_Galeria_2.jpeg,/imagens/Projeto_Galeria_1.jpeg">
-                    <div class="categoria-carrossel-wrapper">
-                        <button class="carrossel-btn" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="carrossel-track">
-                            <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Banheiro 1">
-                            <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Banheiro 2">
-                        </div>
-                        <button class="carrossel-btn" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="categoria-footer">
-                        <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Banheiro</span>
-                        <span class="categoria-meta">3MB · faz 2 dias</span>
-                    </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Adega</span>
+                    <span class="categoria-meta">5MB · faz 2 dias</span>
                 </div>
+            </a>
 
-                <div class="categoria-item" onclick="abrirPainel(this)"
-                     data-nome="Biblioteca"
-                     data-descricao="Estantes e bibliotecas planejadas para todos os ambientes. Estrutura em aço com prateleiras em MDF, combinando resistência e elegância para organizar seus livros e coleções."
-                     data-meta="8MB · faz 2 dias"
-                     data-imgs="/imagens/Projeto_Galeria_3.jpeg,/imagens/Projeto_Galeria_1.jpeg,/imagens/Projeto_Galeria_2.jpeg">
-                    <div class="categoria-carrossel-wrapper">
-                        <button class="carrossel-btn" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="carrossel-track">
-                            <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Biblioteca 1">
-                            <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Biblioteca 2">
-                            <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Biblioteca 3">
-                        </div>
-                        <button class="carrossel-btn" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+            <a href="/midia/banheiro" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Banheiro 1">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Banheiro 2">
                     </div>
-                    <div class="categoria-footer">
-                        <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Biblioteca</span>
-                        <span class="categoria-meta">8MB · faz 2 dias</span>
-                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
-
-                <div class="categoria-item" onclick="abrirPainel(this)"
-                     data-nome="Closet"
-                     data-descricao="Closets e guarda-roupas sob medida para quartos e áreas de vestuário. Estrutura em aço com painéis em MDF e acabamento laminado de alta durabilidade."
-                     data-meta="6MB · faz 2 dias"
-                     data-imgs="/imagens/Projeto_Galeria_1.jpeg,/imagens/Projeto_Galeria_3.jpeg">
-                    <div class="categoria-carrossel-wrapper">
-                        <button class="carrossel-btn" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="carrossel-track">
-                            <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Closet 1">
-                            <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Closet 2">
-                        </div>
-                        <button class="carrossel-btn" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="categoria-footer">
-                        <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Closet</span>
-                        <span class="categoria-meta">6MB · faz 2 dias</span>
-                    </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Banheiro</span>
+                    <span class="categoria-meta">3MB · faz 2 dias</span>
                 </div>
+            </a>
 
-            </div>
-        </main>
-
-        <!-- PAINEL LATERAL (aparece ao lado, empurrando a lista) -->
-        <aside class="midia-painel" id="midiaPainel">
-            <button class="painel-fechar" onclick="fecharPainel()"><i class="fas fa-chevron-left"></i></button>
-
-            <div class="painel-conteudo">
-                <!-- Imagem destaque + descrição -->
-                <div class="painel-topo">
-                    <div class="painel-img-destaque-wrapper">
-                        <img id="painelImgDestaque" src="" alt="">
+            <a href="/midia/biblioteca" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Biblioteca 1">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Biblioteca 2">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Biblioteca 3">
                     </div>
-                    <div class="painel-info">
-                        <h3 id="painelNome"></h3>
-                        <p class="painel-label">Descrição</p>
-                        <p id="painelDescricao"></p>
-                        <p class="painel-meta" id="painelMeta"></p>
-                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Biblioteca</span>
+                    <span class="categoria-meta">8MB · faz 2 dias</span>
+                </div>
+            </a>
 
-                <!-- Grade de imagens da categoria -->
-                <div class="painel-grade" id="painelGrade"></div>
-            </div>
-        </aside>
+            <a href="/midia/closet" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Closet 1">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Closet 2">
+                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Closet</span>
+                    <span class="categoria-meta">6MB · faz 2 dias</span>
+                </div>
+            </a>
 
-    </div><!-- fim midia-workspace -->
-</div><!-- fim dashboard-layout -->
-
+        </div>
+    </main>
+</div>
 
 <!-- MODAL NOVA CATEGORIA -->
 <div id="modalCategoria" class="modal-form-overlay">
@@ -182,73 +136,27 @@
     </div>
 </div>
 
-
 <script>
-    // ── Filtro de pills ──────────────────────────────────────────────
     function ativarFiltro(btn) {
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
     }
 
-    // ── Busca ────────────────────────────────────────────────────────
     function filtrarCategorias() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
         document.querySelectorAll('.categoria-item').forEach(item => {
-            const nome = item.dataset.nome.toLowerCase();
+            const nome = item.querySelector('.categoria-nome').textContent.toLowerCase();
             item.style.display = nome.includes(termo) ? '' : 'none';
         });
     }
 
-    // ── Carrossel ────────────────────────────────────────────────────
     function rolar(event, btn, direcao) {
-        event.stopPropagation(); // não abre o painel ao clicar na seta
+        event.preventDefault();
+        event.stopPropagation();
         const track = btn.closest('.categoria-carrossel-wrapper').querySelector('.carrossel-track');
-        track.scrollBy({ left: direcao * 320, behavior: 'smooth' });
+        track.scrollBy({ left: direcao * track.offsetWidth, behavior: 'smooth' });
     }
 
-    // ── Painel lateral ───────────────────────────────────────────────
-    let categoriaAtiva = null;
-
-    function abrirPainel(item) {
-        const painel  = document.getElementById('midiaPainel');
-        const lista   = document.getElementById('midiaLista');
-        const workspace = document.querySelector('.midia-workspace');
-
-        // Destaca item selecionado
-        document.querySelectorAll('.categoria-item').forEach(i => i.classList.remove('selecionado'));
-        item.classList.add('selecionado');
-
-        // Preenche dados
-        const imgs = item.dataset.imgs ? item.dataset.imgs.split(',') : [];
-        document.getElementById('painelNome').textContent       = item.dataset.nome;
-        document.getElementById('painelDescricao').textContent  = item.dataset.descricao;
-        document.getElementById('painelMeta').textContent       = item.dataset.meta;
-        document.getElementById('painelImgDestaque').src        = imgs[0] || '';
-
-        // Grade de imagens
-        const grade = document.getElementById('painelGrade');
-        grade.innerHTML = '';
-        imgs.forEach((src, i) => {
-            if (i === 0) return; // primeira já é destaque
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = item.dataset.nome + ' ' + i;
-            img.onclick = () => { document.getElementById('painelImgDestaque').src = src; };
-            grade.appendChild(img);
-        });
-
-        // Abre painel (adiciona classe que aciona o CSS)
-        workspace.classList.add('painel-aberto');
-        categoriaAtiva = item;
-    }
-
-    function fecharPainel() {
-        document.querySelector('.midia-workspace').classList.remove('painel-aberto');
-        if (categoriaAtiva) categoriaAtiva.classList.remove('selecionado');
-        categoriaAtiva = null;
-    }
-
-    // ── Modal Nova Categoria ─────────────────────────────────────────
     function abrirModalCategoria() {
         document.getElementById('modalCategoria').style.display = 'flex';
     }

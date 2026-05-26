@@ -2,11 +2,10 @@ package com.fera.metalurgica.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import com.fera.metalurgica.model.Orcamento;
 
 @Entity
-@Table(name = "item_orcamento")
-public class ItemOrcamento {
+@Table(name = "item_pedido")
+public class ItemPedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +18,13 @@ public class ItemOrcamento {
     private BigDecimal subtotal;
 
     @ManyToOne
-    @JoinColumn(name = "orcamento_id")
-    private Orcamento orcamento;
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
 
-    public ItemOrcamento() {
+    public ItemPedido() {
     }
 
-    public ItemOrcamento(Long id, String nomeItem, Integer quantidade, BigDecimal valorUnitario, String material) {
+    public ItemPedido(Long id, String nomeItem, Integer quantidade, BigDecimal valorUnitario, String material) {
         this.id = id;
         this.nomeItem = nomeItem;
         this.quantidade = quantidade;
@@ -38,12 +37,12 @@ public class ItemOrcamento {
 
     // Getters e Setters
 
-    public Orcamento getOrcamento() {
-        return orcamento;
+    public Pedido getPedido() {
+        return pedido;
     }
 
-    public void setOrcamento(Orcamento orcamento) {
-        this.orcamento = orcamento;
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
     }
 
     public Long getId() {

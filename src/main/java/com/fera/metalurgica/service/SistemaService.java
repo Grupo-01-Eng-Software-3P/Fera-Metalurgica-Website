@@ -1,11 +1,11 @@
 package com.fera.metalurgica.service;
 
 import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.Orcamento;
+import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Produto;
 import com.fera.metalurgica.model.Usuario;
 import com.fera.metalurgica.repository.AtividadeRepository;
-import com.fera.metalurgica.repository.OrcamentoRepository;
+import com.fera.metalurgica.repository.PedidoRepository;
 import com.fera.metalurgica.repository.ProdutoRepository;
 import com.fera.metalurgica.repository.UsuarioRepository;
 import jakarta.annotation.PostConstruct;
@@ -22,7 +22,7 @@ public class SistemaService {
     @Autowired
     private ProdutoRepository produtoRepository;
     @Autowired
-    private OrcamentoRepository orcamentoRepository;
+    private PedidoRepository pedidoRepository;
     @Autowired
     private AtividadeRepository atividadeRepository;
     @Autowired
@@ -82,18 +82,18 @@ public class SistemaService {
         produtoRepository.save(produto);
     }
 
-    public List<Orcamento> listarOrcamentos() {
-        return orcamentoRepository.findAll();
+    public List<Pedido> listarOrcamentos() {
+        return pedidoRepository.findAll();
     }
 
-    public void adicionarOrcamento(Orcamento orcamento) {
-        if (orcamento.getItens() != null) {
-            for (var item : orcamento.getItens()) {
-                item.setOrcamento(orcamento);
+    public void adicionarPedido(Pedido pedido) {
+        if (pedido.getItens() != null) {
+            for (var item : pedido.getItens()) {
+                item.setPedido(pedido);
             }
         }
-        orcamento.calcularTotais();
-        orcamentoRepository.save(orcamento);
+        pedido.calcularTotais();
+        pedidoRepository.save(pedido);
     }
 
     public List<Atividade> listarAtividades() {

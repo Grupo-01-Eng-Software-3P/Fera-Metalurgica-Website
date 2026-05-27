@@ -1,71 +1,43 @@
 package com.fera.metalurgica.exception;
 
-import org.springframework.http.*;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
 	// STATUS 404
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
-		ErrorResponse error = ErrorResponse.builder()
-			.status(HttpStatus.NOT_FOUND.value())
-			.error("Not Found")
-			.message(ex.getMessage())
-			.timestamp(LocalDateTime.now())
-			.build();
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public String handleNotFound(ResourceNotFoundException ex, Model model) {
+		model.addAttribute("mensagem", ex.getMessage());
+		return "error/404";
 	}
 
-	// STATUS 400 - NEGÓCIO
+	// STATUS 404 - Endpoint não existente
+	@ExceptionHandler(NoResourceFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public String handleEndpointNotFound(NoResourceFoundException ex, Model model) {
+		model.addAttribute("mensagem", "A página que você procura não existe.");
+		return "error/404";
+	}
+
+	// STATUS 400
 	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
-		ErrorResponse error = ErrorResponse.builder()
-			.status(HttpStatus.BAD_REQUEST.value())
-			.error("Bad Request")
-			.message(ex.getMessage())
-			.timestamp(LocalDateTime.now())
-			.build();
-
-		return ResponseEntity.badRequest().body(error);
-	}
-
-	// STATUS 400 - VALIDAÇÃO
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-		List<String> details = ex.getBindingResult()
-			.getFieldErrors()
-			.stream()
-			.map(field -> field.getField() + ": " + field.getDefaultMessage())
-			.toList();
-
-		ErrorResponse error = ErrorResponse.builder()
-			.status(HttpStatus.BAD_REQUEST.value())
-			.error("Validation Failed")
-			.message("Campos inválidos")
-			.timestamp(LocalDateTime.now())
-			.details(details)
-			.build();
-
-		return ResponseEntity.badRequest().body(error);
+	public String handleBusiness(BusinessException ex, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+		return "redirect:/dashboard";
 	}
 
 	// STATUS 500 (FALLBACK)
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
-		ErrorResponse error = ErrorResponse.builder()
-			.status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			.error("Internal Server Error")
-			.message("Erro inesperado. Tente novamente mais tarde.")
-			.timestamp(LocalDateTime.now())
-			.build();
-
-		return ResponseEntity.internalServerError().body(error);
+	public String handleGeneric(Exception ex, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("erro", "Erro inesperado. Tente novamente mais tarde.");
+		return "redirect:/dashboard";
 	}
 }

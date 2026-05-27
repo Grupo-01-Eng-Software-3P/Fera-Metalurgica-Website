@@ -44,3 +44,45 @@
 .input-gray { width: 100%; padding: 12px; background-color: #E2E2E2; border: none; border-radius: 8px; margin-top: 5px; font-size: 14px; outline: none; }
 .date-short { width: 50%; }
 .btn-black-pill { background-color: black; color: white; border: none; padding: 12px 40px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; }
+
+/* Campo com erro */
+.input-erro {
+    border: 1px solid #ef4444 !important;
+}
+
+/* Mensagem embaixo do campo */
+.mensagem-erro {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Toast de sucesso (canto superior direito) */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast.sucesso {
+    background-color: #dcfce7;
+    border-left: 4px solid #22c55e;
+    color: #166534;
+}
+
+/* Some sozinho após 4 segundos */
+@keyframes fadeOut {
+    0%   { opacity: 1; }
+    70%  { opacity: 1; }
+    99%  { opacity: 0; }
+    100% { opacity: 0; display: none; pointer-events: none; }
+}

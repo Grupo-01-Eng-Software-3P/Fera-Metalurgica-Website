@@ -174,4 +174,9 @@ public class SistemaController {
     public String adega(Model model) {
     return "ambientes/adega";
     }
+
+    @GetMapping("/catalogo/banheiro")
+public String banheiro(Model model) {
+    return "ambientes/banheiro";
+    }
 }

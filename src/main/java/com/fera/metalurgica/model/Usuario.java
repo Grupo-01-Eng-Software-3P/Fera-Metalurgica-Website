@@ -10,7 +10,8 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Mudado para Long para usarmos Auto-Incremento (1, 2, 3...)
 
-    private String nome;
+	@Column(name = "usuario", nullable = false)
+	private String nome;
     private String cargo;
     private LocalDate dataNascimento;
 

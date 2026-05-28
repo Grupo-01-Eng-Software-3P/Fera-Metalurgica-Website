@@ -36,6 +36,11 @@ public class SistemaService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public record OrcamentosAgrupados(List<Pedido> meusPedidos,
+                                      List<Pedido> clientesComOrcamento,
+                                      List<Pedido> clientesPendentes) {
+    }
+
     @PostConstruct
     public void criarAtividadesIniciais() {
         if (atividadeRepository.count() == 0) {
@@ -116,6 +121,25 @@ public class SistemaService {
 
     public List<Pedido> listarOrcamentos() {
         return pedidoRepository.findAllByOrderByDataCriacaoDesc();
+    }
+
+    public OrcamentosAgrupados organizarOrcamentos() {
+        List<Pedido> pedidos = listarOrcamentos();
+        List<Pedido> meusPedidos = new ArrayList<>();
+        List<Pedido> clientesComOrcamento = new ArrayList<>();
+        List<Pedido> clientesPendentes = new ArrayList<>();
+
+        for (Pedido pedido : pedidos) {
+            if (pedido.isCriadoPorAdmin()) {
+                meusPedidos.add(pedido);
+            } else if (pedido.isOrcamentoFinalizado()) {
+                clientesComOrcamento.add(pedido);
+            } else {
+                clientesPendentes.add(pedido);
+            }
+        }
+
+        return new OrcamentosAgrupados(meusPedidos, clientesComOrcamento, clientesPendentes);
     }
 
     @Transactional

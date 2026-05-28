@@ -28,21 +28,34 @@
 
 /* QUADRO KANBAN */
 .kanban-board {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 25px;
-    align-items: flex-start;
-    overflow-x: auto;
+    align-items: start;
     padding-bottom: 20px;
 }
 
 .kanban-column {
     background-color: #F8F8F8;
     border-radius: 16px;
-    min-width: 320px;
-    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 180px);
+    border: 1px solid #EAE3D9;
+    overflow: hidden;
+}
+
+.kanban-column.column-admin {
+    border-top: 4px solid #5C3817;
+}
+
+.kanban-column.column-orcado {
+    border-top: 4px solid #2E7D32;
+}
+
+.kanban-column.column-pendente {
+    border-top: 4px solid #C06014;
 }
 
 .kanban-header {
@@ -72,6 +85,7 @@
 
 /* Bolinhas de Status */
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot.admin { background-color: #5C3817; }
 .dot.pendente { background-color: #f39c12; }
 .dot.aprovado { background-color: #3498db; }
 .dot.finalizado { background-color: #2ecc71; }
@@ -129,12 +143,49 @@
     overflow: hidden;
 }
 
+.card-status-row {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.status-admin {
+    background-color: #F4EBE1;
+    color: #5C3817;
+}
+
+.status-orcado {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+}
+
+.status-pendente {
+    background-color: #FFF3E0;
+    color: #C06014;
+}
+
 .card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-top: 1px solid #F0F0F0;
     padding-top: 15px;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .tag.material {
@@ -157,6 +208,23 @@
 }
 
 .btn-icon:hover { color: #C06014; }
+
+.btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background-color: #F4EBE1;
+    color: #C06014;
+    text-decoration: none;
+}
+
+.btn-pdf:hover {
+    background-color: #E8D5C1;
+    color: #8F4307;
+}
 
 .empty-state {
     text-align: center;
@@ -382,9 +450,38 @@
 }
 
 @media (max-width: 1024px) {
+    .kanban-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .flip-card {
         max-width: 100%;
         height: 90vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .kanban-board {
+        grid-template-columns: 1fr;
+    }
+
+    .kanban-header,
+    .card-footer {
+        gap: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-actions {
+        align-self: flex-end;
+    }
+
+    .orc-header {
+        gap: 10px;
+    }
+
+    .orc-company-info {
+        padding: 16px 18px;
     }
 }
 

@@ -116,6 +116,31 @@ public class Pedido {
     public String getObservacoesAdmin() { return observacoesAdmin; }
     public void setObservacoesAdmin(String observacoesAdmin) { this.observacoesAdmin = observacoesAdmin; }
 
+    @Transient
+    public boolean isCriadoPorAdmin() {
+        return "ADMIN".equalsIgnoreCase(criadoPor);
+    }
+
+    @Transient
+    public boolean isCriadoPorCliente() {
+        return !isCriadoPorAdmin();
+    }
+
+    @Transient
+    public boolean isOrcamentoGerado() {
+        return itens != null && !itens.isEmpty();
+    }
+
+    @Transient
+    public boolean isOrcamentoPendente() {
+        return isCriadoPorCliente() && !isOrcamentoGerado();
+    }
+
+    @Transient
+    public boolean isOrcamentoFinalizado() {
+        return isCriadoPorCliente() && isOrcamentoGerado();
+    }
+
     // Lógica de negócio
 
     public void adicionarItem(ItemPedido item) {

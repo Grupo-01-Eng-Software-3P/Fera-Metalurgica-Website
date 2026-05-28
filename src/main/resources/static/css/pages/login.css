@@ -153,8 +153,8 @@
 }
 
 .login-right h2 {
-    font-size: 48px;
-    margin-bottom: 20px;
+    font-size: 65px;
+    margin-bottom: 40px;
     font-weight: 800;
     line-height: 1.1;
     position: relative;
@@ -162,9 +162,9 @@
 }
 
 .login-right p {
-    font-size: 22px;
-    line-height: 1.5;
-    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.4
+    font-weight: 750;
     color: rgba(255, 255, 255, 0.9);
     position: relative;
     z-index: 1;

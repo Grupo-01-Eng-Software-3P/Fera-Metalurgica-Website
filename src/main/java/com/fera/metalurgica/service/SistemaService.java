@@ -14,7 +14,10 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -111,7 +114,69 @@ public class SistemaService {
 	// PEDIDO
 
     public List<Pedido> listarOrcamentos() {
-        return pedidoRepository.findAll();
+        return pedidoRepository.findAllByOrderByDataCriacaoDesc();
+    }
+
+    @Transactional
+    public Pedido salvarOrcamentoAdmin(Long pedidoId,
+                                       String cliente,
+                                       String telefone,
+                                       String cpf,
+                                       String material,
+                                       String medidas,
+                                       String descricao,
+                                       List<String> itemNomes,
+                                       List<String> itemQuantidades,
+                                       List<String> itemValoresUnitarios,
+                                       String frete,
+                                       String maoObra,
+                                       String observacoesAdmin) {
+
+        Pedido pedido = (pedidoId != null)
+                ? pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
+                : new Pedido();
+
+        pedido.setCliente(cliente);
+        pedido.setTelefone(telefone);
+        pedido.setCpf(cpf);
+        pedido.setMaterial(material);
+        pedido.setMedidas(medidas);
+        pedido.setDescricao(descricao);
+
+        if (pedido.getCriadoPor() == null) {
+            pedido.setCriadoPor("ADMIN");
+        }
+
+        List<ItemPedido> itens = new ArrayList<>();
+        int totalLinhas = Math.max(
+                Math.max(tamanho(itemNomes), tamanho(itemQuantidades)),
+                tamanho(itemValoresUnitarios)
+        );
+
+        for (int i = 0; i < totalLinhas; i++) {
+            String nome = valorOuVazio(itemNomes, i);
+            Integer quantidade = parseInteiro(valorOuVazio(itemQuantidades, i));
+            BigDecimal valorUnitario = parseMoeda(valorOuVazio(itemValoresUnitarios, i));
+
+            if (nome.isBlank() && (quantidade == null || quantidade <= 0) && valorUnitario.compareTo(BigDecimal.ZERO) == 0) {
+                continue;
+            }
+
+            ItemPedido item = new ItemPedido();
+            item.setNomeItem(nome);
+            item.setMaterial(nome);
+            item.setQuantidade(quantidade != null ? quantidade : 0);
+            item.setValorUnitario(valorUnitario);
+            itens.add(item);
+        }
+
+        pedido.setItens(itens);
+        pedido.setValorAdicionais(parseMoeda(frete).add(parseMoeda(maoObra)));
+        pedido.setObservacoesAdmin(observacoesAdmin);
+        pedido.calcularTotais();
+
+        return pedidoRepository.save(pedido);
     }
 
     public void adicionarOrcamento(Pedido pedido) {
@@ -148,14 +213,72 @@ public class SistemaService {
     }
 
     public List<Atividade> listarPorData(LocalDate data) {
-		List<Atividade> resultado = atividadeRepository.findAll().stream()
-			.filter(a -> data.equals(a.getData()))
-			.toList();
+        return atividadeRepository.findAll().stream()
+                .filter(a -> data.equals(a.getData()))
+                .toList();
+    }
 
-		if (resultado.isEmpty()) {
-			throw new ResourceNotFoundException("Nenhuma atividade encontrada para a data: " + data);
-		}
+    private int tamanho(List<?> lista) {
+        return lista == null ? 0 : lista.size();
+    }
 
-		return resultado;
-	}
+    private String valorOuVazio(List<String> lista, int indice) {
+        if (lista == null || indice >= lista.size() || lista.get(indice) == null) {
+            return "";
+        }
+        return lista.get(indice).trim();
+    }
+
+    private Integer parseInteiro(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        String normalizado = valor.replaceAll("[^0-9-]", "");
+        if (normalizado.isBlank() || normalizado.equals("-")) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(normalizado);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private BigDecimal parseMoeda(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+
+        String normalizado = valor.trim()
+                .replace("R$", "")
+                .replaceAll("\\s+", "")
+                .replaceAll("[^0-9,.-]", "");
+
+        if (normalizado.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+
+        if (normalizado.contains(",") && normalizado.contains(".")) {
+            if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
+                normalizado = normalizado.replace(".", "").replace(",", ".");
+            } else {
+                normalizado = normalizado.replace(",", "");
+            }
+        } else if (normalizado.contains(",")) {
+            normalizado = normalizado.replace(".", "").replace(",", ".");
+        } else if (normalizado.indexOf('.') != normalizado.lastIndexOf('.')) {
+            int ultimaPosicao = normalizado.lastIndexOf('.');
+            normalizado = normalizado.substring(0, ultimaPosicao).replace(".", "")
+                    + "."
+                    + normalizado.substring(ultimaPosicao + 1);
+        }
+
+        try {
+            return new BigDecimal(normalizado);
+        } catch (NumberFormatException ex) {
+            return BigDecimal.ZERO;
+        }
+    }
 }

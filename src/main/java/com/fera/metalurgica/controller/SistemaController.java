@@ -29,8 +29,9 @@ public class SistemaController {
         return "home";
     }
 
-	    @GetMapping("/orcamentos")
-    public String orcamentos() {
+	@GetMapping("/orcamentos")
+    public String orcamentos(Model model) {
+        model.addAttribute("orcamentos", service.listarOrcamentos());
         return "orcamentos";
     }
 
@@ -69,6 +70,7 @@ public class SistemaController {
         novoPedido.setMaterial(material);
         novoPedido.setMedidas(medidas);
         novoPedido.setDescricao(descricao);
+        novoPedido.setCriadoPor("CLIENTE");
 
         service.adicionarPedido(novoPedido);
 
@@ -197,5 +199,41 @@ public class SistemaController {
     @GetMapping("/catalogo/banheiro")
 public String banheiro(Model model) {
     return "ambientes/banheiro";
+    }
+
+    @PostMapping("/orcamentos/salvar")
+    public String salvarOrcamento(@RequestParam(required = false) Long pedidoId,
+                                  @RequestParam String cliente,
+                                  @RequestParam String telefone,
+                                  @RequestParam String cpf,
+                                  @RequestParam String material,
+                                  @RequestParam(required = false) String medidas,
+                                  @RequestParam String descricao,
+                                  @RequestParam(required = false) List<String> itemNome,
+                                  @RequestParam(required = false) List<String> itemQuantidade,
+                                  @RequestParam(required = false) List<String> itemValorUnitario,
+                                  @RequestParam(required = false) String frete,
+                                  @RequestParam(required = false) String maoObra,
+                                  @RequestParam(required = false) String observacoesAdmin,
+                                  RedirectAttributes redirectAttributes) {
+
+        service.salvarOrcamentoAdmin(
+                pedidoId,
+                cliente,
+                telefone,
+                cpf,
+                material,
+                medidas,
+                descricao,
+                itemNome,
+                itemQuantidade,
+                itemValorUnitario,
+                frete,
+                maoObra,
+                observacoesAdmin
+        );
+
+        redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
+        return "redirect:/orcamentos";
     }
 }

@@ -3,11 +3,11 @@ package com.fera.metalurgica.service;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.exception.ResourceNotFoundException;
 import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.Orcamento;
+import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Produto;
 import com.fera.metalurgica.model.Usuario;
 import com.fera.metalurgica.repository.AtividadeRepository;
-import com.fera.metalurgica.repository.OrcamentoRepository;
+import com.fera.metalurgica.repository.PedidoRepository;
 import com.fera.metalurgica.repository.ProdutoRepository;
 import com.fera.metalurgica.repository.UsuarioRepository;
 import jakarta.annotation.PostConstruct;
@@ -24,7 +24,7 @@ public class SistemaService {
     @Autowired
     private ProdutoRepository produtoRepository;
     @Autowired
-    private OrcamentoRepository orcamentoRepository;
+    private PedidoRepository pedidoRepository;
     @Autowired
     private AtividadeRepository atividadeRepository;
     @Autowired
@@ -108,27 +108,27 @@ public class SistemaService {
 	}
 
 
-	// ORCAMENTO
+	// PEDIDO
 
-    public List<Orcamento> listarOrcamentos() {
-        return orcamentoRepository.findAll();
+    public List<Pedido> listarOrcamentos() {
+        return pedidoRepository.findAll();
     }
 
-    public void adicionarOrcamento(Orcamento orcamento) {
+    public void adicionarOrcamento(Pedido pedido) {
 
-		if (orcamento.getItens() == null || orcamento.getItens().isEmpty()) {
+		if (pedido.getItens() == null || pedido.getItens().isEmpty()) {
 			throw new BusinessException("O orçamento deve ter pelo menos um item.");
 		}
-		for (var item : orcamento.getItens()) {
-			item.setOrcamento(orcamento);
+		for (var item : pedido.getItens()) {
+			item.setPedido(pedido);
 		}
 
-        orcamento.calcularTotais();
-        orcamentoRepository.save(orcamento);
+        pedido.calcularTotais();
+        pedidoRepository.save(pedido);
     }
 
-	public Orcamento buscarOrcamentoPorId(Long id) {
-		return orcamentoRepository.findById(id)
+	public Pedido buscarOrcamentoPorId(Long id) {
+		return pedidoRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
 	}
 

@@ -51,7 +51,7 @@ Depois tente novamente:
 - Lombok: 1.18.30
 
 O arquivo `pom.xml` já foi atualizado com:
-- Configuração correcta do `maven-compiler-plugin`
+- Configuração correta do `maven-compiler-plugin`
 - Argumento `-XDignore.symbol.file` para evitar conflitos com Lombok
 - Todas as dependências compatíveis com Java 21
 

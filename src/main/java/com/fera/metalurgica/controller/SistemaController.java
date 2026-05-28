@@ -179,4 +179,9 @@ public class SistemaController {
 public String banheiro(Model model) {
     return "ambientes/banheiro";
     }
+
+     @GetMapping("/catalogo/biblioteca")
+    public String biblioteca(Model model) {
+    return "ambientes/biblioteca";
+    }
 }

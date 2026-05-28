@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/pages/usuarios.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body th:attr="data-erro=${erro != null}">
 
 <div class="dashboard-layout">
     <aside class="sidebar">
@@ -28,6 +28,10 @@
     </aside>
 
     <main class="main-content">
+        <div th:if="${sucesso}" id="toastSucesso" class="toast sucesso">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${sucesso}"></span>
+        </div>
         <div class="page-header">
             <h2 class="page-title">Usuário</h2>
             <div class="header-actions">
@@ -79,29 +83,36 @@
 
             <div class="input-group">
                 <label>Nome:</label>
-                <input type="text" name="nome" class="input-gray" required>
+                <input type="text" name="nome" class="input-gray" required
+                    th:value="${nomePreenchido}">
             </div>
 
             <div class="input-group">
                 <label>Cargo:</label>
                 <select name="cargo" class="input-gray" style="cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; padding-right: 40px;" required>
                     <option value="" disabled selected>Selecione um cargo</option>
-                    <option value="Gerente">Gerente</option>
-                    <option value="Atendente">Atendente</option>
-                    <option value="Marceneiro">Marceneiro</option>
-                    <option value="Marketing">Marketing</option>
+                    <option value="Gerente" th:selected="${cargoPreenchido == 'Gerente'}">Gerente</option>
+                    <option value="Atendente" th:selected="${cargoPreenchido == 'Atendente'}">Atendente</option>
+                    <option value="Marceneiro" th:selected="${cargoPreenchido == 'Marceneiro'}">Marceneiro</option>
+                    <option value="Marketing" th:selected="${cargoPreenchido == 'Marketing'}">Marketing</option>
                 </select>
             </div>
 
             <div class="input-group">
                 <label>Data de Nascimento:</label>
-                <input type="date" name="dataNascimento" class="input-gray date-short" required>
+                <input type="date" name="dataNascimento" class="input-gray date-short" required
+                       th:value="${dataNascimentoPreenchido}">
             </div>
 
             <div class="input-group">
                 <label>E-mail Corporativo:</label>
-                <input type="email" name="email" id="inputEmail" class="input-gray" placeholder="exemplo@ferametalurgica.com" required>
+                <input type="email" name="email" id="inputEmail" class="input-gray"
+                       placeholder="exemplo@ferametalurgica.com" required
+                       th:value="${emailPreenchido}"
+                       th:classappend="${erro} ? 'input-erro' : ''">
+                <span class="mensagem-erro" th:if="${erro}" th:text="${erro}"></span>
             </div>
+
             <div class="input-group">
                 <label>Senha de Acesso:</label>
                 <input type="password" name="senha" id="inputSenha" class="input-gray" required>
@@ -152,6 +163,32 @@
                 }
             }
         }
+    }
+
+    window.onload = function () {
+        // Some o toast após 3.5s
+        const toast = document.getElementById("toastSucesso");
+        if (toast) {
+            setTimeout(() => {
+                toast.style.transition = "opacity 0.5s";
+                toast.style.opacity = "0";
+                setTimeout(() => toast.remove(), 500);
+            }, 3500);
+        }
+
+        // Reabre modal se houve erro
+        const temErro = document.body.getAttribute("data-erro") === "true";
+        if (temErro) {
+            document.getElementById("modalCadastroUsuario").style.display = "flex";
+        }
+
+        // Fecha modal ao clicar fora
+        const modal = document.getElementById("modalCadastroUsuario");
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
     }
 </script>
 

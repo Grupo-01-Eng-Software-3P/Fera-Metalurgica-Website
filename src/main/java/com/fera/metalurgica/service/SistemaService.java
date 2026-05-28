@@ -1,5 +1,7 @@
 package com.fera.metalurgica.service;
 
+import com.fera.metalurgica.exception.BusinessException;
+import com.fera.metalurgica.exception.ResourceNotFoundException;
 import com.fera.metalurgica.model.Atividade;
 import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Produto;
@@ -65,48 +67,95 @@ public class SistemaService {
         }
     }
 
+	// USUARIO
+
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
 
     public void adicionarUsuario(Usuario usuario) {
+
+		if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
+			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
+		}
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuarioRepository.save(usuario);
     }
+
+	public Usuario buscarUsuarioPorId(Long id) {
+		return usuarioRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+	}
+
+
+	// PRODUTO
 
     public List<Produto> listarProdutos() {
         return produtoRepository.findAll();
     }
 
     public void adicionarProduto(Produto produto) {
-        produtoRepository.save(produto);
+
+		if (produto.getNome() == null || produto.getNome().isBlank()) {
+			throw new BusinessException("O nome do produto não pode ser vazio.");
+		}
+		produtoRepository.save(produto);
     }
+
+	public Produto buscarProdutoPorId(Long id) {
+		return produtoRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));
+	}
+
+
+	// PEDIDO
 
     public List<Pedido> listarOrcamentos() {
         return pedidoRepository.findAll();
     }
 
-    public void adicionarPedido(Pedido pedido) {
-        if (pedido.getItens() != null) {
-            for (var item : pedido.getItens()) {
-                item.setPedido(pedido);
-            }
-        }
+    public void adicionarOrcamento(Pedido pedido) {
+
+		if (pedido.getItens() == null || pedido.getItens().isEmpty()) {
+			throw new BusinessException("O orçamento deve ter pelo menos um item.");
+		}
+		for (var item : pedido.getItens()) {
+			item.setPedido(pedido);
+		}
+
         pedido.calcularTotais();
         pedidoRepository.save(pedido);
     }
+
+	public Pedido buscarOrcamentoPorId(Long id) {
+		return pedidoRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
+	}
+
+
+	// ATIVIDADE
 
     public List<Atividade> listarAtividades() {
         return atividadeRepository.findAllByOrderByIdDesc();
     }
 
     public Atividade adicionarAtividade(Atividade atividade) {
-        return atividadeRepository.save(atividade);
+
+        if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
+			throw new BusinessException("O título da atividade não pode ser vazio.");
+		}
+		return atividadeRepository.save(atividade);
     }
 
     public List<Atividade> listarPorData(LocalDate data) {
-        return atividadeRepository.findAll().stream()
-                .filter(a -> data.equals(a.getData()))
-                .toList();
-    }
+		List<Atividade> resultado = atividadeRepository.findAll().stream()
+			.filter(a -> data.equals(a.getData()))
+			.toList();
+
+		if (resultado.isEmpty()) {
+			throw new ResourceNotFoundException("Nenhuma atividade encontrada para a data: " + data);
+		}
+
+		return resultado;
+	}
 }

@@ -105,6 +105,29 @@ public class SistemaService {
 		produtoRepository.save(produto);
     }
 
+    public void adicionarPedido(Pedido pedido) {
+        if (pedido.getItens() != null) {
+            for (ItemPedido item : pedido.getItens()) {
+                item.setPedido(pedido);
+            }
+        }
+
+        if (pedido.getCriadoPor() == null) {
+            pedido.setCriadoPor("CLIENTE");
+        }
+
+        pedido.calcularTotais();
+        pedidoRepository.save(pedido);
+    }
+
+	public Produto buscarProdutoPorId(Long id) {
+		return produtoRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));
+	}
+
+
+	// PEDIDO
+
 	public Produto buscarProdutoPorId(Long id) {
 		return produtoRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));

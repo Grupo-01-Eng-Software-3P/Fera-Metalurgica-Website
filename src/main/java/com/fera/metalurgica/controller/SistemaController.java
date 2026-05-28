@@ -1,12 +1,14 @@
 package com.fera.metalurgica.controller;
 
+import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.Orcamento;
+import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Usuario;
 import com.fera.metalurgica.service.SistemaService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -27,14 +29,15 @@ public class SistemaController {
         return "home";
     }
 
-    @GetMapping("/orcamentos")
-    public String orcamentos() {
+	@GetMapping("/orcamentos")
+    public String orcamentos(Model model) {
+        model.addAttribute("orcamentos", service.listarOrcamentos());
         return "orcamentos";
     }
 
     @GetMapping("/pedido")
     public String pedidoForm(Model model) {
-        return "orcamento";
+        return "pedido";
     }
 
     @PostMapping("/pedido")
@@ -57,18 +60,19 @@ public class SistemaController {
             model.addAttribute("medidasPreenchido", medidas);
             model.addAttribute("descricaoPreenchido", descricao);
 
-            return "orcamento";
+            return "pedido";
         }
 
-        Orcamento novoOrcamento = new Orcamento();
-        novoOrcamento.setCliente(cliente);
-        novoOrcamento.setTelefone(telefone);
-        novoOrcamento.setCpf(cpf);
-        novoOrcamento.setMaterial(material);
-        novoOrcamento.setMedidas(medidas);
-        novoOrcamento.setDescricao(descricao);
+        Pedido novoPedido = new Pedido();
+        novoPedido.setCliente(cliente);
+        novoPedido.setTelefone(telefone);
+        novoPedido.setCpf(cpf);
+        novoPedido.setMaterial(material);
+        novoPedido.setMedidas(medidas);
+        novoPedido.setDescricao(descricao);
+        novoPedido.setCriadoPor("CLIENTE");
 
-        service.adicionarOrcamento(novoOrcamento);
+        service.adicionarPedido(novoPedido);
 
         return "redirect:/";
     }
@@ -145,8 +149,17 @@ public class SistemaController {
 
     @GetMapping("/usuarios")
     public String usuarios(Model model) {
-        model.addAttribute("usuarios", service.listarUsuarios());
-        return "usuarios";
+		model.addAttribute("usuarios", service.listarUsuarios());
+		if (!model.containsAttribute("erro")) {
+			model.addAttribute("erro", null);
+		}
+		if (!model.containsAttribute("nomePreenchido")) {
+			model.addAttribute("nomePreenchido", null);
+			model.addAttribute("cargoPreenchido", null);
+			model.addAttribute("dataNascimentoPreenchido", null);
+			model.addAttribute("emailPreenchido", null);
+		}
+		return "usuarios";
     }
 
     @PostMapping("/novo-usuario")
@@ -154,12 +167,20 @@ public class SistemaController {
                                 @RequestParam String cargo,
                                 @RequestParam String dataNascimento,
                                 @RequestParam String email,
-                                @RequestParam String senha) {
-
-        LocalDate dataConvertida = LocalDate.parse(dataNascimento);
-
-        Usuario usuario = new Usuario(null, nome, cargo, dataConvertida, email, senha);
-        service.adicionarUsuario(usuario);
+                                @RequestParam String senha,
+								RedirectAttributes redirectAttributes) {
+		try {
+			LocalDate dataConvertida = LocalDate.parse(dataNascimento);
+			Usuario usuario = new Usuario(null, nome, cargo, dataConvertida, email, senha);
+			service.adicionarUsuario(usuario);
+			redirectAttributes.addFlashAttribute("sucesso", "Usuário cadastrado com sucesso!");
+		} catch (BusinessException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			redirectAttributes.addFlashAttribute("nomePreenchido", nome);
+			redirectAttributes.addFlashAttribute("cargoPreenchido", cargo);
+			redirectAttributes.addFlashAttribute("dataNascimentoPreenchido", dataNascimento);
+			redirectAttributes.addFlashAttribute("emailPreenchido", email);
+		}
 
         return "redirect:/usuarios";
     }
@@ -168,5 +189,56 @@ public class SistemaController {
     public String catalogo(Model model) {
         model.addAttribute("produtos", service.listarProdutos());
         return "catalogo";
+    }
+
+    @GetMapping("/catalogo/adega")
+    public String adega(Model model) {
+    return "ambientes/adega";
+    }
+
+    @GetMapping("/catalogo/banheiro")
+    public String banheiro(Model model) {
+        return "ambientes/banheiro";
+    }
+
+    @GetMapping("/catalogo/biblioteca")
+    public String biblioteca(Model model) {
+        return "ambientes/biblioteca";
+    }
+
+    @PostMapping("/orcamentos/salvar")
+    public String salvarOrcamento(@RequestParam(required = false) Long pedidoId,
+                                  @RequestParam String cliente,
+                                  @RequestParam String telefone,
+                                  @RequestParam String cpf,
+                                  @RequestParam String material,
+                                  @RequestParam(required = false) String medidas,
+                                  @RequestParam String descricao,
+                                  @RequestParam(required = false) List<String> itemNome,
+                                  @RequestParam(required = false) List<String> itemQuantidade,
+                                  @RequestParam(required = false) List<String> itemValorUnitario,
+                                  @RequestParam(required = false) String frete,
+                                  @RequestParam(required = false) String maoObra,
+                                  @RequestParam(required = false) String observacoesAdmin,
+                                  RedirectAttributes redirectAttributes) {
+
+        service.salvarOrcamentoAdmin(
+                pedidoId,
+                cliente,
+                telefone,
+                cpf,
+                material,
+                medidas,
+                descricao,
+                itemNome,
+                itemQuantidade,
+                itemValorUnitario,
+                frete,
+                maoObra,
+                observacoesAdmin
+        );
+
+        redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
+        return "redirect:/orcamentos";
     }
 }

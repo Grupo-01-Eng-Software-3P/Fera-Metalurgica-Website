@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/dashboard",
                                 "/midia",
                                 "/orcamentos",
+                                "/orcamentos/**",
                                 "/usuarios",
                                 "/agenda"
                                 ).authenticated()

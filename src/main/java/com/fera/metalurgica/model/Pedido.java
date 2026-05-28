@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orcamento")
-public class Orcamento {
+@Table(name = "pedido")
+public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +36,12 @@ public class Orcamento {
 
     // Parte 2: Orçamento do Admin
     @OneToMany(
-            mappedBy = "orcamento",
+            mappedBy = "pedido",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
-    private List<ItemOrcamento> itens = new ArrayList<>();
+    private List<ItemPedido> itens = new ArrayList<>();
 
     private BigDecimal valorTotalMateriais;
     private BigDecimal valorAdicionais;
@@ -54,10 +54,10 @@ public class Orcamento {
         this.dataCriacao = LocalDateTime.now();
     }
 
-    public Orcamento() {}
+    public Pedido() {}
 
-    public Orcamento(Long id, String cliente, String telefone, String cpf,
-                     String material, String medidas, String descricao, String criadoPor) {
+    public Pedido(Long id, String cliente, String telefone, String cpf,
+				  String material, String medidas, String descricao, String criadoPor) {
         this.id = id;
         this.cliente = cliente;
         this.telefone = telefone;
@@ -97,10 +97,10 @@ public class Orcamento {
     public LocalDateTime getDataCriacao() { return dataCriacao; }
     public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
 
-    public List<ItemOrcamento> getItens() { return itens; }
-    public void setItens(List<ItemOrcamento> itens) {
+    public List<ItemPedido> getItens() { return itens; }
+    public void setItens(List<ItemPedido> itens) {
         this.itens.clear();
-        for (ItemOrcamento item : itens) {
+        for (ItemPedido item : itens) {
             adicionarItem(item);
         }
         calcularTotais();
@@ -118,22 +118,22 @@ public class Orcamento {
 
     // Lógica de negócio
 
-    public void adicionarItem(ItemOrcamento item) {
+    public void adicionarItem(ItemPedido item) {
         itens.add(item);
-        item.setOrcamento(this);
+        item.setPedido(this);
         calcularTotais();
     }
 
-    public void removerItem(ItemOrcamento item) {
+    public void removerItem(ItemPedido item) {
         itens.remove(item);
-        item.setOrcamento(null);
+        item.setPedido(null);
         calcularTotais();
     }
 
     public void calcularTotais() {
         BigDecimal totalMateriais = BigDecimal.ZERO;
         if (itens != null) {
-            for (ItemOrcamento item : itens) {
+            for (ItemPedido item : itens) {
                 totalMateriais = totalMateriais.add(item.getSubtotal());
             }
         }

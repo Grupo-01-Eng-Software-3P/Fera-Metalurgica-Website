@@ -166,7 +166,24 @@
     font-style: italic;
 }
 
+/* Modal Overlay */
+.modal-form-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(26, 18, 12, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
 /* Modal Content Base */
+.modal-pedido-content,
 .modal-orcamento-content {
     background-color: var(--white);
     border-radius: 20px;
@@ -177,8 +194,12 @@
     overflow-y: auto;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     position: absolute;
+    inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
 }
 
 /* Modal Fechar X */
@@ -254,6 +275,7 @@
 .label-box-input { flex: 2; text-align: center; }
 .input-box { background-color: #F8F8F8; border: 1px solid #DDD; padding: 10px; border-radius: 8px; flex: 1; outline: none; text-align: center; }
 .input-box:focus { border-color: #C06014; }
+.input-box[readonly] { background-color: #EDEDED; cursor: default; }
 
 /* Caixa de Observação */
 .obs-textarea { background-color: #F8F8F8; border: 1px solid #DDD; padding: 10px; border-radius: 8px; resize: none; flex: 1; height: 100%; font-family: inherit; font-size: 14px; outline: none; }
@@ -305,6 +327,7 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     /* ADICIONADO PARA CORRIGIR O ERRO DE LAYOUT */
     background-color: var(--white);
+    overflow: hidden;
 }
 
 .flip-card-front {
@@ -336,4 +359,73 @@
 .btn-flip:hover {
     background-color: #5C3817;
     color: white;
+}
+
+.btn-salvar-orcamento,
+.btn-salvar-pedido {
+    background-color: #5C3817;
+    color: white;
+    border: none;
+    padding: 15px 60px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(92, 56, 23, 0.2);
+}
+
+.btn-salvar-orcamento:hover,
+.btn-salvar-pedido:hover {
+    background-color: #C06014;
+    transform: scale(1.05);
+}
+
+@media (max-width: 1024px) {
+    .flip-card {
+        max-width: 100%;
+        height: 90vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-form-overlay {
+        padding: 12px;
+    }
+
+    .flip-card {
+        height: 90vh;
+    }
+
+    .modal-pedido-content,
+    .modal-orcamento-content {
+        padding: 24px 18px;
+    }
+
+    .orc-header,
+    .orc-company-info,
+    .orc-split-sections,
+    .orc-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .orc-header h2 {
+        font-size: 28px;
+    }
+
+    .orc-numero {
+        font-size: 22px !important;
+    }
+
+    .orc-company-info {
+        gap: 16px;
+    }
+
+    .btn-salvar-orcamento,
+    .btn-salvar-pedido {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 16px;
+    }
 }

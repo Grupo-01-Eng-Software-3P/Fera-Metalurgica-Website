@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Agenda - Fera</title>
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
@@ -16,8 +17,8 @@
         <ul class="sidebar-menu">
             <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
             <li class="active"><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
-            <li><a href="#"><i class="fas fa-image"></i> Mídia</a></li>
-            <li><a href="/orcamento"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
+            <li><a href="/midia"><i class="fas fa-image"></i> Mídia</a></li>
+            <li><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
         <div class="sidebar-user">
@@ -144,144 +145,158 @@
 </div>
 
 <script>
-    // 1. Mocks atualizados com descrição e evento
-    const compromissosMocks = [
-        { dataDia: new Date().getDate(), titulo: "Visita para realizar Orçamento e medidas", descricao: "Levar trena a laser e catálogo de MDF.", horario: "08:00h - 09:30h", evento: "Casa do Cliente", cor: "#007BFF" },
-        { dataDia: new Date().getDate(), titulo: "Realizar entrega do móvel", descricao: "Ligar para o cliente 30 minutos antes de chegar.", horario: "10:40h - 12:00h", evento: "Condomínio Flores", cor: "#28A745" },
-        { dataDia: 15, titulo: "Instalação do projeto", descricao: "Instalação dos armários da cozinha.", horario: "13:30h - 15:00h", evento: "Galpão Principal", cor: "#6F42C1" }
-    ];
+    let compromissos = [];
 
     let dataAtual = new Date();
     let mesAtual = dataAtual.getMonth();
     let anoAtual = dataAtual.getFullYear();
     let diaSelecionado = dataAtual.getDate();
 
-    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
-    // 2. Renderiza o Calendário e as Bolinhas
+    const diasSemana = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira",
+        "Quinta-feira","Sexta-feira","Sábado"];
+
+
+    // =====================
+    // HELPER — evita bug de UTC
+    // =====================
+    function parsarData(dataStr) {
+        const [ano, mes, dia] = dataStr.split("-").map(Number);
+        return new Date(ano, mes - 1, dia);
+    }
+
+
+    // =====================
+    // CARREGAR DO BACKEND
+    // =====================
+    async function carregarAgenda() {
+        const res = await fetch("/agenda/dados");
+        compromissos = await res.json();
+        renderizarCalendario();
+    }
+
+
+    // =====================
+    // CALENDÁRIO
+    // =====================
     function renderizarCalendario() {
-        document.getElementById("mesAnoAtual").innerText = `${meses[mesAtual]} ${anoAtual}`;
+
+        document.getElementById("mesAnoAtual").innerText =
+            `${meses[mesAtual]} ${anoAtual}`;
+
         const grid = document.getElementById("diasCalendario");
         grid.innerHTML = "";
 
         const primeiroDia = new Date(anoAtual, mesAtual, 1).getDay();
         const ultimoDia = new Date(anoAtual, mesAtual + 1, 0).getDate();
-        const ultimoDiaMesAnt = new Date(anoAtual, mesAtual, 0).getDate();
+        const ultimoMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
 
         for (let i = primeiroDia; i > 0; i--) {
-            grid.innerHTML += `<div class="day inactive">${ultimoDiaMesAnt - i + 1}</div>`;
+            grid.innerHTML += `<div class="day inactive">${ultimoMesAnterior - i + 1}</div>`;
         }
 
         for (let i = 1; i <= ultimoDia; i++) {
-            let classe = (i === diaSelecionado && mesAtual === new Date().getMonth()) ? "day active" : "day";
-            let temCompromisso = compromissosMocks.some(c => c.dataDia === i);
-            let dotHtml = temCompromisso ? `<div style="width: 5px; height: 5px; background: var(--fera-orange); border-radius: 50%; position: absolute; bottom: 2px;"></div>` : '';
 
-            grid.innerHTML += `<div class="${classe}" style="position: relative;" onclick="selecionarDia(${i}, this)">
-                                  ${i}
-                                  ${dotHtml}
-                               </div>`;
+            let classe = (i === diaSelecionado) ? "day active" : "day";
+
+            let tem = compromissos.some(c => {
+                const d = parsarData(c.data);
+                return d.getDate() === i &&
+                    d.getMonth() === mesAtual &&
+                    d.getFullYear() === anoAtual;
+            });
+
+            let dot = tem ? `<div style="width:6px;height:6px;background:var(--fera-orange);border-radius:50%;position:absolute;bottom:3px;"></div>` : "";
+
+            grid.innerHTML += `
+                <div class="${classe}" style="position:relative;" onclick="selecionarDia(${i})">
+                    ${i}
+                    ${dot}
+                </div>
+            `;
         }
-        atualizarPainelLateral(diaSelecionado);
+
+        atualizarPainel(diaSelecionado);
     }
 
-    // 3. Atualiza a lista lateral com a função de clicar no compromisso
-    function atualizarPainelLateral(dia) {
-        const dataClique = new Date(anoAtual, mesAtual, dia);
-        document.getElementById("tituloDiaCompromisso").innerText = `${dia} de ${meses[mesAtual]}`;
-        document.getElementById("subtituloDia").innerText = diasSemana[dataClique.getDay()];
+
+    // =====================
+    // SELECIONAR DIA
+    // =====================
+    function selecionarDia(dia) {
+        diaSelecionado = dia;
+        renderizarCalendario();
+    }
+
+
+    // =====================
+    // MUDAR MÊS
+    // =====================
+    function mudarMes(direcao) {
+        mesAtual += direcao;
+        if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
+        if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
+        diaSelecionado = 1;
+        renderizarCalendario();
+    }
+
+
+    // =====================
+    // PAINEL LATERAL
+    // =====================
+    function atualizarPainel(dia) {
+
+        const data = new Date(anoAtual, mesAtual, dia);
+
+        document.getElementById("tituloDiaCompromisso").innerText =
+            `${dia} de ${meses[mesAtual]}`;
+
+        document.getElementById("subtituloDia").innerText =
+            diasSemana[data.getDay()];
 
         const lista = document.getElementById("listaCompromissos");
         lista.innerHTML = "";
 
-        let compromissosDoDia = [];
-        if (mesAtual === new Date().getMonth()) {
-            compromissosDoDia = compromissosMocks.filter(c => c.dataDia === dia);
-        }
+        let doDia = compromissos.filter(c => {
+            const d = parsarData(c.data);
+            return d.getDate() === dia &&
+                d.getMonth() === mesAtual &&
+                d.getFullYear() === anoAtual;
+        });
 
-        if (compromissosDoDia.length === 0) {
-            lista.innerHTML = "<p style='color: #888; font-size: 14px;'>Sem compromissos agendados.</p>";
+        if (doDia.length === 0) {
+            lista.innerHTML = "<p style='color:#888;'>Sem compromissos</p>";
             return;
         }
 
-        compromissosDoDia.forEach(comp => {
-            const indexOriginal = compromissosMocks.indexOf(comp);
+        doDia.forEach(c => {
             lista.innerHTML += `
-                <li class="compromisso-card" style="cursor: pointer;" onclick="abrirDetalhes(${indexOriginal})">
-                    <div style="display: flex; gap: 10px; align-items: baseline;">
-                        <div class="dot-color" style="background-color: ${comp.cor};"></div>
-                        <div>
-                            <span class="comp-title">${comp.titulo}</span>
-                            <span class="comp-time">${comp.horario}</span>
-                        </div>
+                <li class="compromisso-card" onclick="abrirDetalhes(${JSON.stringify(c).replace(/"/g, '&quot;')})">
+                    <div>
+                        <strong>${c.titulo}</strong><br>
+                        <small>${c.horario}</small><br>
+                        <small>${c.evento}</small>
                     </div>
                 </li>
             `;
         });
     }
 
-    function selecionarDia(dia, elementoHtml) {
-        diaSelecionado = dia;
-        document.querySelectorAll('.days-grid .day').forEach(el => el.classList.remove('active'));
-        elementoHtml.classList.add('active');
-        atualizarPainelLateral(dia);
-    }
 
-    function mudarMes(direcao) {
-        mesAtual += direcao;
-        if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
-        else if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
-        diaSelecionado = 1;
-        renderizarCalendario();
-    }
+    // =====================
+    // DETALHES DO COMPROMISSO
+    // =====================
+    function abrirDetalhes(c) {
+        document.getElementById("detalheTitulo").innerText   = c.titulo;
+        document.getElementById("detalheHorario").innerText  = c.horario;
+        document.getElementById("detalheEvento").innerText   = c.evento;
+        document.getElementById("detalheDescricao").innerText = c.descricao || "—";
 
-    // 4. Funções do Modal de Criar
-    function abrirModalAgendamento() { document.getElementById("modalAgendamento").style.display = "flex"; }
-    function fecharModalAgendamento() { document.getElementById("modalAgendamento").style.display = "none"; }
-
-    function salvarAgendamento(event) {
-        event.preventDefault();
-
-        const titulo = document.getElementById("inputTitulo").value;
-        const descricao = document.getElementById("inputDescricao").value;
-        const eventoLocal = document.getElementById("inputEvento").value;
-        const dataInput = document.getElementById("inputData").value;
-        const horaInicio = document.getElementById("inputHoraInicio").value;
-        const horaFim = document.getElementById("inputHoraFim").value;
-
-        const partesData = dataInput.split('-');
-        const diaAgendado = parseInt(partesData[2]);
-        const mesAgendado = parseInt(partesData[1]) - 1;
-        const anoAgendado = parseInt(partesData[0]);
-
-        compromissosMocks.push({
-            dataDia: diaAgendado,
-            titulo: titulo,
-            descricao: descricao || "Sem descrição.",
-            evento: eventoLocal,
-            horario: `${horaInicio}h - ${horaFim}h`,
-            cor: "#C06014"
-        });
-
-        if (mesAgendado === mesAtual && anoAgendado === anoAtual) {
-            diaSelecionado = diaAgendado;
-            renderizarCalendario();
-        }
-
-        fecharModalAgendamento();
-        document.getElementById("formAgendamento").reset();
-    }
-
-    // 5. Funções do Modal de Ler Detalhes
-    function abrirDetalhes(index) {
-        const comp = compromissosMocks[index];
-
-        document.getElementById("detalheTitulo").innerText = comp.titulo;
-        document.getElementById("detalheHorario").innerText = comp.horario;
-        document.getElementById("detalheData").innerText = `${comp.dataDia} de ${meses[mesAtual]} de ${anoAtual}`;
-        document.getElementById("detalheEvento").innerText = comp.evento || "Não informado";
-        document.getElementById("detalheDescricao").innerText = comp.descricao || "Nenhuma descrição adicionada.";
+        const d = parsarData(c.data);
+        document.getElementById("detalheData").innerText =
+            `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
 
         document.getElementById("modalDetalhes").style.display = "flex";
     }
@@ -290,8 +305,60 @@
         document.getElementById("modalDetalhes").style.display = "none";
     }
 
-    // Inicialização
-    renderizarCalendario();
+
+    // =====================
+    // SALVAR NO BACKEND
+    // =====================
+    function salvarAgendamento(event) {
+        event.preventDefault();
+
+        const titulo    = document.getElementById("inputTitulo").value;
+        const descricao = document.getElementById("inputDescricao").value;
+        const evento    = document.getElementById("inputEvento").value;
+        const data      = document.getElementById("inputData").value;
+        const h1        = document.getElementById("inputHoraInicio").value;
+        const h2        = document.getElementById("inputHoraFim").value;
+
+        fetch("/agenda", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                titulo,
+                descricao,
+                evento,
+                data,
+                horario: `${h1} - ${h2}`
+            })
+        }).then(() => {
+            fecharModalAgendamento();
+            document.getElementById("formAgendamento").reset();
+            carregarAgenda();
+        });
+    }
+
+
+    // =====================
+    // MODAL AGENDAMENTO
+    // =====================
+    function abrirModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "flex";
+    }
+    function fecharModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "none";
+    }
+
+    window.onclick = function(e) {
+        ["modalAgendamento", "modalDetalhes"].forEach(id => {
+            const m = document.getElementById(id);
+            if (e.target === m) m.style.display = "none";
+        });
+    };
+
+
+    // =====================
+    // INIT
+    // =====================
+    carregarAgenda();
 </script>
 </body>
 </html>

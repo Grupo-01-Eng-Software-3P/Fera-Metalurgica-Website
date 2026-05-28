@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${categoria.nome} + ' - Fera Mídia'">Categoria - Fera</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/midia.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <h2>Fera</h2>
+        <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
+        <ul class="sidebar-menu">
+            <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="#"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+            <li class="active"><a href="/midia"><i class="fas fa-image"></i> Mídia</a></li>
+            <li><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
+            <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
+        </ul>
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <!-- Header -->
+        <div class="midia-header">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <a href="/midia" class="btn-voltar"><i class="fas fa-chevron-left"></i></a>
+                <h2 class="page-title" th:text="${categoria.nome}">Categoria</h2>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="text" id="inputBusca" onkeyup="filtrarProdutos()" placeholder="Buscar mídia...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="btn-nova-categoria" onclick="abrirModalProduto()">+ Nova Categoria</button>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <button class="filter-pill active" onclick="ativarFiltro(this)">Todas</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Categorias</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Produtos</button>
+            <button class="filter-pill" onclick="ativarFiltro(this)">Vídeos</button>
+        </div>
+
+        <!-- Carrossel grande -->
+        <div class="cat-carrossel">
+            <button class="carrossel-btn esq" onclick="rolarCat(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="cat-carrossel-track" id="catTrack">
+                <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Imagem 1" onclick="selecionarImg(this)">
+                <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Imagem 2" onclick="selecionarImg(this)">
+                <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Imagem 3" onclick="selecionarImg(this)">
+            </div>
+            <button class="carrossel-btn dir" onclick="rolarCat(1)"><i class="fas fa-chevron-right"></i></button>
+            <div class="cat-carrossel-label">
+                <i class="fas fa-pencil-alt"></i>
+                <span th:text="${categoria.nome}">Adega</span>
+            </div>
+        </div>
+
+        <!-- Produto destaque -->
+        <div class="produto-destaque" id="produtoDestaque">
+            <div class="produto-destaque-img">
+                <img id="imgDestaque" src="/imagens/Projeto_Galeria_1.jpeg" alt="Produto">
+            </div>
+            <div class="produto-destaque-info">
+                <p class="destaque-label">Descrição</p>
+                <p id="descDestaque" th:text="${categoria.descricao}">Descrição do produto selecionado.</p>
+                <div class="destaque-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> <span id="nomeDestaque" th:text="${categoria.nome}">Nome</span></span>
+                    <span class="categoria-meta" th:text="${categoria.meta}">5MB · faz 2 dias</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade de produtos -->
+        <div class="produtos-grade" id="produtosGrade">
+
+            <div class="produto-card" onclick="selecionarProduto(this)"
+                 data-nome="Aparador Armário Buffet Deco"
+                 data-descricao="Aparador em madeira com acabamento natural, perfeito para sala de jantar."
+                 data-img="/imagens/Projeto_Galeria_2.jpeg"
+                 data-meta="5MB · faz 2 dias">
+                <div class="produto-card-img">
+                    <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Aparador">
+                </div>
+                <div class="produto-card-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Aparador Armário Buffet Deco</span>
+                    <span class="categoria-meta">5MB · faz 2 dias</span>
+                </div>
+            </div>
+
+            <div class="produto-card" onclick="selecionarProduto(this)"
+                 data-nome="Aparador Armário Buffet Deco"
+                 data-descricao=""
+                 data-img="/imagens/Projeto_Galeria_3.jpeg"
+                 data-meta="5MB · faz 2 dias">
+                <div class="produto-card-img">
+                    <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Aparador 2">
+                </div>
+                <div class="produto-card-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Aparador Armário Buffet Deco</span>
+                    <span class="categoria-meta">5MB · faz 2 dias</span>
+                </div>
+            </div>
+
+            <!-- Placeholder sem imagem -->
+            <div class="produto-card produto-placeholder" onclick="selecionarProduto(this)"
+                 data-nome="projeto-portas-principal.jpg"
+                 data-descricao=""
+                 data-img=""
+                 data-meta="5MB · faz 2 dias">
+                <div class="produto-card-img placeholder-img">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="produto-card-footer">
+                    <span class="categoria-nome" style="color:#bbb;">projeto-portas-principal.jpg</span>
+                    <span class="categoria-meta">5MB · faz 2 dias</span>
+                </div>
+            </div>
+
+            <!-- Botão adicionar imagem -->
+            <div class="produto-card produto-add" onclick="abrirModalImagem()">
+                <div class="produto-card-img add-img">
+                    <i class="fas fa-plus"></i>
+                    <span>Adicionar imagem</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<!-- MODAL ADICIONAR IMAGEM -->
+<div id="modalImagem" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;"><i class="fas fa-image"></i> Adicionar Imagem</h3>
+        <form action="/nova-imagem" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" class="input-field" placeholder="Ex: Armário Buffet" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição (opcional):</label>
+                <textarea name="descricao" class="input-field" rows="3" placeholder="Descreva esta imagem..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>Arquivo:</label>
+                <input type="file" name="arquivo" class="input-field" accept="image/*" required>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalImagem()">Cancelar</button>
+                <button type="submit" class="btn-primary">Adicionar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL ADICIONAR DESCRIÇÃO -->
+<div id="modalDescricao" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 6px;"><i class="fas fa-align-left"></i> Adicionar Descrição</h3>
+        <p style="color: #888; font-size: 13px; margin-bottom: 20px;" id="modalDescNome">Produto</p>
+        <form onsubmit="salvarDescricao(event)">
+            <div class="input-group">
+                <label>Descrição:</label>
+                <textarea id="inputDescricao" class="input-field" rows="4" placeholder="Descreva este produto..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalDescricao()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL NOVO PRODUTO -->
+<div id="modalProduto" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Nova Categoria</h3>
+        <form action="/novo-produto" method="post">
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" class="input-field" placeholder="Ex: Sala de Estar" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição:</label>
+                <textarea name="descricao" class="input-field" rows="3" placeholder="Descreva esta categoria..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalProduto()">Cancelar</button>
+                <button type="submit" class="btn-primary">Criar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function ativarFiltro(btn) {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function filtrarProdutos() {
+        const termo = document.getElementById('inputBusca').value.toLowerCase();
+        document.querySelectorAll('.produto-card:not(.produto-add)').forEach(card => {
+            const nome = (card.dataset.nome || '').toLowerCase();
+            card.style.display = nome.includes(termo) ? '' : 'none';
+        });
+    }
+
+    function rolarCat(dir) {
+        const track = document.getElementById('catTrack');
+        track.scrollBy({ left: dir * track.offsetWidth, behavior: 'smooth' });
+    }
+
+    function selecionarImg(img) {
+        document.getElementById('imgDestaque').src = img.src;
+    }
+
+    // Referência ao card atualmente selecionado (para salvar descrição depois)
+    let cardSelecionado = null;
+
+    function selecionarProduto(card) {
+        document.querySelectorAll('.produto-card').forEach(c => c.classList.remove('selecionado'));
+        card.classList.add('selecionado');
+        cardSelecionado = card;
+
+        const img    = card.dataset.img || '';
+        const nome   = card.dataset.nome || '';
+        const desc   = card.dataset.descricao || '';
+
+        document.getElementById('imgDestaque').src             = img;
+        document.getElementById('nomeDestaque').textContent    = nome;
+
+        const descEl = document.getElementById('descDestaque');
+
+        if (desc.trim() === '') {
+            // Sem descrição: mostra link para adicionar
+            descEl.innerHTML = '<span style="color:#bbb; font-style:italic;">Sem descrição. </span>' +
+                '<a href="#" onclick="abrirModalDescricao(event)" style="color:var(--fera-orange); font-weight:bold; font-size:13px;">+ Adicionar descrição</a>';
+        } else {
+            descEl.textContent = desc;
+        }
+    }
+
+    // ── Modal Imagem ─────────────────────────────
+    function abrirModalImagem() {
+        document.getElementById('modalImagem').style.display = 'flex';
+    }
+    function fecharModalImagem() {
+        document.getElementById('modalImagem').style.display = 'none';
+    }
+
+    // ── Modal Descrição ──────────────────────────
+    function abrirModalDescricao(event) {
+        if (event) event.preventDefault();
+        const nome = cardSelecionado ? cardSelecionado.dataset.nome : '';
+        document.getElementById('modalDescNome').textContent = nome;
+        document.getElementById('inputDescricao').value = cardSelecionado ? (cardSelecionado.dataset.descricao || '') : '';
+        document.getElementById('modalDescricao').style.display = 'flex';
+    }
+    function fecharModalDescricao() {
+        document.getElementById('modalDescricao').style.display = 'none';
+    }
+    function salvarDescricao(event) {
+        event.preventDefault();
+        const novaDesc = document.getElementById('inputDescricao').value.trim();
+        if (cardSelecionado && novaDesc !== '') {
+            cardSelecionado.dataset.descricao = novaDesc;
+            document.getElementById('descDestaque').textContent = novaDesc;
+        }
+        fecharModalDescricao();
+    }
+
+    // ── Modal Novo Produto ───────────────────────
+    function abrirModalProduto() {
+        document.getElementById('modalProduto').style.display = 'flex';
+    }
+    function fecharModalProduto() {
+        document.getElementById('modalProduto').style.display = 'none';
+    }
+
+    // Fecha modal clicando fora
+    window.onclick = function(e) {
+        ['modalImagem','modalDescricao','modalProduto'].forEach(id => {
+            const m = document.getElementById(id);
+            if (e.target === m) m.style.display = 'none';
+        });
+    };
+</script>
+
+</body>
+</html>

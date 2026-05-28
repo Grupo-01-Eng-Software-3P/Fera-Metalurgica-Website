@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Orçamentos - Fera</title>
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
@@ -47,8 +48,65 @@
                 <button class="btn-brown" onclick="abrirModalNovoOrcamento(null)">+ Novo Orçamento</button>
             </div>
         </div>
+        <div th:if="${orcamentoSalvo}" style="margin-bottom: 20px; padding: 12px 16px; border-radius: 12px; background-color: #E8F5E9; color: #2E7D32; font-weight: 600;" th:text="${orcamentoSalvo}"></div>
         <div class="kanban-board">
-            <!-- Colunas e cards do Kanban -->
+            <div class="kanban-column" style="min-width: 100%;">
+                <div class="kanban-header">
+                    <h3><span class="dot pendente"></span> Pedidos recebidos</h3>
+                    <span class="count" th:text="${#lists.size(orcamentos)}">0</span>
+                </div>
+
+                <div class="kanban-cards" th:if="${!#lists.isEmpty(orcamentos)}">
+                    <article class="orcamento-card"
+                             th:each="orcamento : ${orcamentos}"
+                             th:attr="
+                                 data-id=${orcamento.id},
+                                 data-cliente=${orcamento.cliente},
+                                 data-telefone=${orcamento.telefone},
+                                 data-cpf=${orcamento.cpf},
+                                 data-material=${orcamento.material},
+                                 data-medidas=${orcamento.medidas},
+                                 data-descricao=${orcamento.descricao},
+                                 data-criado-por=${orcamento.criadoPor},
+                                 data-valor-adicionais=${orcamento.valorAdicionais},
+                                 data-observacoes-admin=${orcamento.observacoesAdmin},
+                                 data-item1-nome=${orcamento.itens.size() > 0 ? orcamento.itens[0].nomeItem : ''},
+                                 data-item1-quantidade=${orcamento.itens.size() > 0 ? orcamento.itens[0].quantidade : ''},
+                                 data-item1-valor-unitario=${orcamento.itens.size() > 0 ? orcamento.itens[0].valorUnitario : ''},
+                                 data-item2-nome=${orcamento.itens.size() > 1 ? orcamento.itens[1].nomeItem : ''},
+                                 data-item2-quantidade=${orcamento.itens.size() > 1 ? orcamento.itens[1].quantidade : ''},
+                                 data-item2-valor-unitario=${orcamento.itens.size() > 1 ? orcamento.itens[1].valorUnitario : ''},
+                                 data-item3-nome=${orcamento.itens.size() > 2 ? orcamento.itens[2].nomeItem : ''},
+                                 data-item3-quantidade=${orcamento.itens.size() > 2 ? orcamento.itens[2].quantidade : ''},
+                                 data-item3-valor-unitario=${orcamento.itens.size() > 2 ? orcamento.itens[2].valorUnitario : ''}"
+                             onclick="abrirModalNovoOrcamento(this)">
+                        <div class="card-header">
+                            <span class="id-pedido" th:text="|Pedido #${orcamento.id}|">Pedido #1</span>
+                            <span class="data"
+                                  th:text="${orcamento.dataCriacao != null ? #temporals.format(orcamento.dataCriacao, 'dd/MM/yyyy HH:mm') : 'Sem data'}">
+                                01/01/2026 12:00
+                            </span>
+                        </div>
+
+                        <h3 class="cliente-nome" th:text="${orcamento.cliente}">Nome do cliente</h3>
+
+                        <p class="descricao-resumo" th:text="${orcamento.descricao}">
+                            Descrição do pedido
+                        </p>
+
+                        <div class="card-footer">
+                            <span class="tag material" th:text="${orcamento.material}">Material</span>
+                            <button type="button" class="btn-icon" title="Ver detalhes">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(orcamentos)}">
+                    Nenhum pedido cadastrado ainda.
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -59,7 +117,7 @@
         <div class="flip-card-inner">
             <!-- Frente do Card: Pedido do Cliente -->
             <div class="flip-card-front">
-                <div class="modal-orcamento-content">
+                <div class="modal-pedido-content">
                     <span class="fechar-modal-x" onclick="fecharModalOrcamento()">&times;</span>
                     <div class="orc-header">
                         <h2>Pedido do Cliente</h2>
@@ -99,13 +157,21 @@
                 </div>
             </div>
 
-            <!-- Verso do Card: Orçamento do Admin -->
             <div class="flip-card-back">
-                <div class="modal-orcamento-content">
+                <form class="modal-pedido-content" id="formOrcamentoAdmin" th:action="@{/orcamentos/salvar}" method="post" onsubmit="return salvarOrcamento(event)">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="pedidoId" id="pedidoIdOculto">
+                    <input type="hidden" name="cliente" id="clienteOculto">
+                    <input type="hidden" name="telefone" id="telefoneOculto">
+                    <input type="hidden" name="cpf" id="cpfOculto">
+                    <input type="hidden" name="material" id="materialOculto">
+                    <input type="hidden" name="medidas" id="medidasOculto">
+                    <input type="hidden" name="descricao" id="descricaoOculto">
+
                     <span class="fechar-modal-x" onclick="fecharModalOrcamento()">&times;</span>
                     <div class="orc-header">
                         <h2>Orçamento</h2>
-                        <h2 class="orc-numero" id="orcamento-numero-back">Nº 01</h2>
+                        <h2 class="orc-numero" id="pedido-numero-back">Pedido #01</h2>
                     </div>
                     <div class="orc-company-info">
                         <div class="orc-company-text">
@@ -131,9 +197,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
-                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
-                                <tr><td><input type="number"></td><td><input type="text"></td><td><input type="text" placeholder="R$"></td></tr>
+                                <tr>
+                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
+                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -142,72 +220,178 @@
                             <div class="orc-section-title">ADICIONAIS</div>
                             <div class="orc-add-row">
                                 <div class="label-box">Frete</div>
-                                <input type="text" class="input-box" placeholder="R$">
+                                <input type="text" name="frete" id="freteOrcamento" class="input-box" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()">
                             </div>
                             <div class="orc-add-row">
                                 <div class="label-box">Mão de Obra</div>
-                                <input type="text" class="input-box" placeholder="R$">
+                                <input type="text" name="maoObra" id="maoObraOrcamento" class="input-box" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()">
                             </div>
                         </div>
                         <div class="orc-observacao">
                             <div class="orc-section-title">OBSERVAÇÃO</div>
-                            <textarea class="obs-textarea" placeholder="Digite as observações..."></textarea>
+                            <textarea class="obs-textarea" name="observacoesAdmin" placeholder="Digite as observações..."></textarea>
                         </div>
                     </div>
                     <div class="orc-totais">
                          <div class="orc-total-item">
                             <span>Valor Total:</span>
-                            <input type="text" class="input-box" placeholder="R$">
+                            <input type="text" id="valorTotalCalculado" class="input-box" readonly value="R$ 0,00">
                         </div>
                     </div>
                     <div class="orc-footer">
                         <button type="button" class="btn-flip" onclick="flipCard()">Virar para Pedido</button>
                         <button type="submit" class="btn-salvar-orcamento">Salvar Orçamento</button>
                     </div>
-                </div>
+                </form>
             </div>
+</div>
         </div>
     </div>
 </div>
-
 <script>
-    function abrirModalNovoOrcamento(orcamento) {
+    function abrirModalNovoOrcamento(pedido) {
         const modal = document.getElementById("modalOrcamento");
         const formCliente = document.getElementById('formPedidoCliente');
+        const formOrcamento = document.getElementById('formOrcamentoAdmin');
         const card = document.querySelector('.flip-card-inner');
+        const pedidoData = pedido && pedido.dataset ? pedido.dataset : pedido;
 
         if (card.classList.contains('is-flipped')) {
             card.classList.remove('is-flipped');
         }
 
         formCliente.reset();
-        // Limpar formulário do admin também
+        formOrcamento.reset();
+        formOrcamento.elements['pedidoId'].value = '';
+        Array.from(formCliente.elements).forEach(element => {
+            element.disabled = false;
+        });
 
-        if (orcamento) {
-            formCliente.elements['cliente'].value = orcamento.cliente;
-            formCliente.elements['telefone'].value = orcamento.telefone;
-            formCliente.elements['cpf'].value = orcamento.cpf;
-            formCliente.elements['material'].value = orcamento.material;
-            formCliente.elements['medidas'].value = orcamento.medidas;
-            formCliente.elements['descricao'].value = orcamento.descricao;
-            document.getElementById('pedido-numero-front').innerText = `Nº ${orcamento.id}`;
-            document.getElementById('orcamento-numero-back').innerText = `Nº ${orcamento.id}`;
+        if (pedidoData) {
+            formCliente.elements['cliente'].value = pedidoData.cliente || '';
+            formCliente.elements['telefone'].value = pedidoData.telefone || '';
+            formCliente.elements['cpf'].value = pedidoData.cpf || '';
+            formCliente.elements['material'].value = pedidoData.material || '';
+            formCliente.elements['medidas'].value = pedidoData.medidas || '';
+            formCliente.elements['descricao'].value = pedidoData.descricao || '';
+            formOrcamento.elements['pedidoId'].value = pedidoData.id || '';
+            formOrcamento.elements['frete'].value = pedidoData.valorAdicionais || '';
+            formOrcamento.elements['maoObra'].value = '';
+            formOrcamento.elements['observacoesAdmin'].value = pedidoData.observacoesAdmin || '';
 
-            const isCriadoPorCliente = orcamento.criadoPor === 'CLIENTE';
+            const quantidadeInputs = formOrcamento.querySelectorAll('input[name="itemQuantidade"]');
+            const nomeInputs = formOrcamento.querySelectorAll('input[name="itemNome"]');
+            const valorInputs = formOrcamento.querySelectorAll('input[name="itemValorUnitario"]');
+            const itens = [
+                { nome: pedidoData.item1Nome, quantidade: pedidoData.item1Quantidade, valor: pedidoData.item1ValorUnitario },
+                { nome: pedidoData.item2Nome, quantidade: pedidoData.item2Quantidade, valor: pedidoData.item2ValorUnitario },
+                { nome: pedidoData.item3Nome, quantidade: pedidoData.item3Quantidade, valor: pedidoData.item3ValorUnitario }
+            ];
+
+            itens.forEach((item, index) => {
+                if (quantidadeInputs[index]) {
+                    quantidadeInputs[index].value = item.quantidade || '';
+                }
+                if (nomeInputs[index]) {
+                    nomeInputs[index].value = item.nome || '';
+                }
+                if (valorInputs[index]) {
+                    valorInputs[index].value = item.valor || '';
+                }
+            });
+
+            document.getElementById('pedido-numero-front').innerText = pedidoData.id ? `Pedido #${pedidoData.id}` : 'Pedido novo';
+            document.getElementById('pedido-numero-back').innerText = pedidoData.id ? `Pedido #${pedidoData.id}` : 'Pedido novo';
+
+            const isCriadoPorCliente = (pedidoData.criadoPor || 'CLIENTE') === 'CLIENTE';
             Array.from(formCliente.elements).forEach(element => {
                 if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                     element.disabled = isCriadoPorCliente;
                 }
             });
         } else {
-            Array.from(formCliente.elements).forEach(element => {
-                element.disabled = false;
-            });
-            document.getElementById('pedido-numero-front').innerText = 'Nº NOVO';
-            document.getElementById('orcamento-numero-back').innerText = 'Nº NOVO';
+            document.getElementById('pedido-numero-front').innerText = 'Pedido novo';
+            document.getElementById('pedido-numero-back').innerText = 'Pedido novo';
         }
 
+        atualizarTotalOrcamento();
         modal.style.display = "flex";
+    }
+
+    function salvarOrcamento(event) {
+        const formOrcamento = event.currentTarget;
+        const formCliente = document.getElementById('formPedidoCliente');
+
+        if (!formCliente.reportValidity()) {
+            return false;
+        }
+
+        formOrcamento.elements['cliente'].value = formCliente.elements['cliente'].value.trim();
+        formOrcamento.elements['telefone'].value = formCliente.elements['telefone'].value.trim();
+        formOrcamento.elements['cpf'].value = formCliente.elements['cpf'].value.trim();
+        formOrcamento.elements['material'].value = formCliente.elements['material'].value.trim();
+        formOrcamento.elements['medidas'].value = formCliente.elements['medidas'].value.trim();
+        formOrcamento.elements['descricao'].value = formCliente.elements['descricao'].value.trim();
+
+        atualizarTotalOrcamento();
+        return true;
+    }
+
+    function parseMonetario(valor) {
+        const texto = String(valor || '').trim().replace(/[^\d,.-]/g, '');
+
+        if (!texto) {
+            return 0;
+        }
+
+        if (texto.includes(',') && texto.includes('.')) {
+            if (texto.lastIndexOf(',') > texto.lastIndexOf('.')) {
+                return Number(texto.replace(/\./g, '').replace(',', '.')) || 0;
+            }
+            return Number(texto.replace(/,/g, '')) || 0;
+        }
+
+        if (texto.includes(',')) {
+            return Number(texto.replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        if ((texto.match(/\./g) || []).length > 1) {
+            const ultimaPosicao = texto.lastIndexOf('.');
+            const normalizado = texto.substring(0, ultimaPosicao).replace(/\./g, '') + '.' + texto.substring(ultimaPosicao + 1);
+            return Number(normalizado) || 0;
+        }
+
+        return Number(texto) || 0;
+    }
+
+    function formatarMonetario(valor) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
+    }
+
+    function atualizarTotalOrcamento() {
+        const form = document.getElementById('formOrcamentoAdmin');
+        if (!form) {
+            return;
+        }
+
+        const quantidades = form.querySelectorAll('input[name="itemQuantidade"]');
+        const valores = form.querySelectorAll('input[name="itemValorUnitario"]');
+        let totalMateriais = 0;
+
+        for (let i = 0; i < Math.max(quantidades.length, valores.length); i++) {
+            const quantidade = parseMonetario(quantidades[i] ? quantidades[i].value : '');
+            const valorUnitario = parseMonetario(valores[i] ? valores[i].value : '');
+            totalMateriais += quantidade * valorUnitario;
+        }
+
+        const frete = parseMonetario(form.elements['frete'] ? form.elements['frete'].value : '');
+        const maoObra = parseMonetario(form.elements['maoObra'] ? form.elements['maoObra'].value : '');
+        const total = totalMateriais + frete + maoObra;
+
+        document.getElementById('valorTotalCalculado').value = formatarMonetario(total);
     }
 
     function fecharModalOrcamento() {

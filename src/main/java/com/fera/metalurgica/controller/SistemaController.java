@@ -197,8 +197,13 @@ public class SistemaController {
     }
 
     @GetMapping("/catalogo/banheiro")
-public String banheiro(Model model) {
-    return "ambientes/banheiro";
+    public String banheiro(Model model) {
+        return "ambientes/banheiro";
+    }
+
+    @GetMapping("/catalogo/biblioteca")
+    public String biblioteca(Model model) {
+        return "ambientes/biblioteca";
     }
 
     @PostMapping("/orcamentos/salvar")

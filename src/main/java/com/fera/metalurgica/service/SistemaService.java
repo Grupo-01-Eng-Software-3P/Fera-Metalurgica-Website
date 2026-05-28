@@ -110,11 +110,11 @@ public class SistemaService {
 
 	// PEDIDO
 
-    public List<Pedido> listarOrcamentos() {
+    public List<Pedido> listarPedidos() {
         return pedidoRepository.findAll();
     }
 
-    public void adicionarOrcamento(Pedido pedido) {
+    public void adicionarPedido(Pedido pedido) {
 
 		if (pedido.getItens() == null || pedido.getItens().isEmpty()) {
 			throw new BusinessException("O orçamento deve ter pelo menos um item.");
@@ -127,7 +127,7 @@ public class SistemaService {
         pedidoRepository.save(pedido);
     }
 
-	public Pedido buscarOrcamentoPorId(Long id) {
+	public Pedido buscarPedidoPorId(Long id) {
 		return pedidoRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
 	}

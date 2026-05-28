@@ -110,7 +110,7 @@ public class SistemaController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("orcamentos", service.listarOrcamentos());
+        model.addAttribute("orcamentos", service.listarPedidos());
         model.addAttribute("atividades", service.listarAtividades());
         return "dashboard";
     }

@@ -206,6 +206,16 @@ public class SistemaController {
         return "ambientes/biblioteca";
     }
 
+    @GetMapping("/catalogo/closet")
+    public String closet(Model model) {
+        return "ambientes/closet";
+    }
+
+    @GetMapping("/catalogo/cozinha")
+    public String cozinha(Model model) {
+        return "ambientes/cozinha";
+    }
+
     @PostMapping("/orcamentos/salvar")
     public String salvarOrcamento(@RequestParam(required = false) Long pedidoId,
                                   @RequestParam String cliente,

@@ -1,12 +1,15 @@
 package com.fera.metalurgica.controller;
 
+import com.fera.metalurgica.dto.UsuarioDTO;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.model.Atividade;
 import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Usuario;
 import com.fera.metalurgica.service.SistemaService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -150,39 +153,46 @@ public class SistemaController {
     @GetMapping("/usuarios")
     public String usuarios(Model model) {
 		model.addAttribute("usuarios", service.listarUsuarios());
-		if (!model.containsAttribute("erro")) {
-			model.addAttribute("erro", null);
+
+		if (!model.containsAttribute("usuarioDTO")) {
+			model.addAttribute("usuarioDTO", new UsuarioDTO());
 		}
-		if (!model.containsAttribute("nomePreenchido")) {
-			model.addAttribute("nomePreenchido", null);
-			model.addAttribute("cargoPreenchido", null);
-			model.addAttribute("dataNascimentoPreenchido", null);
-			model.addAttribute("emailPreenchido", null);
-		}
+
 		return "usuarios";
     }
 
     @PostMapping("/novo-usuario")
-    public String salvarUsuario(@RequestParam String nome,
-                                @RequestParam String cargo,
-                                @RequestParam String dataNascimento,
-                                @RequestParam String email,
-                                @RequestParam String senha,
+    public String salvarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO dto,
+								BindingResult result,
 								RedirectAttributes redirectAttributes) {
-		try {
-			LocalDate dataConvertida = LocalDate.parse(dataNascimento);
-			Usuario usuario = new Usuario(null, nome, cargo, dataConvertida, email, senha);
-			service.adicionarUsuario(usuario);
-			redirectAttributes.addFlashAttribute("sucesso", "Usuário cadastrado com sucesso!");
-		} catch (BusinessException ex) {
-			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
-			redirectAttributes.addFlashAttribute("nomePreenchido", nome);
-			redirectAttributes.addFlashAttribute("cargoPreenchido", cargo);
-			redirectAttributes.addFlashAttribute("dataNascimentoPreenchido", dataNascimento);
-			redirectAttributes.addFlashAttribute("emailPreenchido", email);
+
+		if (result.hasErrors()) {
+			redirectAttributes.addFlashAttribute(
+				"org.springframework.validation.BindingResult.usuarioDTO", result);
+			redirectAttributes.addFlashAttribute("usuarioDTO", dto);
+			return "redirect:/usuarios";
 		}
 
-        return "redirect:/usuarios";
+		try {
+			LocalDate dataConvertida = LocalDate.parse(dto.getDataNascimento());
+			Usuario usuario = new Usuario(
+				null,
+				dto.getNome(),
+				dto.getCargo(),
+				dataConvertida,
+				dto.getEmail(),
+				dto.getSenha()
+			);
+			service.adicionarUsuario(usuario);
+			redirectAttributes.addFlashAttribute("sucesso", "Usuário cadastrado com sucesso!");
+
+		} catch (BusinessException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			redirectAttributes.addFlashAttribute("usuarioDTO", dto);
+		}
+
+
+		return "redirect:/usuarios";
     }
 
     @GetMapping("/catalogo")

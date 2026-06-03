@@ -81,7 +81,11 @@
 
             <div class="input-group">
                 <label>Nome:</label>
-                <input type="text" th:field="*{nome}" class="input-gray" required>
+                <input type="text" th:field="*{nome}" class="input-gray" required
+                       th:classappend="${erro != null and erroCampo == 'nome'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'nome'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
@@ -97,11 +101,18 @@
                     <option value="Marceneiro">Marceneiro</option>
                     <option value="Marketing">Marketing</option>
                 </select>
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'cargo'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>Data de Nascimento:</label>
-                <input type="date" th:field="*{dataNascimento}" class="input-gray date-short" required>
+                <input type="date" th:field="*{dataNascimento}" class="input-gray date-short" required
+                       th:classappend="${erro != null and erroCampo == 'dataNascimento'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'dataNascimento'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">

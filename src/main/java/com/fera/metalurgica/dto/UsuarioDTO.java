@@ -11,7 +11,7 @@ public class UsuarioDTO {
 	private String cargo;
 
 	@NotNull(message = "Data de nascimento é obrigatória")
-	private String dataNascimento; // String aqui, conversão fica no controller/service
+	private String dataNascimento;
 
 	@NotBlank(message = "Email é obrigatório")
 	@Email(message = "Email inválido")

@@ -11,7 +11,7 @@
 <body th:attr="data-erro=${erro != null}">
 
 <div class="dashboard-layout">
-    <aside class="sidebar">
+    <aside class="sidebar">s
         <h2>Fera</h2>
         <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
 
@@ -108,13 +108,19 @@
                 <label>E-mail Corporativo:</label>
                 <input type="email" th:field="*{email}" id="inputEmail" class="input-gray"
                        placeholder="admin@fera.com" required
-                       th:classappend="${erro} ? 'input-erro' : ''">
-                <span class="mensagem-erro" th:if="${erro}" th:text="${erro}"></span>
+                       th:classappend="${erro != null and erroCampo == 'email'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'email'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>Senha de Acesso:</label>
-                <input type="password" th:field="*{senha}" id="inputSenha" class="input-gray" required>
+                <input type="password" th:field="*{senha}" id="inputSenha" class="input-gray" required
+                       th:classappend="${erro != null and erroCampo == 'senha'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'senha'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div style="text-align: center; margin-top: 30px;">

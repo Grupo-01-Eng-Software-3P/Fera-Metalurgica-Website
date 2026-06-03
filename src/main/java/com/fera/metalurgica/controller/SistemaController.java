@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -167,9 +168,14 @@ public class SistemaController {
 								RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
-			redirectAttributes.addFlashAttribute(
-				"org.springframework.validation.BindingResult.usuarioDTO", result);
+			FieldError fieldError = result.getFieldError();
 			redirectAttributes.addFlashAttribute("usuarioDTO", dto);
+			redirectAttributes.addFlashAttribute("erro", fieldError != null
+				? fieldError.getDefaultMessage()
+				: "Verifique os campos preenchidos.");
+			redirectAttributes.addFlashAttribute("erroCampo", fieldError != null
+				? fieldError.getField()
+				: "");
 			return "redirect:/usuarios";
 		}
 
@@ -188,6 +194,7 @@ public class SistemaController {
 
 		} catch (BusinessException ex) {
 			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			redirectAttributes.addFlashAttribute("erroCampo", "email");
 			redirectAttributes.addFlashAttribute("usuarioDTO", dto);
 		}
 

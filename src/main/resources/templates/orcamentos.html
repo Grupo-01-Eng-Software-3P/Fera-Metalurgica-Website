@@ -185,21 +185,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="number" name="itemQuantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemNome" oninput="atualizarTotalOrcamento()"></td>
-                                    <td><input type="text" name="itemValorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
-                                </tr>
+                            <tr>
+                                <td><input type="number" name="itens[0].quantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[0].nome"       oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[0].valorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" name="itens[1].quantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[1].nome"       oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[1].valorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" name="itens[2].quantidade" min="0" step="1" oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[2].nome"       oninput="atualizarTotalOrcamento()"></td>
+                                <td><input type="text"   name="itens[2].valorUnitario" placeholder="R$ 0,00" oninput="atualizarTotalOrcamento()"></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -267,9 +267,10 @@
             formOrcamento.elements['maoObra'].value = '';
             formOrcamento.elements['observacoesAdmin'].value = pedidoData.observacoesAdmin || '';
 
-            const quantidadeInputs = formOrcamento.querySelectorAll('input[name="itemQuantidade"]');
-            const nomeInputs = formOrcamento.querySelectorAll('input[name="itemNome"]');
-            const valorInputs = formOrcamento.querySelectorAll('input[name="itemValorUnitario"]');
+            const quantidadeInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".quantidade"]');
+            const nomeInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".nome"]');
+            const valorInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".valorUnitario"]');
+
             const itens = [
                 { nome: pedidoData.item1Nome, quantidade: pedidoData.item1Quantidade, valor: pedidoData.item1ValorUnitario },
                 { nome: pedidoData.item2Nome, quantidade: pedidoData.item2Quantidade, valor: pedidoData.item2ValorUnitario },
@@ -338,7 +339,7 @@
             }
             return Number(texto.replace(/,/g, '')) || 0;
         }
-
+    
         if (texto.includes(',')) {
             return Number(texto.replace(/\./g, '').replace(',', '.')) || 0;
         }
@@ -365,8 +366,9 @@
             return;
         }
 
-        const quantidades = form.querySelectorAll('input[name="itemQuantidade"]');
-        const valores = form.querySelectorAll('input[name="itemValorUnitario"]');
+        const quantidades = form.querySelectorAll('input[name^="itens"][name$=".quantidade"]');
+        const valores = form.querySelectorAll('input[name^="itens"][name$=".valorUnitario"]');
+
         let totalMateriais = 0;
 
         for (let i = 0; i < Math.max(quantidades.length, valores.length); i++) {

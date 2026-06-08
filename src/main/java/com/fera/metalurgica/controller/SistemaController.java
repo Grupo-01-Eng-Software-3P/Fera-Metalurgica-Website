@@ -1,5 +1,6 @@
 package com.fera.metalurgica.controller;
 
+import com.fera.metalurgica.dto.OrcamentoAdminDTO;
 import com.fera.metalurgica.dto.PedidoDTO;
 import com.fera.metalurgica.dto.UsuarioDTO;
 import com.fera.metalurgica.exception.BusinessException;
@@ -225,39 +226,13 @@ public class SistemaController {
         return "ambientes/cozinha";
     }
 
-    @PostMapping("/orcamentos/salvar")
-    public String salvarOrcamento(@RequestParam(required = false) Long pedidoId,
-                                  @RequestParam String cliente,
-                                  @RequestParam String telefone,
-                                  @RequestParam String cpf,
-                                  @RequestParam String material,
-                                  @RequestParam(required = false) String medidas,
-                                  @RequestParam String descricao,
-                                  @RequestParam(required = false) List<String> itemNome,
-                                  @RequestParam(required = false) List<String> itemQuantidade,
-                                  @RequestParam(required = false) List<String> itemValorUnitario,
-                                  @RequestParam(required = false) String frete,
-                                  @RequestParam(required = false) String maoObra,
-                                  @RequestParam(required = false) String observacoesAdmin,
-                                  RedirectAttributes redirectAttributes) {
+	@PostMapping("/orcamentos/salvar")
+	public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
+	                              RedirectAttributes redirectAttributes) {
 
-        service.salvarOrcamentoAdmin(
-                pedidoId,
-                cliente,
-                telefone,
-                cpf,
-                material,
-                medidas,
-                descricao,
-                itemNome,
-                itemQuantidade,
-                itemValorUnitario,
-                frete,
-                maoObra,
-                observacoesAdmin
-        );
+		service.salvarOrcamentoAdmin(dto);
 
-        redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
-        return "redirect:/orcamentos";
-    }
+		redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
+		return "redirect:/orcamentos";
+	}
 }

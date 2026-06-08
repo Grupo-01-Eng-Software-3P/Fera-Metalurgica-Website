@@ -1,5 +1,7 @@
 package com.fera.metalurgica.service;
 
+import com.fera.metalurgica.dto.ItemPedidoDTO;
+import com.fera.metalurgica.dto.OrcamentoAdminDTO;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.exception.ResourceNotFoundException;
 import com.fera.metalurgica.model.Atividade;
@@ -118,67 +120,51 @@ public class SistemaService {
         return pedidoRepository.findAllByOrderByDataCriacaoDesc();
     }
 
-    @Transactional
-    public Pedido salvarOrcamentoAdmin(Long pedidoId,
-                                       String cliente,
-                                       String telefone,
-                                       String cpf,
-                                       String material,
-                                       String medidas,
-                                       String descricao,
-                                       List<String> itemNomes,
-                                       List<String> itemQuantidades,
-                                       List<String> itemValoresUnitarios,
-                                       String frete,
-                                       String maoObra,
-                                       String observacoesAdmin) {
+	@Transactional
+	public Pedido salvarOrcamentoAdmin(OrcamentoAdminDTO dto) {
 
-        Pedido pedido = (pedidoId != null)
-                ? pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
-                : new Pedido();
+		Pedido pedido = (dto.getPedidoId() != null)
+			? pedidoRepository.findById(dto.getPedidoId())
+			.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
+			: new Pedido();
 
-        pedido.setCliente(cliente);
-        pedido.setTelefone(telefone);
-        pedido.setCpf(cpf);
-        pedido.setMaterial(material);
-        pedido.setMedidas(medidas);
-        pedido.setDescricao(descricao);
+		pedido.setCliente(dto.getCliente());
+		pedido.setTelefone(dto.getTelefone());
+		pedido.setCpf(dto.getCpf());
+		pedido.setMaterial(dto.getMaterial());
+		pedido.setMedidas(dto.getMedidas());
+		pedido.setDescricao(dto.getDescricao());
 
-        if (pedido.getCriadoPor() == null) {
-            pedido.setCriadoPor("ADMIN");
-        }
+		if (pedido.getCriadoPor() == null) {
+			pedido.setCriadoPor("ADMIN");
+		}
 
-        List<ItemPedido> itens = new ArrayList<>();
-        int totalLinhas = Math.max(
-                Math.max(tamanho(itemNomes), tamanho(itemQuantidades)),
-                tamanho(itemValoresUnitarios)
-        );
+		List<ItemPedido> itens = new ArrayList<>();
 
-        for (int i = 0; i < totalLinhas; i++) {
-            String nome = valorOuVazio(itemNomes, i);
-            Integer quantidade = parseInteiro(valorOuVazio(itemQuantidades, i));
-            BigDecimal valorUnitario = parseMoeda(valorOuVazio(itemValoresUnitarios, i));
+		for (ItemPedidoDTO itemDTO : dto.getItens()) {
+			String nome        = itemDTO.getNome() != null ? itemDTO.getNome().trim() : "";
+			Integer quantidade = parseInteiro(itemDTO.getQuantidade());
+			BigDecimal valor   = parseMoeda(itemDTO.getValorUnitario());
 
-            if (nome.isBlank() && (quantidade == null || quantidade <= 0) && valorUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                continue;
-            }
+			if (nome.isBlank() && (quantidade == null || quantidade <= 0) && valor.compareTo(BigDecimal.ZERO) == 0) {
+				continue;
+			}
 
-            ItemPedido item = new ItemPedido();
-            item.setNomeItem(nome);
-            item.setMaterial(nome);
-            item.setQuantidade(quantidade != null ? quantidade : 0);
-            item.setValorUnitario(valorUnitario);
-            itens.add(item);
-        }
+			ItemPedido item = new ItemPedido();
+			item.setNomeItem(nome);
+			item.setMaterial(nome);
+			item.setQuantidade(quantidade != null ? quantidade : 0);
+			item.setValorUnitario(valor);
+			itens.add(item);
+		}
 
-        pedido.setItens(itens);
-        pedido.setValorAdicionais(parseMoeda(frete).add(parseMoeda(maoObra)));
-        pedido.setObservacoesAdmin(observacoesAdmin);
-        pedido.calcularTotais();
+		pedido.setItens(itens);
+		pedido.setValorAdicionais(parseMoeda(dto.getFrete()).add(parseMoeda(dto.getMaoObra())));
+		pedido.setObservacoesAdmin(dto.getObservacoesAdmin());
+		pedido.calcularTotais();
 
-        return pedidoRepository.save(pedido);
-    }
+		return pedidoRepository.save(pedido);
+	}
 
     public void adicionarPedido(Pedido pedido) {
 		if (pedido.getItens() != null) {

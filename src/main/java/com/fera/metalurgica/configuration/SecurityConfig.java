@@ -28,11 +28,12 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 "/dashboard",
+								"/agenda",
+								"/agenda/**",
                                 "/midia",
                                 "/orcamentos",
                                 "/orcamentos/**",
-                                "/usuarios",
-                                "/agenda"
+                                "/usuarios"
                                 ).authenticated()
                         .anyRequest().permitAll()
                 )

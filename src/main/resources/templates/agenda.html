@@ -10,6 +10,9 @@
 </head>
 <body>
 
+<input type="hidden" id="csrfToken"  th:value="${_csrf.token}">
+<input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
@@ -319,9 +322,15 @@
         const h1        = document.getElementById("inputHoraInicio").value;
         const h2        = document.getElementById("inputHoraFim").value;
 
+        const csrfToken  = document.getElementById("csrfToken").value;
+        const csrfHeader = document.getElementById("csrfHeader").value;
+
         fetch("/agenda", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken
+                },
             body: JSON.stringify({
                 titulo,
                 descricao,

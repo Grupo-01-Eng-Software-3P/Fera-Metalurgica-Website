@@ -1,5 +1,6 @@
 package com.fera.metalurgica.controller;
 
+import com.fera.metalurgica.dto.PedidoDTO;
 import com.fera.metalurgica.dto.UsuarioDTO;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.model.Atividade;
@@ -39,42 +40,33 @@ public class SistemaController {
         return "orcamentos";
     }
 
-    @GetMapping("/pedido")
-    public String pedidoForm(Model model) {
-        return "pedido";
-    }
+	@GetMapping("/pedido")
+	public String pedidoForm(Model model) {
+		model.addAttribute("pedidoDTO", new PedidoDTO()); // inicializa vazio
+		return "pedido";
+	}
 
     @PostMapping("/pedido")
-    public String salvarPedido(@RequestParam String cliente,
-                               @RequestParam String telefone,
-                               @RequestParam String cpf,
-                               @RequestParam String material,
-                               @RequestParam(required = false) String medidas,
-                               @RequestParam String descricao,
+    public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
+                               BindingResult result,
                                Model model) {
 
-        if (!isCPFValido(cpf)) {
-            model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
+		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
+			if (!isCPFValido(dto.getCpf())) {
+				model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
+			}
+			model.addAttribute("pedidoDTO", dto); // preserva os campos preenchidos
+			return "pedido";
+		}
 
-            // Preserva os dados preenchidos em caso de erro
-            model.addAttribute("clientePreenchido", cliente);
-            model.addAttribute("telefonePreenchido", telefone);
-            model.addAttribute("cpfPreenchido", cpf);
-            model.addAttribute("materialPreenchido", material);
-            model.addAttribute("medidasPreenchido", medidas);
-            model.addAttribute("descricaoPreenchido", descricao);
-
-            return "pedido";
-        }
-
-        Pedido novoPedido = new Pedido();
-        novoPedido.setCliente(cliente);
-        novoPedido.setTelefone(telefone);
-        novoPedido.setCpf(cpf);
-        novoPedido.setMaterial(material);
-        novoPedido.setMedidas(medidas);
-        novoPedido.setDescricao(descricao);
-        novoPedido.setCriadoPor("CLIENTE");
+		Pedido novoPedido = new Pedido();
+		novoPedido.setCliente(dto.getCliente());
+		novoPedido.setTelefone(dto.getTelefone());
+		novoPedido.setCpf(dto.getCpf());
+		novoPedido.setMaterial(dto.getMaterial());
+		novoPedido.setMedidas(dto.getMedidas());
+		novoPedido.setDescricao(dto.getDescricao());
+		novoPedido.setCriadoPor("CLIENTE");
 
         service.adicionarPedido(novoPedido);
 

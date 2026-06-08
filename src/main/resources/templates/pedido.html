@@ -29,24 +29,24 @@
             <span th:text="${erroCpf}"></span>
         </div>
 
-        <form th:action="@{/pedido}" method="post" onsubmit="return validarFormulario()">
+        <form th:action="@{/pedido}" th:object="${pedidoDTO}" method="post" onsubmit="return validarFormulario()">
             <input type="hidden"
                    th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}">
 
             <div class="input-group">
                 <label>Nome Completo:</label>
-                <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" th:value="${clientePreenchido}" required>
+                <input type="text" name="cliente" class="input-field" placeholder="Ex: João da Silva" th:value="*{cliente}" required>
             </div>
 
             <div style="display: flex; gap: 15px;">
                 <div class="input-group" style="flex: 1;">
                     <label>Telefone:</label>
-                    <input type="text" name="telefone" id="telefone" class="input-field" placeholder="(00) 00000-0000" th:value="${telefonePreenchido}" required>
+                    <input type="text" name="telefone" id="telefone" class="input-field" placeholder="(00) 00000-0000" th:value="*{telefone}" required>
                 </div>
                 <div class="input-group" style="flex: 1;">
                     <label>CPF:</label>
-                    <input type="text" name="cpf" id="cpf" class="input-field" placeholder="000.000.000-00" th:value="${cpfPreenchido}" oninput="mascaraCPF(this)" maxlength="14" required>
+                    <input type="text" name="cpf" id="cpf" class="input-field" placeholder="000.000.000-00" th:value="*{cpf}" oninput="mascaraCPF(this)" maxlength="14" required>
                     <small id="cpf-error" style="color: red; display: none; margin-top: 5px;">CPF Inválido!</small>
                 </div>
             </div>
@@ -54,18 +54,18 @@
             <div style="display: flex; gap: 15px;">
                 <div class="input-group" style="flex: 1;">
                     <label>Material Desejado:</label>
-                    <input type="text" name="material" class="input-field" placeholder="Ex: Madeira, Ferro e Vidro..." th:value="${materialPreenchido}" required>
+                    <input type="text" name="material" class="input-field" placeholder="Ex: Madeira, Ferro e Vidro..." th:value="*{material}" required>
                 </div>
 
                 <div class="input-group" style="flex: 1;">
                     <label>Medidas (Aprox.):</label>
-                    <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m" th:value="${medidasPreenchido}">
+                    <input type="text" name="medidas" class="input-field" placeholder="Ex: 2m x 1m" th:value="*{medidas}">
                 </div>
             </div>
 
             <div class="input-group">
                 <label>Descrição do Projeto:</label>
-                <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva como você imagina o móvel, onde será usado, cor, etc." required th:text="${descricaoPreenchido}"></textarea>
+                <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva como você imagina o móvel, onde será usado, cor, etc." required th:text="*{descricao}"></textarea>
             </div>
 
             <div class="input-group">

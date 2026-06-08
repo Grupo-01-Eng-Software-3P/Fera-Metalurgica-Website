@@ -6,11 +6,16 @@ import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.repository.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +27,18 @@ public class SistemaService {
 	@Autowired private PedidoRepository pedidoRepository;
 	@Autowired private AtividadeRepository atividadeRepository;
 	@Autowired private UsuarioRepository usuarioRepository;
+	@Autowired private CategoriaRepository categoriaRepository;
+	@Autowired private MidiaRepository midiaRepository;
 	@Autowired private PasswordEncoder passwordEncoder;
+
+	@Value("${upload.dir:uploads/}")
+	private String uploadDir;
 
 	public record OrcamentosAgrupados(List<Pedido> meusPedidos,
 									  List<Pedido> clientesComOrcamento,
 									  List<Pedido> clientesPendentes) {}
 
+	// ── INIT ─────────────────────────────────────────────
 	@PostConstruct
 	public void criarAtividadesIniciais() {
 		if (atividadeRepository.count() == 0) {
@@ -57,26 +68,18 @@ public class SistemaService {
 		}
 	}
 
-	// ── USUÁRIO ──────────────────────────────────────────
+	// ── USUÁRIOS & PRODUTOS ──────────────────────────────
 	public List<Usuario> listarUsuarios() { return usuarioRepository.findAll(); }
-
 	public void adicionarUsuario(Usuario usuario) {
-		if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
-			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
-		}
+		if (usuarioRepository.findByEmail(usuario.getEmail()) != null) throw new BusinessException("E-mail já cadastrado.");
 		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 		usuarioRepository.save(usuario);
 	}
 
-	// ── PRODUTO ──────────────────────────────────────────
 	public List<Produto> listarProdutos() { return produtoRepository.findAll(); }
+	public void adicionarProduto(Produto p) { if(p.getNome() == null || p.getNome().isBlank()) throw new BusinessException("Nome vazio."); produtoRepository.save(p); }
 
-	public void adicionarProduto(Produto produto) {
-		if (produto.getNome() == null || produto.getNome().isBlank()) throw new BusinessException("Nome do produto vazio.");
-		produtoRepository.save(produto);
-	}
-
-	// ── PEDIDO ───────────────────────────────────────────
+	// ── ORÇAMENTOS (PEDIDOS) ─────────────────────────────
 	public List<Pedido> listarOrcamentos() { return pedidoRepository.findAllByOrderByDataCriacaoDesc(); }
 
 	public OrcamentosAgrupados organizarOrcamentos() {
@@ -91,9 +94,9 @@ public class SistemaService {
 	}
 
 	@Transactional
-	public Pedido salvarOrcamentoAdmin(Long pedidoId, String cliente, String telefone, String cpf, String material, String medidas, String descricao,
-									   List<String> itemNomes, List<String> itemQuantidades, List<String> itemValoresUnitarios,
-									   String frete, String maoObra, String observacoesAdmin) {
+	public Pedido salvarOrcamentoAdmin(Long pedidoId, String cliente, String telefone, String cpf, String material,
+									   String medidas, String descricao, List<String> itemNomes, List<String> itemQuantidades,
+									   List<String> itemValoresUnitarios, String frete, String maoObra, String obs) {
 
 		Pedido pedido = (pedidoId != null) ? pedidoRepository.findById(pedidoId).orElseThrow() : new Pedido();
 		pedido.setCliente(cliente); pedido.setTelefone(telefone); pedido.setCpf(cpf);
@@ -113,21 +116,35 @@ public class SistemaService {
 			item.setNomeItem(nome); item.setQuantidade(qtd != null ? qtd : 0); item.setValorUnitario(valor); item.setPedido(pedido);
 			itens.add(item);
 		}
-
 		pedido.setItens(itens);
 		pedido.setValorAdicionais(parseMoeda(frete).add(parseMoeda(maoObra)));
-		pedido.setObservacoesAdmin(observacoesAdmin);
+		pedido.setObservacoesAdmin(obs);
 		pedido.calcularTotais();
 		return pedidoRepository.save(pedido);
 	}
 
-	// ── ATIVIDADE ────────────────────────────────────────
-	public List<Atividade> listarAtividades() { return atividadeRepository.findAllByOrderByIdDesc(); }
-	public Atividade adicionarAtividade(Atividade atividade) { return atividadeRepository.save(atividade); }
+	// ── MÍDIA & ATIVIDADE ────────────────────────────────
+	public List<Midia> listarMidiasPorCategoria(Long catId) { return midiaRepository.findByCategoria(categoriaRepository.findById(catId).orElse(null)); }
 
-	// ── AUXILIARES ───────────────────────────────────────
-	private int tamanho(List<?> lista) { return lista == null ? 0 : lista.size(); }
-	private String valorOuVazio(List<String> lista, int i) { return (lista == null || i >= lista.size()) ? "" : lista.get(i).trim(); }
+	public Midia adicionarMidia(MultipartFile arquivo, String nome, String desc, Long catId) throws IOException {
+		CategoriaEntity cat = categoriaRepository.findById(catId).orElseThrow();
+		Path pasta = Paths.get(uploadDir).toAbsolutePath().normalize();
+		Files.createDirectories(pasta);
+		String nomeArquivo = System.currentTimeMillis() + "_" + StringUtils.cleanPath(arquivo.getOriginalFilename());
+		Files.copy(arquivo.getInputStream(), pasta.resolve(nomeArquivo), StandardCopyOption.REPLACE_EXISTING);
+
+		Midia midia = new Midia();
+		midia.setNome(nome); midia.setDescricao(desc); midia.setCaminho("/uploads/" + nomeArquivo);
+		midia.setCategoria(cat);
+		return midiaRepository.save(midia);
+	}
+
+	public List<Atividade> listarAtividades() { return atividadeRepository.findAllByOrderByIdDesc(); }
+	public Atividade adicionarAtividade(Atividade a) { return atividadeRepository.save(a); }
+
+	// ── HELPERS ──────────────────────────────────────────
+	private int tamanho(List<?> l) { return l == null ? 0 : l.size(); }
+	private String valorOuVazio(List<String> l, int i) { return (l == null || i >= l.size()) ? "" : l.get(i).trim(); }
 	private Integer parseInteiro(String v) { try { return Integer.parseInt(v.replaceAll("[^0-9-]", "")); } catch (Exception e) { return null; } }
 	private BigDecimal parseMoeda(String v) {
 		String n = v.replaceAll("[^0-9,.-]", "");

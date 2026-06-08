@@ -19,7 +19,7 @@
             <a href="#"><i class="fab fa-facebook"></i></a>
             <a href="#"><i class="fab fa-whatsapp"></i></a>
             <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="/pedido" class="btn-outline"> Criar Orçamento</a>
+            <a href="/pedido" class="btn-outline">Criar Orçamento</a>
             <a href="/login"><i class="fas fa-user-circle"></i> Perfil</a>
         </div>
     </nav>
@@ -98,11 +98,8 @@
     </div>
 
     <div class="catalogo-btn-container">
-        <a class="btn-catalogo" href="/catalogo">
-            Saiba mais
-        </a>
+        <a class="btn-catalogo" href="/catalogo">Saiba mais</a>
     </div>
-
 </section>
 
 <div id="modalGaleria" class="modal">
@@ -151,13 +148,12 @@
         </div>
     </div>
 </footer>
+
 <script>
     function abrirModal(elementoImg) {
         var modal = document.getElementById("modalGaleria");
         var imagemExpandida = document.getElementById("imagemExpandida");
-
         modal.style.display = "block";
-        // Copia o 'src' da imagem pequena clicada para a imagem grande
         imagemExpandida.src = elementoImg.src;
     }
 
@@ -173,5 +169,6 @@
         }
     }
 </script>
+
 </body>
 </html>

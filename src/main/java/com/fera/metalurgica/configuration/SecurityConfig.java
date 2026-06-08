@@ -23,22 +23,36 @@ public class SecurityConfig {
 					"/nova-categoria",
 					"/novo-produto",
 					"/nova-imagem",
-					"/orcamentos/salvar" // Necessário para o formulário de orçamento
+					"/orcamentos/salvar"
 				)
 			)
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(
-					"/login", "/css/**", "/js/**", "/imagens/**", "/uploads/**",
-					"/", "/orcamento", "/catalogo", "/pedido"
+					"/login",
+					"/css/**",
+					"/js/**",
+					"/imagens/**",
+					"/uploads/**",
+					"/",
+					"/catalogo",
+					"/catalogo/ambiente/**",
+					"/pedido"
 				).permitAll()
 				.requestMatchers(
 					"/dashboard",
-					"/midia", "/midia/**",
-					"/orcamentos", "/orcamentos/**",
-					"/usuarios", "/novo-usuario",
-					"/agenda", "/agenda/**"
+					"/midia",
+					"/midia/**",
+					"/nova-imagem",
+					"/nova-categoria",
+					"/orcamentos",
+					"/orcamentos/**",
+					"/usuarios",
+					"/novo-usuario",
+					"/agenda",
+					"/agenda/**",
+					"/nova-atividade"
 				).authenticated()
-				.anyRequest().permitAll()
+				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
 				.loginPage("/login")

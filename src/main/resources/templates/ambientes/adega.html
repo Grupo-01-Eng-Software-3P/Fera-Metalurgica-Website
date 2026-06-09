@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Adega - Fera Metalúrgica</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/adega.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="adega-page">
+
+<!-- NAV -->
+<nav class="top-nav top-nav--overlay">
+    <div class="nav-left">
+        <a href="/catalogo" class="btn-voltar"><i class="fas fa-bars"></i></a>
+        <a href="/" class="btn-home"><i class="fas fa-home"></i></a>
+    </div>
+    <div class="nav-links">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/5545999474748"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.instagram.com/metalurgica_fera/"><i class="fab fa-instagram"></i></a>
+        <a href="/pedido" class="btn-outline">Orçamento</a>
+    </div>
+    <div class="logo-nav">
+        <h2>FERA</h2>
+    </div>
+</nav>
+
+<!-- HERO -->
+<header class="adega-hero" style="background-image: url('/imagens/Pag.Adega/Adega Moderna - Wine Cellar.jpg');">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-titulo">Adega</h1>
+    </div>
+</header>
+
+<!-- SEÇÃO DE PRODUTO -->
+<section class="produto-section">
+
+    <!-- CARD PRODUTO -->
+    <div class="produto-card">
+        <div class="produto-imagem">
+            <img src="/imagens/Pag.Adega/adega.1movel.jpg" alt="Adega Bar">
+        </div>
+        <div class="produto-info">
+            <h2>Adega Bar</h2>
+            <p>
+                A Adega Bar Bélgica P/ 16 Garrafas Rede Móveis é perfeita para
+                os amantes de vinho que desejam ter uma opção elegante e
+                funcional para armazenar suas garrafas. Com um design
+                moderno e sofisticado, esta adega é fabricada em MDP de alta
+                qualidade, garantindo durabilidade e resistência. Sua cor preta
+                traz um toque de elegância para qualquer ambiente. O modelo
+                Adega Bar Buffet oferece espaço para até 16 garrafas, permitindo
+                que você organize sua coleção de forma prática e organizada.
+                Compre agora e tenha suas garrafas sempre à mão, prontas para
+                serem apreciadas em momentos especiais.
+            </p>
+            <a href="/pedido" class="btn-orcamento">Solicitar Orçamento</a>
+        </div>
+    </div>
+
+    <!-- CARD PRODUTO 2-->
+    <div class="produto-card">
+        <div class="produto-imagem">
+            <img src="/imagens/Pag.Adega/adega.2movel.jpg" alt="Adega Bar">
+        </div>
+        <div class="produto-info">
+            <h2>Aparador Armário Buffet Deco</h2>
+            <p>
+                Descubra o Aparador Florença – Elegância e Funcionalidade em um Só Lugar!
+                Está cansado de ver sua sala de estar desorganizada e sem um móvel que una funcionalidade e estilo?
+                O Aparador Florença é a solução perfeita para você!
+                Com um design moderno e várias funcionalidades, ele é ideal para quem quer manter a casa organizada sem perder o charme.
+                Aproveite nossa oferta especial e transforme seu ambiente por um preço irresistível!
+                O Aparador Florença oferece uma solução prática e elegante para organizar seus objetos e bebidas!
+                Combina perfeitamente com diversos estilos de decoração, adicionando um toque sofisticado ao seu espaço.
+            </p>
+            <a href="/pedido" class="btn-orcamento">Solicitar Orçamento</a>
+        </div>
+    </div>
+
+    <!-- CARD PRODUTO 3-->
+    <div class="produto-card">
+        <div class="produto-imagem">
+            <img src="/imagens/Pag.Adega/adega.3movel.jpg" alt="Adega Bar">
+        </div>
+        <div class="produto-info">
+            <h2>Aparador de Sala</h2>
+            <p>
+                Seu material excelente e facilidade de montagem, além de se encaixar bem em espaços pequenos.
+                O design retrô e elegante é destacado, proporcionando um toque de sofisticação ao ambiente.
+                A qualidade do material e o estado impecável das peças são frequentemente mencionados como pontos positivos.
+            </p>
+            <a href="/pedido" class="btn-orcamento">Solicitar Orçamento</a>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- MODAL -->
+<div id="modalGaleria" class="modal">
+    <span class="fechar-modal" onclick="fecharModal()">&times;</span>
+    <img class="modal-conteudo" id="imagemExpandida">
+</div>
+
+<!-- CTA -->
+<section class="cta-section" style="background-image: url('/imagens/hero-bg.png');">
+    <div class="cta-overlay"></div>
+    <div class="cta-content">
+        <h2>Tudo para o seu lar</h2>
+        <a href="/pedido" class="btn-cta">Quero fazer um orçamento</a>
+    </div>
+</section>
+
+<!-- FOOTER (igual home.html) -->
+<footer class="main-footer">
+    <div class="footer-left">
+        <h3>Fera Metalurgica</h3>
+        <p>Fera Metalúrgica é sinônimo de força, precisão e qualidade. Especializada em soluções metálicas sob medida, unimos tecnologia, experiência e dedicação para entregar resultados resistentes, confiáveis e feitos para durar. Mais do que metal, entregamos confiança em cada projeto.</p>
+        <div class="social-icons-footer">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+    </div>
+    <div class="footer-links-container">
+        <div class="footer-column">
+            <h4>Veja mais</h4>
+            <ul>
+                <li><a href="/catalogo">Catálogo</a></li>
+                <li><a href="/pedido">Orçamento</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Suporte</h4>
+            <ul>
+                <li><a href="#">Contato</a></li>
+                <li><a href="#">Suporte</a></li>
+                <li><a href="#">Diretrizes</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function abrirModal(elementoImg) {
+        var modal = document.getElementById("modalGaleria");
+        var imagemExpandida = document.getElementById("imagemExpandida");
+        modal.style.display = "block";
+        imagemExpandida.src = elementoImg.src;
+    }
+    function fecharModal() {
+        var modal = document.getElementById("modalGaleria");
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        var modal = document.getElementById("modalGaleria");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
+

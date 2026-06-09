@@ -7,7 +7,11 @@ import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.model.Atividade;
 import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.model.Usuario;
+import com.fera.metalurgica.service.OrcamentoPdfService;
 import com.fera.metalurgica.service.SistemaService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,9 +28,11 @@ import java.util.List;
 public class SistemaController {
 
     private final SistemaService service;
+    private final OrcamentoPdfService pdfService;
 
-    public SistemaController(SistemaService service) {
+    public SistemaController(SistemaService service, OrcamentoPdfService pdfService) {
         this.service = service;
+        this.pdfService = pdfService;
     }
 
     @GetMapping("/")
@@ -37,7 +43,11 @@ public class SistemaController {
 
 	@GetMapping("/orcamentos")
     public String orcamentos(Model model) {
+        var orcamentos = service.organizarOrcamentos();
         model.addAttribute("orcamentos", service.listarOrcamentos());
+        model.addAttribute("orcamentosMeus", orcamentos.meusPedidos());
+        model.addAttribute("orcamentosClientesComOrcamento", orcamentos.clientesComOrcamento());
+        model.addAttribute("orcamentosClientesPendentes", orcamentos.clientesPendentes());
         return "orcamentos";
     }
 
@@ -46,6 +56,18 @@ public class SistemaController {
 		model.addAttribute("pedidoDTO", new PedidoDTO()); // inicializa vazio
 		return "pedido";
 	}
+    @GetMapping("/orcamentos/{id}/pdf")
+    public ResponseEntity<byte[]> baixarPdfOrcamento(@PathVariable Long id) {
+        Pedido pedido = service.buscarPedidoPorId(id);
+        byte[] pdf = pdfService.gerarPdf(pedido);
+        String nomeArquivo = "orcamento-" + id + ".pdf";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nomeArquivo + "\"")
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
 
     @PostMapping("/pedido")
     public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,

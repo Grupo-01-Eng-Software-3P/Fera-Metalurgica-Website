@@ -35,6 +35,8 @@ public class SistemaService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ZApiService zApiService;
 
     @PostConstruct
     public void criarAtividadesIniciais() {
@@ -181,16 +183,24 @@ public class SistemaService {
     }
 
     public void adicionarPedido(Pedido pedido) {
-		if (pedido.getItens() != null) {
-			for (ItemPedido item : pedido.getItens()) {
-				item.setPedido(pedido);
-			}
-		}
-		if (pedido.getCriadoPor() == null) {
-			pedido.setCriadoPor("CLIENTE");
-		}
-        pedido.calcularTotais();
-        pedidoRepository.save(pedido);
+    if (pedido.getItens() != null) {
+        for (ItemPedido item : pedido.getItens()) {
+            item.setPedido(pedido);
+        }
+    }
+    if (pedido.getCriadoPor() == null) {
+        pedido.setCriadoPor("CLIENTE");
+    }
+    pedido.calcularTotais();
+    pedidoRepository.save(pedido);
+
+    // Notificação WhatsApp
+    zApiService.enviarNotificacaoOrcamento(
+    pedido.getCliente(),
+    pedido.getTelefone(),
+    pedido.getDescricao()
+    );
+    
     }
 
 	public Pedido buscarPedidoPorId(Long id) {

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<article class="orcamento-card"
+         th:fragment="card(orcamento, statusLabel, statusClass)"
+         th:attr="data-id=${orcamento.id},
+                  data-cliente=${orcamento.cliente},
+                  data-telefone=${orcamento.telefone},
+                  data-cpf=${orcamento.cpf},
+                  data-material=${orcamento.material},
+                  data-medidas=${orcamento.medidas},
+                  data-descricao=${orcamento.descricao},
+                  data-criado-por=${orcamento.criadoPor},
+                  data-valor-adicionais=${orcamento.valorAdicionais},
+                  data-observacoes-admin=${orcamento.observacoesAdmin},
+                  data-item1-nome=${#lists.size(orcamento.itens) > 0 ? orcamento.itens[0].nomeItem : ''},
+                  data-item1-quantidade=${#lists.size(orcamento.itens) > 0 ? orcamento.itens[0].quantidade : ''},
+                  data-item1-valor-unitario=${#lists.size(orcamento.itens) > 0 ? orcamento.itens[0].valorUnitario : ''},
+                  data-item2-nome=${#lists.size(orcamento.itens) > 1 ? orcamento.itens[1].nomeItem : ''},
+                  data-item2-quantidade=${#lists.size(orcamento.itens) > 1 ? orcamento.itens[1].quantidade : ''},
+                  data-item2-valor-unitario=${#lists.size(orcamento.itens) > 1 ? orcamento.itens[1].valorUnitario : ''},
+                  data-item3-nome=${#lists.size(orcamento.itens) > 2 ? orcamento.itens[2].nomeItem : ''},
+                  data-item3-quantidade=${#lists.size(orcamento.itens) > 2 ? orcamento.itens[2].quantidade : ''},
+                  data-item3-valor-unitario=${#lists.size(orcamento.itens) > 2 ? orcamento.itens[2].valorUnitario : ''}"
+         onclick="abrirModalNovoOrcamento(this)">
+    <div class="card-header">
+        <span class="id-pedido" th:text="|Pedido #${orcamento.id}|">Pedido #1</span>
+        <span class="data"
+              th:text="${orcamento.dataCriacao != null ? #temporals.format(orcamento.dataCriacao, 'dd/MM/yyyy HH:mm') : 'Sem data'}">
+            01/01/2026 12:00
+        </span>
+    </div>
+
+    <div class="card-status-row">
+        <span class="status-chip" th:classappend="${statusClass}" th:text="${statusLabel}">Status</span>
+    </div>
+
+    <h3 class="cliente-nome" th:text="${orcamento.cliente}">Nome do cliente</h3>
+
+    <p class="descricao-resumo" th:text="${orcamento.descricao}">
+        Descrição do pedido
+    </p>
+
+    <div class="card-footer">
+        <span class="tag material" th:text="${orcamento.material}">Material</span>
+        <div class="card-actions">
+            <button type="button" class="btn-icon" title="Ver detalhes">
+                <i class="fas fa-eye"></i>
+            </button>
+            <a th:if="${orcamento.orcamentoGerado}"
+               th:href="@{'/orcamentos/' + ${orcamento.id} + '/pdf'}"
+               class="btn-icon btn-pdf"
+               title="Baixar PDF"
+               onclick="event.stopPropagation();">
+                <i class="fas fa-file-pdf"></i>
+            </a>
+        </div>
+    </div>
+</article>
+</body>
+</html>

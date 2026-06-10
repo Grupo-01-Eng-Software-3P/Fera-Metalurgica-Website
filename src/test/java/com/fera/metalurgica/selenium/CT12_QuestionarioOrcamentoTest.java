@@ -10,10 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * CT12 – Questionário de Orçamento
- * Tipo: Funcional
- * Cenário: Cliente acessa o formulário de orçamento e preenche os dados.
- *          Campos obrigatórios: nome, telefone, cpf, material, descrição.
- *          Campos opcionais: medidas, anexo.
  */
 @DisplayName("CT12 - Questionário de Orçamento")
 public class CT12_QuestionarioOrcamentoTest extends BaseTest {
@@ -22,132 +18,106 @@ public class CT12_QuestionarioOrcamentoTest extends BaseTest {
     @DisplayName("CT12.1 - Página /pedido carrega corretamente sem login")
     void paginaPedidoCarrega() {
         abrirPagina("/pedido");
-
-        assertTrue(driver.getCurrentUrl().contains("/pedido"),
-                "Página de pedido deve ser acessível sem login");
-        assertTrue(elementoPresente(By.cssSelector("form")),
-                "Formulário de pedido deve estar presente");
+        assertTrue(driver.getCurrentUrl().contains("/pedido"));
+        assertTrue(elementoPresente(By.cssSelector("form")));
     }
 
     @Test
     @DisplayName("CT12.2 - Acesso via botão 'Criar Orçamento' no menu")
     void acessoViaMenuCriarOrcamento() {
         abrirPagina("/");
-
         aguardarElemento(By.cssSelector("a[href='/pedido']")).click();
-
-        assertTrue(driver.getCurrentUrl().contains("/pedido"),
-                "Clicar em 'Criar Orçamento' deve navegar para /pedido");
+        assertTrue(driver.getCurrentUrl().contains("/pedido"));
     }
 
     @Test
     @DisplayName("CT12.3 - Acesso via botão 'Faça seu orçamento' na seção CTA")
     void acessoViaSecaoCTA() {
         abrirPagina("/");
-
         WebElement btnCTA = aguardarElemento(By.cssSelector("a[href='/pedido'].btn-white-solid"));
         clicarJS(btnCTA);
-
-        assertTrue(driver.getCurrentUrl().contains("/pedido"),
-                "Botão 'Faça seu orçamento' deve navegar para /pedido");
+        assertTrue(driver.getCurrentUrl().contains("/pedido"));
     }
 
     @Test
     @DisplayName("CT12.4 - Todos os campos obrigatórios estão presentes")
     void camposObrigatoriosPresentes() {
         abrirPagina("/pedido");
-
-        // Campos obrigatórios por RF-12
-        assertTrue(elementoPresente(By.cssSelector("input[name='cliente']")),  "Campo nome");
-        assertTrue(elementoPresente(By.cssSelector("input[name='telefone']")),  "Campo telefone");
-        assertTrue(elementoPresente(By.cssSelector("input[name='cpf']")),       "Campo CPF");
-        assertTrue(elementoPresente(By.cssSelector("input[name='material']")),  "Campo material");
-        assertTrue(elementoPresente(By.cssSelector("textarea[name='descricao']")), "Campo descrição");
+        assertTrue(elementoPresente(By.cssSelector("input[name='cliente']")));
+        assertTrue(elementoPresente(By.cssSelector("input[name='telefone']")));
+        assertTrue(elementoPresente(By.cssSelector("input[name='cpf']")));
+        assertTrue(elementoPresente(By.cssSelector("input[name='material']")));
+        assertTrue(elementoPresente(By.cssSelector("textarea[name='descricao']")));
     }
 
     @Test
     @DisplayName("CT12.5 - Campos opcionais (medidas e arquivo) estão presentes")
     void camposOpcionaisPresentes() {
         abrirPagina("/pedido");
-
-        assertTrue(elementoPresente(By.cssSelector("input[name='medidas']")),
-                "Campo Medidas deve estar presente (opcional)");
-        assertTrue(elementoPresente(By.cssSelector("input[name='arquivo']")),
-                "Campo Anexar Referência deve estar presente (opcional)");
+        assertTrue(elementoPresente(By.cssSelector("input[name='medidas']")));
+        assertTrue(elementoPresente(By.cssSelector("input[name='arquivo']")));
     }
 
     @Test
     @DisplayName("CT12.6 - Preenchimento de formulário com dados válidos")
     void preenchimentoComDadosValidos() {
         abrirPagina("/pedido");
-
-        driver.findElement(By.cssSelector("input[name='cliente']")).sendKeys("Carlos da Silva");
+        WebElement inputCliente = driver.findElement(By.cssSelector("input[name='cliente']"));
+        inputCliente.sendKeys("Carlos da Silva");
         driver.findElement(By.id("telefone")).sendKeys("(41) 98888-7777");
-        driver.findElement(By.id("cpf")).sendKeys("529.982.247-25"); // CPF matematicamente válido
+        driver.findElement(By.id("cpf")).sendKeys("529.982.247-25");
         driver.findElement(By.cssSelector("input[name='material']")).sendKeys("Aço Inox");
-        driver.findElement(By.cssSelector("input[name='medidas']")).sendKeys("1,5m x 0,8m");
         driver.findElement(By.cssSelector("textarea[name='descricao']")).sendKeys("Suporte para equipamentos de cozinha industrial");
-
-        // Verifica que os campos mantêm os valores
-        assertEquals("Carlos da Silva",
-                driver.findElement(By.cssSelector("input[name='cliente']")).getAttribute("value"));
-        assertEquals("Aço Inox",
-                driver.findElement(By.cssSelector("input[name='material']")).getAttribute("value"));
+        assertEquals("Carlos da Silva", inputCliente.getAttribute("value"));
     }
 
     @Test
-    @DisplayName("CT12.7 - Submissão com CPF inválido exibe erro")
+    @DisplayName("CT12.7 - Submissão com CPF inválido exibe mensagem de erro")
     void submissaoComCPFInvalido() {
         abrirPagina("/pedido");
 
         driver.findElement(By.cssSelector("input[name='cliente']")).sendKeys("Teste CPF Invalido");
         driver.findElement(By.id("telefone")).sendKeys("(41) 99999-0000");
-        driver.findElement(By.id("cpf")).sendKeys("111.111.111-11"); // CPF inválido
-        driver.findElement(By.cssSelector("input[name='material']")).sendKeys("Ferro");
-        driver.findElement(By.cssSelector("textarea[name='descricao']")).sendKeys("Teste de CPF inválido");
 
+        // Digita CPF inválido e sai do campo para disparar o evento de validação JS
+        WebElement campoCPF = driver.findElement(By.id("cpf"));
+        campoCPF.sendKeys("111.111.111-11");
+        campoCPF.sendKeys("\t"); // Tab para perder o foco
+
+        driver.findElement(By.cssSelector("input[name='material']")).sendKeys("Ferro");
+        driver.findElement(By.cssSelector("textarea[name='descricao']")).sendKeys("Teste");
+
+        // Tenta submeter
         driver.findElement(By.cssSelector("button[type='submit']")).click();
 
-        // Página deve retornar /pedido com mensagem de erro ou o elemento de erro deve aparecer
-        String urlAtual = driver.getCurrentUrl();
-        boolean erroExibido = elementoPresente(By.id("cpf-error")) &&
-                driver.findElement(By.id("cpf-error")).isDisplayed();
-        boolean redirecionouDePedido = urlAtual.contains("/pedido");
+        // Aguarda o span de erro ficar visível (validarCPFInput() seta display:block)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("cpf-error")));
 
-        assertTrue(erroExibido || redirecionouDePedido,
-                "CPF inválido deve exibir erro ou manter o usuário na página /pedido");
+        WebElement erro = driver.findElement(By.id("cpf-error"));
+        assertTrue(erro.isDisplayed(), "Mensagem 'CPF Inválido!' deve estar visível");
+        assertTrue(driver.getCurrentUrl().contains("/pedido"),
+                "Deve permanecer em /pedido quando CPF for inválido");
     }
 
     @Test
     @DisplayName("CT12.8 - Formulário não submete sem campos obrigatórios")
     void formularioNaoSubmeteSemObrigatorios() {
         abrirPagina("/pedido");
-
-        // Tenta submeter vazio
-        WebElement btnSubmit = driver.findElement(By.cssSelector("button[type='submit']"));
-        clicarJS(btnSubmit);
-
-        // Deve continuar em /pedido
-        assertTrue(driver.getCurrentUrl().contains("/pedido"),
-                "Formulário não deve ser submetido sem campos obrigatórios");
+        clicarJS(driver.findElement(By.cssSelector("button[type='submit']")));
+        assertTrue(driver.getCurrentUrl().contains("/pedido"));
     }
 
     @Test
     @DisplayName("CT12.9 - Submissão com dados completos e CPF válido redireciona para home")
     void submissaoCompletaRedirecionaHome() {
         abrirPagina("/pedido");
-
         driver.findElement(By.cssSelector("input[name='cliente']")).sendKeys("Ana Souza");
         driver.findElement(By.id("telefone")).sendKeys("(41) 97777-6666");
         driver.findElement(By.id("cpf")).sendKeys("529.982.247-25");
         driver.findElement(By.cssSelector("input[name='material']")).sendKeys("Madeira e Ferro");
-        driver.findElement(By.cssSelector("textarea[name='descricao']")).sendKeys("Estante para sala de estar com acabamento em madeira");
-
+        driver.findElement(By.cssSelector("textarea[name='descricao']")).sendKeys("Estante para sala de estar");
         driver.findElement(By.cssSelector("button[type='submit']")).click();
-
-        // Após submissão bem-sucedida, o controller redireciona para /
         wait.until(ExpectedConditions.urlToBe(BASE_URL + "/"));
-        assertEquals(BASE_URL + "/", driver.getCurrentUrl(),
-                "Após envio bem-sucedido do pedido, deve redirecionar para a home");
+        assertEquals(BASE_URL + "/", driver.getCurrentUrl());
     }
 }

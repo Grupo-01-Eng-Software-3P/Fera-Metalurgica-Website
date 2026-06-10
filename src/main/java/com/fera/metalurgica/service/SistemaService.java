@@ -5,10 +5,10 @@ import com.fera.metalurgica.dto.OrcamentosDTO;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.repository.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.ArrayList;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,6 +21,7 @@ public class SistemaService {
 	private final MidiaRepository midiaRepository;
 	private final AtividadeRepository atividadeRepository;
 	private final ZApiService zApiService;
+	private final PasswordEncoder passwordEncoder;
 
 	public SistemaService(ProdutoRepository produtoRepository,
 						  PedidoRepository pedidoRepository,
@@ -28,7 +29,8 @@ public class SistemaService {
 						  CategoriaRepository categoriaRepository,
 						  MidiaRepository midiaRepository,
 						  AtividadeRepository atividadeRepository,
-						  ZApiService zApiService) {
+						  ZApiService zApiService,
+						  PasswordEncoder passwordEncoder) {
 		this.produtoRepository = produtoRepository;
 		this.pedidoRepository = pedidoRepository;
 		this.usuarioRepository = usuarioRepository;
@@ -36,6 +38,41 @@ public class SistemaService {
 		this.midiaRepository = midiaRepository;
 		this.atividadeRepository = atividadeRepository;
 		this.zApiService = zApiService;
+		this.passwordEncoder = passwordEncoder;
+	}
+
+	@PostConstruct
+	public void garantirUsuarioAdmin() {
+		boolean adminExiste = false;
+
+		for (Usuario usuario : usuarioRepository.findAll()) {
+			if ("admin@fera.com".equalsIgnoreCase(usuario.getEmail())) {
+				adminExiste = true;
+				if (usuario.getSenha() == null || usuario.getSenha().isBlank()) {
+					usuario.setSenha(passwordEncoder.encode("1234"));
+					usuarioRepository.save(usuario);
+					continue;
+				}
+			}
+
+			String senhaAtual = usuario.getSenha();
+			if (senhaAtual != null && !senhaAtual.isBlank() && !senhaAtual.startsWith("$2")) {
+				usuario.setSenha(passwordEncoder.encode(senhaAtual));
+				usuarioRepository.save(usuario);
+			}
+		}
+
+		if (!adminExiste) {
+			Usuario admin = new Usuario(
+				null,
+				"Lucas Stibbe",
+				"Administrador",
+				LocalDate.of(2007, 1, 19),
+				"admin@fera.com",
+				passwordEncoder.encode("1234")
+			);
+			usuarioRepository.save(admin);
+		}
 	}
 
 	// ── MÉTODOS DE ATIVIDADE (AGENDA) ──
@@ -56,6 +93,7 @@ public class SistemaService {
 		if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
 			throw new BusinessException("E-mail já cadastrado!");
 		}
+		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 		usuarioRepository.save(usuario);
 	}
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,6 @@
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
-        <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
         <ul class="sidebar-menu">
             <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
             <li class="active"><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
@@ -22,342 +21,115 @@
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
         <div class="sidebar-user">
-            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+            <form th:action="@{/logout}" method="POST">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </form>
         </div>
     </aside>
 
     <main class="main-content">
         <div class="page-header">
-            <h1 class="page-title" style="font-size: 32px;">Agenda</h1>
-            <div class="header-actions">
-                <button class="btn-agendar" onclick="abrirModalAgendamento()">
-                    <i class="fas fa-plus"></i> Novo Agendamento
-                </button>
-            </div>
+            <h1 class="page-title">Agenda</h1>
+            <button class="btn-agendar" onclick="abrirModalAgendamento()"><i class="fas fa-plus"></i> Novo Agendamento</button>
         </div>
 
         <div class="agenda-wrapper">
-
             <div class="calendar-section">
                 <div class="calendar-header-nav">
                     <i class="fas fa-chevron-left nav-seta" onclick="mudarMes(-1)"></i>
-                    <h2 id="mesAnoAtual">Maio 2026</h2>
+                    <h2 id="mesAnoAtual"></h2>
                     <i class="fas fa-chevron-right nav-seta" onclick="mudarMes(1)"></i>
                 </div>
-
-                <div class="weekdays">
-                    <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-                </div>
-
+                <div class="weekdays"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
                 <div class="days-grid" id="diasCalendario"></div>
             </div>
 
             <div class="appointments-section">
-                <h3 id="tituloDiaCompromisso">14 de Maio</h3>
-                <p id="subtituloDia" style="color: #888; margin-bottom: 25px; font-weight: 500;">Quinta-feira</p>
-
-                <ul class="compromissos-list" id="listaCompromissos">
-                </ul>
+                <h3 id="tituloDiaCompromisso"></h3>
+                <ul class="compromissos-list" id="listaCompromissos"></ul>
             </div>
-
         </div>
     </main>
 </div>
 
 <div id="modalAgendamento" class="modal-form-overlay">
-    <div class="modal-form-content modal-premium">
-        <div class="modal-header">
-            <h3><i class="fas fa-calendar-plus"></i> Novo Agendamento</h3>
-            <span class="fechar-modal-x" onclick="fecharModalAgendamento()">&times;</span>
-        </div>
-
+    <div class="modal-form-content">
+        <h3>Novo Agendamento</h3>
         <form id="formAgendamento" onsubmit="salvarAgendamento(event)">
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Título do Compromisso</label>
-                    <input type="text" id="inputTitulo" class="input-premium" placeholder="Ex: Entrega de Móvel Industrial" required>
-                </div>
+            <input type="text" id="inputTitulo" placeholder="Título" required>
+            <textarea id="inputDescricao" placeholder="Descrição"></textarea>
+            <input type="date" id="inputData" required>
+            <div style="display:flex; gap:10px;">
+                <input type="time" id="inputHoraInicio" required>
+                <input type="time" id="inputHoraFim" required>
             </div>
-
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Descrição / Observações</label>
-                    <textarea id="inputDescricao" class="input-premium" rows="2" placeholder="Detalhes extras sobre o serviço..."></textarea>
-                </div>
-            </div>
-
-            <div class="form-row split">
-                <div class="input-group">
-                    <label>Data</label>
-                    <input type="date" id="inputData" class="input-premium" required>
-                </div>
-                <div class="input-group">
-                    <label>Horário</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="time" id="inputHoraInicio" class="input-premium" required>
-                        <span style="font-weight: bold; color: #666;">até</span>
-                        <input type="time" id="inputHoraFim" class="input-premium" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Local ou Evento</label>
-                    <input type="text" id="inputEvento" class="input-premium" placeholder="Ex: Galpão A ou Endereço do Cliente" required>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn-cancelar" onclick="fecharModalAgendamento()">Cancelar</button>
-                <button type="submit" class="btn-salvar">Confirmar Agendamento</button>
-            </div>
+            <input type="text" id="inputEvento" placeholder="Local/Evento" required>
+            <button type="submit" class="btn-salvar">Confirmar</button>
         </form>
-    </div>
-</div>
-
-<div id="modalDetalhes" class="modal-form-overlay">
-    <div class="modal-form-content modal-premium">
-        <div class="modal-header">
-            <h3><i class="fas fa-calendar-check"></i> Detalhes do Compromisso</h3>
-            <span class="fechar-modal-x" onclick="fecharDetalhes()">&times;</span>
-        </div>
-
-        <div style="padding: 30px 40px;">
-            <h4 id="detalheTitulo" style="color: var(--fera-orange); font-size: 22px; margin-bottom: 20px;">Título do Evento</h4>
-
-            <div style="display: flex; flex-direction: column; gap: 15px; font-size: 16px; color: var(--text-dark);">
-                <p><strong><i class="fas fa-clock" style="color: #A09A92; width: 25px;"></i> Horário:</strong> <span id="detalheHorario"></span></p>
-                <p><strong><i class="fas fa-calendar-day" style="color: #A09A92; width: 25px;"></i> Data:</strong> <span id="detalheData"></span></p>
-                <p><strong><i class="fas fa-map-marker-alt" style="color: #A09A92; width: 25px;"></i> Local:</strong> <span id="detalheEvento"></span></p>
-
-                <div style="background-color: #F8F8F8; padding: 15px; border-radius: 10px; margin-top: 10px;">
-                    <strong style="display: block; margin-bottom: 5px;"><i class="fas fa-align-left" style="color: #A09A92;"></i> Descrição:</strong>
-                    <span id="detalheDescricao" style="color: #666; font-size: 15px; line-height: 1.5;"></span>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn-salvar" onclick="fecharDetalhes()">Fechar</button>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
     let compromissos = [];
-
     let dataAtual = new Date();
     let mesAtual = dataAtual.getMonth();
     let anoAtual = dataAtual.getFullYear();
-    let diaSelecionado = dataAtual.getDate();
 
-    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-
-    const diasSemana = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira",
-        "Quinta-feira","Sexta-feira","Sábado"];
-
-
-    // =====================
-    // HELPER — evita bug de UTC
-    // =====================
-    function parsarData(dataStr) {
-        const [ano, mes, dia] = dataStr.split("-").map(Number);
-        return new Date(ano, mes - 1, dia);
-    }
-
-
-    // =====================
-    // CARREGAR DO BACKEND
-    // =====================
     async function carregarAgenda() {
         const res = await fetch("/agenda/dados");
         compromissos = await res.json();
         renderizarCalendario();
     }
 
+    async function salvarAgendamento(event) {
+        event.preventDefault();
+        const atividade = {
+            titulo: document.getElementById("inputTitulo").value,
+            descricao: document.getElementById("inputDescricao").value,
+            evento: document.getElementById("inputEvento").value,
+            data: document.getElementById("inputData").value,
+            horario: document.getElementById("inputHoraInicio").value + " - " + document.getElementById("inputHoraFim").value
+        };
 
-    // =====================
-    // CALENDÁRIO
-    // =====================
+        const response = await fetch("/agenda", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(atividade)
+        });
+
+        if (response.ok) {
+            document.getElementById("modalAgendamento").style.display = "none";
+            document.getElementById("formAgendamento").reset();
+            await carregarAgenda();
+        }
+    }
+
     function renderizarCalendario() {
-
-        document.getElementById("mesAnoAtual").innerText =
-            `${meses[mesAtual]} ${anoAtual}`;
-
+        const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        document.getElementById("mesAnoAtual").innerText = `${meses[mesAtual]} ${anoAtual}`;
         const grid = document.getElementById("diasCalendario");
         grid.innerHTML = "";
-
-        const primeiroDia = new Date(anoAtual, mesAtual, 1).getDay();
         const ultimoDia = new Date(anoAtual, mesAtual + 1, 0).getDate();
-        const ultimoMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
-
-        for (let i = primeiroDia; i > 0; i--) {
-            grid.innerHTML += `<div class="day inactive">${ultimoMesAnterior - i + 1}</div>`;
-        }
-
         for (let i = 1; i <= ultimoDia; i++) {
-
-            let classe = (i === diaSelecionado) ? "day active" : "day";
-
-            let tem = compromissos.some(c => {
-                const d = parsarData(c.data);
-                return d.getDate() === i &&
-                    d.getMonth() === mesAtual &&
-                    d.getFullYear() === anoAtual;
-            });
-
-            let dot = tem ? `<div style="width:6px;height:6px;background:var(--fera-orange);border-radius:50%;position:absolute;bottom:3px;"></div>` : "";
-
-            grid.innerHTML += `
-                <div class="${classe}" style="position:relative;" onclick="selecionarDia(${i})">
-                    ${i}
-                    ${dot}
-                </div>
-            `;
+            grid.innerHTML += `<div class="day" onclick="selecionarDia(${i})">${i}</div>`;
         }
-
-        atualizarPainel(diaSelecionado);
     }
 
-
-    // =====================
-    // SELECIONAR DIA
-    // =====================
     function selecionarDia(dia) {
-        diaSelecionado = dia;
-        renderizarCalendario();
+        document.getElementById("tituloDiaCompromisso").innerText = dia + " de " + mesAtual;
+        // Lógica para filtrar listaCompromissos aqui
     }
 
-
-    // =====================
-    // MUDAR MÊS
-    // =====================
     function mudarMes(direcao) {
         mesAtual += direcao;
         if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
         if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
-        diaSelecionado = 1;
         renderizarCalendario();
     }
 
+    function abrirModalAgendamento() { document.getElementById("modalAgendamento").style.display = "flex"; }
 
-    // =====================
-    // PAINEL LATERAL
-    // =====================
-    function atualizarPainel(dia) {
-
-        const data = new Date(anoAtual, mesAtual, dia);
-
-        document.getElementById("tituloDiaCompromisso").innerText =
-            `${dia} de ${meses[mesAtual]}`;
-
-        document.getElementById("subtituloDia").innerText =
-            diasSemana[data.getDay()];
-
-        const lista = document.getElementById("listaCompromissos");
-        lista.innerHTML = "";
-
-        let doDia = compromissos.filter(c => {
-            const d = parsarData(c.data);
-            return d.getDate() === dia &&
-                d.getMonth() === mesAtual &&
-                d.getFullYear() === anoAtual;
-        });
-
-        if (doDia.length === 0) {
-            lista.innerHTML = "<p style='color:#888;'>Sem compromissos</p>";
-            return;
-        }
-
-        doDia.forEach(c => {
-            lista.innerHTML += `
-                <li class="compromisso-card" onclick="abrirDetalhes(${JSON.stringify(c).replace(/"/g, '&quot;')})">
-                    <div>
-                        <strong>${c.titulo}</strong><br>
-                        <small>${c.horario}</small><br>
-                        <small>${c.evento}</small>
-                    </div>
-                </li>
-            `;
-        });
-    }
-
-
-    // =====================
-    // DETALHES DO COMPROMISSO
-    // =====================
-    function abrirDetalhes(c) {
-        document.getElementById("detalheTitulo").innerText   = c.titulo;
-        document.getElementById("detalheHorario").innerText  = c.horario;
-        document.getElementById("detalheEvento").innerText   = c.evento;
-        document.getElementById("detalheDescricao").innerText = c.descricao || "—";
-
-        const d = parsarData(c.data);
-        document.getElementById("detalheData").innerText =
-            `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
-
-        document.getElementById("modalDetalhes").style.display = "flex";
-    }
-
-    function fecharDetalhes() {
-        document.getElementById("modalDetalhes").style.display = "none";
-    }
-
-
-    // =====================
-    // SALVAR NO BACKEND
-    // =====================
-    function salvarAgendamento(event) {
-        event.preventDefault();
-
-        const titulo    = document.getElementById("inputTitulo").value;
-        const descricao = document.getElementById("inputDescricao").value;
-        const evento    = document.getElementById("inputEvento").value;
-        const data      = document.getElementById("inputData").value;
-        const h1        = document.getElementById("inputHoraInicio").value;
-        const h2        = document.getElementById("inputHoraFim").value;
-
-        fetch("/agenda", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                titulo,
-                descricao,
-                evento,
-                data,
-                horario: `${h1} - ${h2}`
-            })
-        }).then(() => {
-            fecharModalAgendamento();
-            document.getElementById("formAgendamento").reset();
-            carregarAgenda();
-        });
-    }
-
-
-    // =====================
-    // MODAL AGENDAMENTO
-    // =====================
-    function abrirModalAgendamento() {
-        document.getElementById("modalAgendamento").style.display = "flex";
-    }
-    function fecharModalAgendamento() {
-        document.getElementById("modalAgendamento").style.display = "none";
-    }
-
-    window.onclick = function(e) {
-        ["modalAgendamento", "modalDetalhes"].forEach(id => {
-            const m = document.getElementById(id);
-            if (e.target === m) m.style.display = "none";
-        });
-    };
-
-
-    // =====================
-    // INIT
-    // =====================
     carregarAgenda();
 </script>
 </body>

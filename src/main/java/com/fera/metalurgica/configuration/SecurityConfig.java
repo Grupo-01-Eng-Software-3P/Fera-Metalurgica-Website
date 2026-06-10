@@ -10,51 +10,29 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+			.csrf(csrf -> csrf.ignoringRequestMatchers(
+				"/orcamentos/salvar", "/pedido", "/novo-usuario", "/nova-imagem", "/nova-categoria",
+				"/agenda", "/agenda/dados" // Adicionado para permitir o fetch do JS
+			))
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/login", "/css/**", "/js/**", "/imagens/**", "/").permitAll()
+				.anyRequest().authenticated()
+			)
+			.formLogin(form -> form
+				.loginPage("/login")
+				.defaultSuccessUrl("/dashboard", true)
+				.permitAll()
+			)
+			.logout(logout -> logout.logoutSuccessUrl("/login?logout"));
 
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/login",
-                                "/css/**",
-                                "/",
-                                "/js/**",
-                                "/imagens/**",
-                                "/orcamento",
-                                "/catalogo",
-                                "/pedido"
+		return http.build();
+	}
 
-                        ).permitAll()
-                        .requestMatchers(
-                                "/dashboard",
-                                "/midia",
-                                "/orcamentos",
-                                "/orcamentos/**",
-                                "/usuarios",
-                                "/agenda"
-                                ).authenticated()
-                        .anyRequest().permitAll()
-                )
-
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/dashboard", false)
-                        .permitAll()
-                )
-
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
-                );
-
-        return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

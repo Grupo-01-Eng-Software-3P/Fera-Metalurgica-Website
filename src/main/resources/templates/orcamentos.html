@@ -22,7 +22,13 @@
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
         <div class="sidebar-user">
-            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
+            <i class="fas fa-user-circle"></i> Lucas Stibbe
+            <form th:action="@{/logout}" method="POST" style="display:inline;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" style="background:none; border:none; color:inherit; cursor:pointer;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -38,63 +44,56 @@
         </div>
         <div th:if="${orcamentoSalvo}" style="margin-bottom: 20px; padding: 12px 16px; border-radius: 12px; background-color: #E8F5E9; color: #2E7D32; font-weight: 600;" th:text="${orcamentoSalvo}"></div>
         <div class="kanban-board">
-            <div class="kanban-column" style="min-width: 100%;">
+            <section class="kanban-column column-admin">
                 <div class="kanban-header">
-                    <h3><span class="dot pendente"></span> Pedidos recebidos</h3>
-                    <span class="count" th:text="${#lists.size(orcamentos)}">0</span>
+                    <h3><span class="dot admin"></span> Pedidos criados por mim</h3>
+                    <span class="count" th:text="${#lists.size(orcamentosMeus)}">0</span>
                 </div>
 
-                <div class="kanban-cards" th:if="${!#lists.isEmpty(orcamentos)}">
-                    <article class="orcamento-card"
-                             th:each="orcamento : ${orcamentos}"
-                             th:attr="
-                                 data-id=${orcamento.id},
-                                 data-cliente=${orcamento.cliente},
-                                 data-telefone=${orcamento.telefone},
-                                 data-cpf=${orcamento.cpf},
-                                 data-material=${orcamento.material},
-                                 data-medidas=${orcamento.medidas},
-                                 data-descricao=${orcamento.descricao},
-                                 data-criado-por=${orcamento.criadoPor},
-                                 data-valor-adicionais=${orcamento.valorAdicionais},
-                                 data-observacoes-admin=${orcamento.observacoesAdmin},
-                                 data-item1-nome=${orcamento.itens.size() > 0 ? orcamento.itens[0].nomeItem : ''},
-                                 data-item1-quantidade=${orcamento.itens.size() > 0 ? orcamento.itens[0].quantidade : ''},
-                                 data-item1-valor-unitario=${orcamento.itens.size() > 0 ? orcamento.itens[0].valorUnitario : ''},
-                                 data-item2-nome=${orcamento.itens.size() > 1 ? orcamento.itens[1].nomeItem : ''},
-                                 data-item2-quantidade=${orcamento.itens.size() > 1 ? orcamento.itens[1].quantidade : ''},
-                                 data-item2-valor-unitario=${orcamento.itens.size() > 1 ? orcamento.itens[1].valorUnitario : ''},
-                                 data-item3-nome=${orcamento.itens.size() > 2 ? orcamento.itens[2].nomeItem : ''},
-                                 data-item3-quantidade=${orcamento.itens.size() > 2 ? orcamento.itens[2].quantidade : ''},
-                                 data-item3-valor-unitario=${orcamento.itens.size() > 2 ? orcamento.itens[2].valorUnitario : ''}"
-                             onclick="abrirModalNovoOrcamento(this)">
-                        <div class="card-header">
-                            <span class="id-pedido" th:text="|Pedido #${orcamento.id}|">Pedido #1</span>
-                            <span class="data"
-                                  th:text="${orcamento.dataCriacao != null ? #temporals.format(orcamento.dataCriacao, 'dd/MM/yyyy HH:mm') : 'Sem data'}">
-                                01/01/2026 12:00
-                            </span>
-                        </div>
-
-                        <h3 class="cliente-nome" th:text="${orcamento.cliente}">Nome do cliente</h3>
-
-                        <p class="descricao-resumo" th:text="${orcamento.descricao}">
-                            Descrição do pedido
-                        </p>
-
-                        <div class="card-footer">
-                            <span class="tag material" th:text="${orcamento.material}">Material</span>
-                            <button type="button" class="btn-icon" title="Ver detalhes">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </article>
+                <div class="kanban-cards" th:if="${!#lists.isEmpty(orcamentosMeus)}">
+                    <th:block th:each="orcamento : ${orcamentosMeus}">
+                        <div th:replace="~{fragments/orcamento-card :: card(orcamento=${orcamento}, statusLabel='Feito por mim', statusClass='status-admin')}"></div>
+                    </th:block>
                 </div>
 
-                <div class="empty-state" th:if="${#lists.isEmpty(orcamentos)}">
-                    Nenhum pedido cadastrado ainda.
+                <div class="empty-state" th:if="${#lists.isEmpty(orcamentosMeus)}">
+                    Nenhum pedido feito por você.
                 </div>
-            </div>
+            </section>
+
+            <section class="kanban-column column-orcado">
+                <div class="kanban-header">
+                    <h3><span class="dot finalizado"></span> Clientes com orçamento</h3>
+                    <span class="count" th:text="${#lists.size(orcamentosClientesComOrcamento)}">0</span>
+                </div>
+
+                <div class="kanban-cards" th:if="${!#lists.isEmpty(orcamentosClientesComOrcamento)}">
+                    <th:block th:each="orcamento : ${orcamentosClientesComOrcamento}">
+                        <div th:replace="~{fragments/orcamento-card :: card(orcamento=${orcamento}, statusLabel='Orçamento feito', statusClass='status-orcado')}"></div>
+                    </th:block>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(orcamentosClientesComOrcamento)}">
+                    Nenhum pedido de cliente com orçamento pronto.
+                </div>
+            </section>
+
+            <section class="kanban-column column-pendente">
+                <div class="kanban-header">
+                    <h3><span class="dot pendente"></span> Clientes aguardando orçamento</h3>
+                    <span class="count" th:text="${#lists.size(orcamentosClientesPendentes)}">0</span>
+                </div>
+
+                <div class="kanban-cards" th:if="${!#lists.isEmpty(orcamentosClientesPendentes)}">
+                    <th:block th:each="orcamento : ${orcamentosClientesPendentes}">
+                        <div th:replace="~{fragments/orcamento-card :: card(orcamento=${orcamento}, statusLabel='Aguardando orçamento', statusClass='status-pendente')}"></div>
+                    </th:block>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(orcamentosClientesPendentes)}">
+                    Nenhum pedido de cliente aguardando orçamento.
+                </div>
+            </section>
         </div>
     </main>
 </div>

@@ -1,4 +1,4 @@
-/* Top Nav (Público) */
+﻿/* Top Nav (Público) */
 .top-nav {
     position: relative;
     z-index: 2;
@@ -89,3 +89,6 @@
     gap: 10px;
 }
 .config-icon { margin-left: 20px; cursor: pointer; }
+.sidebar-user form { margin: 0; padding: 0; }
+.sidebar-user button { background: none; border: none; color: var(--white); font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; opacity: 0.8; padding: 0; }
+.sidebar-user button:hover { opacity: 1; }

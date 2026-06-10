@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -23,9 +23,7 @@
             <li class="active"><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
 
-        <div class="sidebar-user">
-            <i class="fas fa-user-circle"></i> Lucas Stibbe <i class="fas fa-cog config-icon"></i>
-        </div>
+        <div class="sidebar-user"><i class="fas fa-user-circle"></i> Lucas Stibbe <form th:action="@{/logout}" method="POST"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit"><i class="fas fa-sign-out-alt"></i> Sair</button></form></div>
     </aside>
 
     <main class="main-content">
@@ -195,3 +193,4 @@
 
 </body>
 </html>
+

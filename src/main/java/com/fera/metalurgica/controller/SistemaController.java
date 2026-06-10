@@ -26,68 +26,15 @@ public class SistemaController {
 		this.pdfService = pdfService;
 	}
 
+	@GetMapping("/login")
+	public String login() { return "login"; }
+
 	@GetMapping("/")
 	public String home(Model model) {
 		model.addAttribute("produtos", service.listarProdutos());
 		return "home";
 	}
 
-	// ── ORÇAMENTOS & KANBAN ──────────────────────────────
-	@GetMapping("/orcamentos")
-	public String orcamentos(Model model) {
-		var orcamentos = service.organizarOrcamentos();
-		model.addAttribute("orcamentosMeus", orcamentos.meusPedidos());
-		model.addAttribute("orcamentosClientesComOrcamento", orcamentos.clientesComOrcamento());
-		model.addAttribute("orcamentosClientesPendentes", orcamentos.clientesPendentes());
-		return "orcamentos";
-	}
-
-	@PostMapping("/orcamentos/salvar")
-	public String salvarOrcamento(@RequestParam(required = false) Long pedidoId,
-								  @RequestParam String cliente, @RequestParam String telefone,
-								  @RequestParam String cpf, @RequestParam String material,
-								  @RequestParam(required = false) String medidas, @RequestParam String descricao,
-								  @RequestParam(required = false) List<String> itemNome,
-								  @RequestParam(required = false) List<String> itemQuantidade,
-								  @RequestParam(required = false) List<String> itemValorUnitario,
-								  @RequestParam(required = false) String frete,
-								  @RequestParam(required = false) String maoObra,
-								  @RequestParam(required = false) String observacoesAdmin,
-								  RedirectAttributes ra) {
-
-		service.salvarOrcamentoAdmin(pedidoId, cliente, telefone, cpf, material, medidas, descricao,
-			itemNome, itemQuantidade, itemValorUnitario, frete, maoObra, observacoesAdmin);
-		ra.addFlashAttribute("orcamentoSalvo", "Orçamento processado!");
-		return "redirect:/orcamentos";
-	}
-
-	@GetMapping("/orcamentos/{id}/pdf")
-	public ResponseEntity<byte[]> baixarPdfOrcamento(@PathVariable Long id) {
-		Pedido p = service.buscarPedidoPorId(id);
-		byte[] pdf = pdfService.gerarPdf(p);
-		return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF)
-			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orcamento-" + id + ".pdf\"")
-			.body(pdf);
-	}
-
-	// ── PEDIDO CLIENTE ───────────────────────────────────
-	@GetMapping("/pedido") public String pedidoForm() { return "pedido"; }
-
-	@PostMapping("/pedido")
-	public String salvarPedido(@RequestParam String cliente, @RequestParam String telefone,
-							   @RequestParam String cpf, @RequestParam String material,
-							   @RequestParam(required = false) String medidas, @RequestParam String descricao,
-							   Model model) {
-		if (!isCPFValido(cpf)) { model.addAttribute("erroCpf", "CPF Inválido."); return "pedido"; }
-		Pedido p = new Pedido();
-		p.setCliente(cliente); p.setTelefone(telefone); p.setCpf(cpf);
-		p.setMaterial(material); p.setMedidas(medidas); p.setDescricao(descricao);
-		p.setCriadoPor("CLIENTE");
-		service.adicionarPedido(p);
-		return "redirect:/";
-	}
-
-	// ── DASHBOARD ────────────────────────────────────────
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
 		List<Pedido> todos = service.listarOrcamentos();
@@ -98,8 +45,59 @@ public class SistemaController {
 		return "dashboard";
 	}
 
+	// ── ORÇAMENTOS ───────────────────────────────────────
+	@GetMapping("/orcamentos")
+	public String orcamentos(Model model) {
+		var orcamentos = service.organizarOrcamentos();
+		model.addAttribute("orcamentosMeus", orcamentos.meusPedidos());
+		model.addAttribute("orcamentosClientesComOrcamento", orcamentos.clientesComOrcamento());
+		model.addAttribute("orcamentosClientesPendentes", orcamentos.clientesPendentes());
+		return "orcamentos";
+	}
+
+	@PostMapping("/orcamentos/salvar")
+	public String salvarOrcamento(@RequestParam(required = false) Long pedidoId, @RequestParam String cliente,
+								  @RequestParam String telefone, @RequestParam String cpf, @RequestParam String material,
+								  @RequestParam(required = false) String medidas, @RequestParam String descricao,
+								  @RequestParam(required = false) List<String> itemNome, @RequestParam(required = false) List<String> itemQuantidade,
+								  @RequestParam(required = false) List<String> itemValorUnitario, @RequestParam(required = false) String frete,
+								  @RequestParam(required = false) String maoObra, @RequestParam(required = false) String observacoesAdmin,
+								  RedirectAttributes ra) {
+		service.salvarOrcamentoAdmin(pedidoId, cliente, telefone, cpf, material, medidas, descricao, itemNome, itemQuantidade, itemValorUnitario, frete, maoObra, observacoesAdmin);
+		ra.addFlashAttribute("orcamentoSalvo", "Orçamento processado!");
+		return "redirect:/orcamentos";
+	}
+
+	// ── MÍDIA E AGENDA ───────────────────────────────────
+	@GetMapping("/midia")
+	public String midia() { return "midia"; }
+
+	@GetMapping("/agenda")
+	public String agenda(Model model) {
+		return "agenda";
+	}
+
+	// Novos métodos para a API da Agenda (JSON)
+	@GetMapping("/agenda/dados")
+	@ResponseBody
+	public List<Atividade> listarDadosAgenda() {
+		return service.listarAtividades();
+	}
+
+	@PostMapping("/agenda")
+	@ResponseBody
+	public String salvarAgendamento(@RequestBody Atividade atividade) {
+		// Certifique-se de que no seu service existe o método salvarAtividade
+		service.salvarAtividade(atividade);
+		return "Sucesso";
+	}
+
 	// ── USUÁRIOS ─────────────────────────────────────────
-	@GetMapping("/usuarios") public String usuarios(Model model) { model.addAttribute("usuarios", service.listarUsuarios()); return "usuarios"; }
+	@GetMapping("/usuarios")
+	public String usuarios(Model model) {
+		model.addAttribute("usuarios", service.listarUsuarios());
+		return "usuarios";
+	}
 
 	@PostMapping("/novo-usuario")
 	public String salvarUsuario(@RequestParam String nome, @RequestParam String cargo,

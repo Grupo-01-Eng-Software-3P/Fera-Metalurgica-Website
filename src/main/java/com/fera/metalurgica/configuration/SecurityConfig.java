@@ -12,58 +12,21 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
 		http
-			.csrf(csrf -> csrf
-				.ignoringRequestMatchers(
-					"/agenda/**",
-					"/nova-atividade",
-					"/novo-usuario",
-					"/pedido",
-					"/nova-categoria",
-					"/novo-produto",
-					"/nova-imagem",
-					"/orcamentos/salvar"
-				)
-			)
+			.csrf(csrf -> csrf.ignoringRequestMatchers(
+				"/orcamentos/salvar", "/pedido", "/novo-usuario", "/nova-imagem", "/nova-categoria",
+				"/agenda", "/agenda/dados" // Adicionado para permitir o fetch do JS
+			))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(
-					"/login",
-					"/css/**",
-					"/js/**",
-					"/imagens/**",
-					"/uploads/**",
-					"/",
-					"/catalogo",
-					"/catalogo/ambiente/**",
-					"/pedido"
-				).permitAll()
-				.requestMatchers(
-					"/dashboard",
-					"/midia",
-					"/midia/**",
-					"/nova-imagem",
-					"/nova-categoria",
-					"/orcamentos",
-					"/orcamentos/**",
-					"/usuarios",
-					"/novo-usuario",
-					"/agenda",
-					"/agenda/**",
-					"/nova-atividade"
-				).authenticated()
+				.requestMatchers("/login", "/css/**", "/js/**", "/imagens/**", "/").permitAll()
 				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
 				.loginPage("/login")
-				.usernameParameter("email")
-				.passwordParameter("password")
-				.defaultSuccessUrl("/dashboard", false)
+				.defaultSuccessUrl("/dashboard", true)
 				.permitAll()
 			)
-			.logout(logout -> logout
-				.logoutSuccessUrl("/login?logout")
-			);
+			.logout(logout -> logout.logoutSuccessUrl("/login?logout"));
 
 		return http.build();
 	}

@@ -2,7 +2,7 @@ package com.fera.metalurgica.service;
 
 import com.fera.metalurgica.model.ItemPedido;
 import com.fera.metalurgica.model.Pedido;
-import org.apache.pdfbox.pdmodel.PDDocument; // Importação corrigida
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;

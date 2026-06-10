@@ -11,7 +11,7 @@ public class Usuario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "usuario", nullable = false)
+	@Column(nullable = false)
 	private String nome;
 	private String cargo;
 	private LocalDate dataNascimento;

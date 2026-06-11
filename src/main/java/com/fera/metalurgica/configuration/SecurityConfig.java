@@ -18,11 +18,13 @@ public class SecurityConfig {
 				"/agenda", "/agenda/dados" // Adicionado para permitir o fetch do JS
 			))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/login", "/css/**", "/js/**", "/imagens/**", "/").permitAll()
+				.requestMatchers("/login", "/css/**", "/js/**", "/imagens/**", "/", "/pedido", "/catalogo", "/catalogo/**").permitAll()
 				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
 				.loginPage("/login")
+				.usernameParameter("email")
+				.passwordParameter("password")
 				.defaultSuccessUrl("/dashboard", true)
 				.permitAll()
 			)

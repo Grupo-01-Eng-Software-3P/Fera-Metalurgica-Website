@@ -1,0 +1,14 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebarUser(nomeUsuario)" class="sidebar-user">
+    <div class="sidebar-user-info">
+        <i class="fas fa-user-circle"></i>
+        <span th:text="${nomeUsuario}">Lucas Stibbe</span>
+    </div>
+
+    <form th:action="@{/logout}" method="POST" class="sidebar-logout-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="sidebar-logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sair</span>
+        </button>
+    </form>
+</div>

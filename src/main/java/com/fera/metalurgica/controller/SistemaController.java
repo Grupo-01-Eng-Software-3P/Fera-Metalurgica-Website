@@ -55,6 +55,18 @@ public class SistemaController {
 		return "orcamentos";
 	}
 
+	@GetMapping("/orcamentos/{id}/pdf")
+	public ResponseEntity<byte[]> baixarPdfOrcamento(@PathVariable Long id) {
+		Pedido pedido = service.buscarPedidoPorId(id);
+		byte[] pdf = pdfService.gerarPdf(pedido);
+
+		return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_PDF)
+			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orcamento-" + id + ".pdf\"")
+			.contentLength(pdf.length)
+			.body(pdf);
+	}
+
 	@PostMapping("/orcamentos/salvar")
 	public String salvarOrcamento(@RequestParam(required = false) Long pedidoId, @RequestParam String cliente,
 								  @RequestParam String telefone, @RequestParam String cpf, @RequestParam String material,

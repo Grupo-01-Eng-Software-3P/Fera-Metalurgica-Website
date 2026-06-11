@@ -14,6 +14,7 @@
     <aside class="sidebar">
         <h2>Fera</h2>
         <p style="font-size: 12px; margin-bottom: 30px;">Metalúrgica & Móveis</p>
+
         <ul class="sidebar-menu">
             <li><a href="/dashboard"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
@@ -21,18 +22,11 @@
             <li><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
-        <div class="sidebar-user">
-            <i class="fas fa-user-circle"></i> Lucas Stibbe
-            <form th:action="@{/logout}" method="POST" style="display:inline; margin-left: 10px;">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" style="background:none; border:none; color:inherit; cursor:pointer;" title="Sair">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </form>
-        </div>
+        <div th:replace="~{fragments/sidebar-user :: sidebarUser('Lucas Stibbe')}"></div>
     </aside>
 
     <main class="main-content">
+
         <div class="midia-header">
             <h2 class="page-title">Mídia</h2>
             <div class="header-actions">
@@ -52,39 +46,85 @@
         </div>
 
         <div class="categorias-lista" id="categoriaLista">
-            <div th:if="${#lists.isEmpty(categorias)}" style="text-align:center; padding: 60px; color: #aaa;">
-                <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; display:block;"></i>
-                <p>Nenhuma categoria cadastrada ainda.</p>
-            </div>
 
-            <a th:each="cat : ${categorias}" th:href="@{'/midia/' + ${cat.nome}}" class="categoria-item">
+            <a href="/midia/adega" class="categoria-item">
                 <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
                     <div class="carrossel-track">
-                        <div th:if="${cat.midias != null and !cat.midias.isEmpty()}">
-                            <img th:each="m : ${cat.midias}" th:src="@{${m.caminho}}" th:alt="${m.nome}" style="min-width:100%;height:220px;object-fit:cover;">
-                        </div>
-                        <div th:if="${cat.midias == null or cat.midias.isEmpty()}" style="min-width:100%;height:220px;background:#f0ece8;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:48px;">
-                            <i class="fas fa-images"></i>
-                        </div>
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Adega 1">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Adega 2">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Adega 3">
                     </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
                 <div class="categoria-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> <span th:text="${cat.nome}"></span></span>
-                    <span class="categoria-meta" th:text="${cat.midias != null ? cat.midias.size() + ' arquivo(s)' : '0 arquivo(s)'}"></span>
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Adega</span>
+                    <span class="categoria-meta">5MB · faz 2 dias</span>
                 </div>
             </a>
+
+            <a href="/midia/banheiro" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Banheiro 1">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Banheiro 2">
+                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Banheiro</span>
+                    <span class="categoria-meta">3MB · faz 2 dias</span>
+                </div>
+            </a>
+
+            <a href="/midia/biblioteca" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Biblioteca 1">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Biblioteca 2">
+                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Biblioteca 3">
+                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Biblioteca</span>
+                    <span class="categoria-meta">8MB · faz 2 dias</span>
+                </div>
+            </a>
+
+            <a href="/midia/closet" class="categoria-item">
+                <div class="categoria-carrossel-wrapper">
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carrossel-track">
+                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Closet 1">
+                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Closet 2">
+                    </div>
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="categoria-footer">
+                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Closet</span>
+                    <span class="categoria-meta">6MB · faz 2 dias</span>
+                </div>
+            </a>
+
         </div>
     </main>
 </div>
 
+<!-- MODAL NOVA CATEGORIA -->
 <div id="modalCategoria" class="modal-form-overlay">
     <div class="modal-form-content">
         <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Nova Categoria</h3>
-        <form th:action="@{/nova-categoria}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <form action="/nova-categoria" method="post">
             <div class="input-group">
                 <label>Nome da Categoria:</label>
                 <input type="text" name="nome" class="input-field" placeholder="Ex: Sala de Estar" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição:</label>
+                <textarea name="descricao" class="input-field" rows="3" placeholder="Descreva esta categoria..."></textarea>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button type="button" class="btn-secondary-outline" onclick="fecharModalCategoria()">Cancelar</button>
@@ -99,6 +139,7 @@
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
     }
+
     function filtrarCategorias() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
         document.querySelectorAll('.categoria-item').forEach(item => {
@@ -106,12 +147,25 @@
             item.style.display = nome.includes(termo) ? '' : 'none';
         });
     }
-    function abrirModalCategoria() { document.getElementById('modalCategoria').style.display = 'flex'; }
-    function fecharModalCategoria() { document.getElementById('modalCategoria').style.display = 'none'; }
+
+    function rolar(event, btn, direcao) {
+        event.preventDefault();
+        event.stopPropagation();
+        const track = btn.closest('.categoria-carrossel-wrapper').querySelector('.carrossel-track');
+        track.scrollBy({ left: direcao * track.offsetWidth, behavior: 'smooth' });
+    }
+
+    function abrirModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'flex';
+    }
+    function fecharModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'none';
+    }
     window.onclick = function(e) {
         const m = document.getElementById('modalCategoria');
         if (e.target === m) m.style.display = 'none';
     };
 </script>
+
 </body>
 </html>

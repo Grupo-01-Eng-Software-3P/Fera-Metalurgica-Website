@@ -23,107 +23,22 @@ import java.util.List;
 @Controller
 public class SistemaController {
 
-    private final SistemaService service;
-    private final OrcamentoPdfService pdfService;
+	private final SistemaService service;
+	private final OrcamentoPdfService pdfService;
 
-    public SistemaController(SistemaService service, OrcamentoPdfService pdfService) {
-        this.service = service;
-        this.pdfService = pdfService;
-    }
-
-    @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("produtos", service.listarProdutos());
-        return "home";
-    }
-
-	@GetMapping("/orcamentos")
-    public String orcamentos(Model model) {
-        var orcamentos = service.organizarOrcamentos();
-        model.addAttribute("orcamentos", service.listarOrcamentos());
-        model.addAttribute("orcamentosMeus", orcamentos.meusPedidos());
-        model.addAttribute("orcamentosClientesComOrcamento", orcamentos.clientesComOrcamento());
-        model.addAttribute("orcamentosClientesPendentes", orcamentos.clientesPendentes());
-        return "orcamentos";
-    }
-
-	@GetMapping("/pedido")
-	public String pedidoForm(Model model) {
-		model.addAttribute("pedidoDTO", new PedidoDTO()); // inicializa vazio
-		return "pedido";
+	public SistemaController(SistemaService service, OrcamentoPdfService pdfService) {
+		this.service = service;
+		this.pdfService = pdfService;
 	}
-    @GetMapping("/orcamentos/{id}/pdf")
-    public ResponseEntity<byte[]> baixarPdfOrcamento(@PathVariable Long id) {
-        Pedido pedido = service.buscarPedidoPorId(id);
-        byte[] pdf = pdfService.gerarPdf(pedido);
-        String nomeArquivo = "orcamento-" + id + ".pdf";
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nomeArquivo + "\"")
-                .contentLength(pdf.length)
-                .body(pdf);
-    }
+	@GetMapping("/login")
+	public String login() { return "login"; }
 
-    @PostMapping("/pedido")
-    public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
-                               BindingResult result,
-                               Model model) {
-
-		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
-			if (!isCPFValido(dto.getCpf())) {
-				model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
-			}
-			model.addAttribute("pedidoDTO", dto); // preserva os campos preenchidos
-			return "pedido";
-		}
-
-		Pedido novoPedido = new Pedido();
-		novoPedido.setCliente(dto.getCliente());
-		novoPedido.setTelefone(dto.getTelefone());
-		novoPedido.setCpf(dto.getCpf());
-		novoPedido.setMaterial(dto.getMaterial());
-		novoPedido.setMedidas(dto.getMedidas());
-		novoPedido.setDescricao(dto.getDescricao());
-		novoPedido.setCriadoPor("CLIENTE");
-
-        service.adicionarPedido(novoPedido);
-
-        return "redirect:/";
-    }
-
-    // Valida CPF com cálculo dos dígitos verificadores
-    private boolean isCPFValido(String cpf) {
-        cpf = cpf.replaceAll("[^0-9]", "");
-
-        if (cpf.length() != 11) return false;
-        if (cpf.matches("(\\d)\\1{10}")) return false;
-
-        try {
-            int soma = 0, peso = 10;
-            for (int i = 0; i < 9; i++) {
-                soma += (cpf.charAt(i) - 48) * peso--;
-            }
-            int r = 11 - (soma % 11);
-            char dig10 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
-
-            soma = 0; peso = 11;
-            for (int i = 0; i < 10; i++) {
-                soma += (cpf.charAt(i) - 48) * peso--;
-            }
-            r = 11 - (soma % 11);
-            char dig11 = (r == 10 || r == 11) ? '0' : (char) (r + 48);
-
-            return (dig10 == cpf.charAt(9)) && (dig11 == cpf.charAt(10));
-        } catch (InputMismatchException e) {
-            return false;
-        }
-    }
-
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+	@GetMapping("/")
+	public String home(Model model) {
+		model.addAttribute("produtos", service.listarProdutos());
+		return "home";
+	}
 
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
@@ -135,35 +50,53 @@ public class SistemaController {
 		return "dashboard";
 	}
 
-    @GetMapping("/midia")
-    public String midia(Model model) {
-        return "midia";
-    }
+	// ── ORÇAMENTOS ───────────────────────────────────────
+	@GetMapping("/orcamentos")
+	public String orcamentos(Model model) {
+		var orcamentos = service.organizarOrcamentos();
+		model.addAttribute("orcamentos", service.listarOrcamentos());
+		model.addAttribute("orcamentosMeus", orcamentos.meusPedidos());
+		model.addAttribute("orcamentosClientesComOrcamento", orcamentos.clientesComOrcamento());
+		model.addAttribute("orcamentosClientesPendentes", orcamentos.clientesPendentes());
+		return "orcamentos";
+	}
 
-    @GetMapping("/midia/{slug}")
-    public String midiaCategoria(@PathVariable String slug, Model model) {
-        model.addAttribute("categoria", new com.fera.metalurgica.model.Categoria(
-                slug, "Descrição da categoria " + slug, "5MB · faz 2 dias"));
-        return "midia-categoria";
-    }
+	@PostMapping("/orcamentos/salvar")
+	public String salvarOrcamento(@RequestParam(required = false) Long pedidoId, @RequestParam String cliente,
+								  @RequestParam String telefone, @RequestParam String cpf, @RequestParam String material,
+								  @RequestParam(required = false) String medidas, @RequestParam String descricao,
+								  @RequestParam(required = false) List<String> itemNome, @RequestParam(required = false) List<String> itemQuantidade,
+								  @RequestParam(required = false) List<String> itemValorUnitario, @RequestParam(required = false) String frete,
+								  @RequestParam(required = false) String maoObra, @RequestParam(required = false) String observacoesAdmin,
+								  RedirectAttributes ra) {
+		service.salvarOrcamentoAdmin(pedidoId, cliente, telefone, cpf, material, medidas, descricao, itemNome, itemQuantidade, itemValorUnitario, frete, maoObra, observacoesAdmin);
+		ra.addFlashAttribute("orcamentoSalvo", "Orçamento processado!");
+		return "redirect:/orcamentos";
+	}
 
-    @GetMapping("/agenda")
-    public String agenda() {
-        return "agenda";
-    }
+	// ── MÍDIA E AGENDA ───────────────────────────────────
+	@GetMapping("/midia")
+	public String midia() { return "midia"; }
 
-    @GetMapping("/agenda/dados")
-    @ResponseBody
-    public List<Atividade> listarAgenda() {
-        return service.listarAtividades();
-    }
+	@GetMapping("/agenda")
+	public String agenda(Model model) {
+		return "agenda";
+	}
 
-    @PostMapping("/agenda")
-    @ResponseBody
-    public Atividade salvarAgenda(@RequestBody Atividade atividade) {
-        service.adicionarAtividade(atividade);
-        return atividade;
-    }
+	// Novos métodos para a API da Agenda (JSON)
+	@GetMapping("/agenda/dados")
+	@ResponseBody
+	public List<Atividade> listarDadosAgenda() {
+		return service.listarAtividades();
+	}
+
+	@PostMapping("/agenda")
+	@ResponseBody
+	public String salvarAgendamento(@RequestBody Atividade atividade) {
+		// Certifique-se de que no seu service existe o método salvarAtividade
+		service.salvarAtividade(atividade);
+		return "Sucesso";
+	}
 
 	// ── USUÁRIOS ─────────────────────────────────────────
 	@GetMapping("/usuarios")
@@ -175,12 +108,12 @@ public class SistemaController {
 		}
 
 		return "usuarios";
-    }
+	}
 
-    @PostMapping("/novo-usuario")
-    public String salvarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO dto,
-								BindingResult result,
-								RedirectAttributes redirectAttributes) {
+	@PostMapping("/novo-usuario")
+	public String salvarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO dto,
+	                            BindingResult result,
+	                            RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			FieldError fieldError = result.getFieldError();
@@ -215,23 +148,11 @@ public class SistemaController {
 
 
 		return "redirect:/usuarios";
-    }
+	}
 
-    @GetMapping("/catalogo")
-    public String catalogo(Model model) {
-        model.addAttribute("produtos", service.listarProdutos());
-        return "catalogo";
-    }
-
-    @GetMapping("/catalogo/adega")
-    public String adega(Model model) {
-    return "ambientes/adega";
-    }
-
-    @GetMapping("/catalogo/banheiro")
-    public String banheiro(Model model) {
-        return "ambientes/banheiro";
-    }
+	// ── CATÁLOGO DINÂMICO ────────────────────────────────
+	@GetMapping("/catalogo")
+	public String catalogo(Model model) { model.addAttribute("categorias", service.listarCategorias()); return "catalogo"; }
 
 	@GetMapping("/catalogo/ambiente/{slug}")
 	public String catalogoAmbiente(@PathVariable String slug, Model model) {
@@ -242,23 +163,38 @@ public class SistemaController {
 		return "catalogo-ambiente";
 	}
 
-    @GetMapping("/catalogo/closet")
-    public String closet(Model model) {
-        return "ambientes/closet";
-    }
+	// ── AUXILIARES ───────────────────────────────────────
+	private boolean isCPFValido(String cpf) {
+		cpf = cpf.replaceAll("[^0-9]", "");
+		if (cpf.length() != 11 || cpf.matches("(\\d)\\1{10}")) return false;
+		try {
+			int soma = 0, peso = 10;
+			for (int i = 0; i < 9; i++) soma += (cpf.charAt(i) - 48) * peso--;
+			int r = 11 - (soma % 11);
+			char d10 = (r >= 10) ? '0' : (char) (r + 48);
+			soma = 0; peso = 11;
+			for (int i = 0; i < 10; i++) soma += (cpf.charAt(i) - 48) * peso--;
+			r = 11 - (soma % 11);
+			char d11 = (r >= 10) ? '0' : (char) (r + 48);
+			return (d10 == cpf.charAt(9)) && (d11 == cpf.charAt(10));
+		} catch (Exception e) { return false; }
+	}
 
-    @GetMapping("/catalogo/cozinha")
-    public String cozinha(Model model) {
-        return "ambientes/cozinha";
-    }
+	private String limparCampo(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		String limpo = valor.trim();
+		return limpo.isBlank() ? null : limpo;
+	}
 
-	@PostMapping("/orcamentos/salvar")
-	public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
-	                              RedirectAttributes redirectAttributes) {
-
-		service.salvarOrcamentoAdmin(dto);
-
-		redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
-		return "redirect:/orcamentos";
+	private void preencherCamposPedido(RedirectAttributes ra, String cliente, String telefone, String cpf,
+									   String material, String medidas, String descricao) {
+		ra.addFlashAttribute("clientePreenchido", cliente);
+		ra.addFlashAttribute("telefonePreenchido", telefone);
+		ra.addFlashAttribute("cpfPreenchido", cpf);
+		ra.addFlashAttribute("materialPreenchido", material);
+		ra.addFlashAttribute("medidasPreenchido", medidas);
+		ra.addFlashAttribute("descricaoPreenchido", descricao);
 	}
 }

@@ -35,6 +35,49 @@ public class SistemaController {
 		return "home";
 	}
 
+	@GetMapping("/pedido")
+	public String pedido() {
+		return "pedido";
+	}
+
+	@PostMapping("/pedido")
+	public String salvarPedido(@RequestParam(required = false) String cliente,
+							   @RequestParam(required = false) String telefone,
+							   @RequestParam(required = false) String cpf,
+							   @RequestParam(required = false) String material,
+							   @RequestParam(required = false) String medidas,
+							   @RequestParam(required = false) String descricao,
+							   RedirectAttributes ra) {
+		String clienteLimpo = limparCampo(cliente);
+		String telefoneLimpo = limparCampo(telefone);
+		String cpfLimpo = limparCampo(cpf);
+		String materialLimpo = limparCampo(material);
+		String medidasLimpa = limparCampo(medidas);
+		String descricaoLimpa = limparCampo(descricao);
+
+		if (clienteLimpo == null || telefoneLimpo == null || cpfLimpo == null || materialLimpo == null || descricaoLimpa == null) {
+			preencherCamposPedido(ra, clienteLimpo, telefoneLimpo, cpfLimpo, materialLimpo, medidasLimpa, descricaoLimpa);
+			ra.addFlashAttribute("erro", "Preencha os campos obrigatórios antes de enviar.");
+			return "redirect:/pedido";
+		}
+
+		if (!isCPFValido(cpfLimpo)) {
+			preencherCamposPedido(ra, clienteLimpo, telefoneLimpo, cpfLimpo, materialLimpo, medidasLimpa, descricaoLimpa);
+			ra.addFlashAttribute("erroCpf", "CPF inválido!");
+			return "redirect:/pedido";
+		}
+
+		try {
+			service.adicionarPedido(new Pedido(null, clienteLimpo, telefoneLimpo, cpfLimpo, materialLimpo, medidasLimpa, descricaoLimpa, "CLIENTE"));
+			ra.addFlashAttribute("sucesso", "Orçamento enviado com sucesso! Em breve entraremos em contato.");
+		} catch (Exception ex) {
+			preencherCamposPedido(ra, clienteLimpo, telefoneLimpo, cpfLimpo, materialLimpo, medidasLimpa, descricaoLimpa);
+			ra.addFlashAttribute("erro", "Não foi possível enviar seu orçamento. Tente novamente.");
+		}
+
+		return "redirect:/pedido";
+	}
+
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
 		List<Pedido> todos = service.listarOrcamentos();
@@ -96,6 +139,15 @@ public class SistemaController {
 	@GetMapping("/usuarios")
 	public String usuarios(Model model) {
 		model.addAttribute("usuarios", service.listarUsuarios());
+		if (!model.containsAttribute("erro")) {
+			model.addAttribute("erro", null);
+		}
+		if (!model.containsAttribute("nomePreenchido")) {
+			model.addAttribute("nomePreenchido", null);
+			model.addAttribute("cargoPreenchido", null);
+			model.addAttribute("dataNascimentoPreenchido", null);
+			model.addAttribute("emailPreenchido", null);
+		}
 		return "usuarios";
 	}
 
@@ -138,5 +190,23 @@ public class SistemaController {
 			char d11 = (r >= 10) ? '0' : (char) (r + 48);
 			return (d10 == cpf.charAt(9)) && (d11 == cpf.charAt(10));
 		} catch (Exception e) { return false; }
+	}
+
+	private String limparCampo(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		String limpo = valor.trim();
+		return limpo.isBlank() ? null : limpo;
+	}
+
+	private void preencherCamposPedido(RedirectAttributes ra, String cliente, String telefone, String cpf,
+									   String material, String medidas, String descricao) {
+		ra.addFlashAttribute("clientePreenchido", cliente);
+		ra.addFlashAttribute("telefonePreenchido", telefone);
+		ra.addFlashAttribute("cpfPreenchido", cpf);
+		ra.addFlashAttribute("materialPreenchido", material);
+		ra.addFlashAttribute("medidasPreenchido", medidas);
+		ra.addFlashAttribute("descricaoPreenchido", descricao);
 	}
 }

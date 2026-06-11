@@ -1,20 +1,11 @@
 package com.fera.metalurgica.service;
 
-import com.fera.metalurgica.dto.ItemPedidoDTO;
-import com.fera.metalurgica.dto.OrcamentoAdminDTO;
 import com.fera.metalurgica.exception.BusinessException;
 import com.fera.metalurgica.exception.ResourceNotFoundException;
-import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.ItemPedido;
-import com.fera.metalurgica.model.Pedido;
-import com.fera.metalurgica.model.Produto;
-import com.fera.metalurgica.model.Usuario;
-import com.fera.metalurgica.repository.AtividadeRepository;
-import com.fera.metalurgica.repository.PedidoRepository;
-import com.fera.metalurgica.repository.ProdutoRepository;
-import com.fera.metalurgica.repository.UsuarioRepository;
+import com.fera.metalurgica.dto.*;
+import com.fera.metalurgica.model.*;
+import com.fera.metalurgica.repository.*;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,21 +18,66 @@ import java.util.List;
 @Service
 public class SistemaService {
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
-    @Autowired
-    private PedidoRepository pedidoRepository;
-    @Autowired
-    private AtividadeRepository atividadeRepository;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	private final ProdutoRepository produtoRepository;
+	private final PedidoRepository pedidoRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final CategoriaRepository categoriaRepository;
+	private final MidiaRepository midiaRepository;
+	private final AtividadeRepository atividadeRepository;
+	private final ZApiService zApiService;
+	private final PasswordEncoder passwordEncoder;
 
-    public record OrcamentosAgrupados(List<Pedido> meusPedidos,
-                                      List<Pedido> clientesComOrcamento,
-                                      List<Pedido> clientesPendentes) {
-    }
+	public SistemaService(ProdutoRepository produtoRepository,
+						  PedidoRepository pedidoRepository,
+						  UsuarioRepository usuarioRepository,
+						  CategoriaRepository categoriaRepository,
+						  MidiaRepository midiaRepository,
+						  AtividadeRepository atividadeRepository,
+						  ZApiService zApiService,
+						  PasswordEncoder passwordEncoder) {
+		this.produtoRepository = produtoRepository;
+		this.pedidoRepository = pedidoRepository;
+		this.usuarioRepository = usuarioRepository;
+		this.categoriaRepository = categoriaRepository;
+		this.midiaRepository = midiaRepository;
+		this.atividadeRepository = atividadeRepository;
+		this.zApiService = zApiService;
+		this.passwordEncoder = passwordEncoder;
+	}
+
+	@PostConstruct
+	public void garantirUsuarioAdmin() {
+		boolean adminExiste = false;
+
+		for (Usuario usuario : usuarioRepository.findAll()) {
+			if ("admin@fera.com".equalsIgnoreCase(usuario.getEmail())) {
+				adminExiste = true;
+				if (usuario.getSenha() == null || usuario.getSenha().isBlank()) {
+					usuario.setSenha(passwordEncoder.encode("1234"));
+					usuarioRepository.save(usuario);
+					continue;
+				}
+			}
+
+			String senhaAtual = usuario.getSenha();
+			if (senhaAtual != null && !senhaAtual.isBlank() && !senhaAtual.startsWith("$2")) {
+				usuario.setSenha(passwordEncoder.encode(senhaAtual));
+				usuarioRepository.save(usuario);
+			}
+		}
+
+		if (!adminExiste) {
+			Usuario admin = new Usuario(
+				null,
+				"Lucas Stibbe",
+				"Administrador",
+				LocalDate.of(2007, 1, 19),
+				"admin@fera.com",
+				passwordEncoder.encode("1234")
+			);
+			usuarioRepository.save(admin);
+		}
+	}
 
     @PostConstruct
     public void criarAtividadesIniciais() {
@@ -78,6 +114,7 @@ public class SistemaService {
         }
     }
 
+
 	// USUARIO
 
     public List<Usuario> listarUsuarios() {
@@ -105,6 +142,14 @@ public class SistemaService {
         return produtoRepository.findAll();
     }
 
+	public List<Categoria> listarCategorias() {
+		return categoriaRepository.findAll();
+	}
+
+	public List<Midia> listarMidiasPorCategoria(Long id) {
+		return midiaRepository.findByCategoriaId(id);
+	}
+
     public void adicionarProduto(Produto produto) {
 
 		if (produto.getNome() == null || produto.getNome().isBlank()) {
@@ -125,7 +170,7 @@ public class SistemaService {
         return pedidoRepository.findAllByOrderByDataCriacaoDesc();
     }
 
-    public OrcamentosAgrupados organizarOrcamentos() {
+    public OrcamentosDTO organizarOrcamentos() {
         List<Pedido> pedidos = listarOrcamentos();
         List<Pedido> meusPedidos = new ArrayList<>();
         List<Pedido> clientesComOrcamento = new ArrayList<>();
@@ -141,7 +186,7 @@ public class SistemaService {
             }
         }
 
-        return new OrcamentosAgrupados(meusPedidos, clientesComOrcamento, clientesPendentes);
+        return new OrcamentosDTO(meusPedidos, clientesComOrcamento, clientesPendentes);
     }
 
 
@@ -191,7 +236,7 @@ public class SistemaService {
 		return pedidoRepository.save(pedido);
 	}
 
-    public void adicionarPedido(Pedido pedido) {
+	public void adicionarPedido(Pedido pedido) {
 		if (pedido.getItens() != null) {
 			for (ItemPedido item : pedido.getItens()) {
 				item.setPedido(pedido);
@@ -200,9 +245,16 @@ public class SistemaService {
 		if (pedido.getCriadoPor() == null) {
 			pedido.setCriadoPor("CLIENTE");
 		}
-        pedido.calcularTotais();
-        pedidoRepository.save(pedido);
-    }
+		pedido.calcularTotais();
+		pedidoRepository.save(pedido);
+
+		// Notificação WhatsApp
+		zApiService.enviarNotificacaoOrcamento(
+			pedido.getCliente(),
+			pedido.getTelefone(),
+			pedido.getDescricao()
+		);
+	}
 
 	public Pedido buscarPedidoPorId(Long id) {
 		return pedidoRepository.findById(id)
@@ -211,6 +263,10 @@ public class SistemaService {
 
 
 	// ATIVIDADE
+
+	public void salvarAtividade(Atividade atividade) {
+		atividadeRepository.save(atividade);
+	}
 
     public List<Atividade> listarAtividades() {
         return atividadeRepository.findAllByOrderByIdDesc();

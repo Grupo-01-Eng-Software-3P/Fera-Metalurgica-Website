@@ -33,7 +33,10 @@ public class SecurityConfig {
                                 "/midia",
                                 "/orcamentos",
                                 "/orcamentos/**",
-                                "/usuarios"
+                                "/usuarios",
+								"novo-usuario",
+								"nova-imagem",
+								"/nova-categoria"
                                 ).authenticated()
                         .anyRequest().permitAll()
                 )

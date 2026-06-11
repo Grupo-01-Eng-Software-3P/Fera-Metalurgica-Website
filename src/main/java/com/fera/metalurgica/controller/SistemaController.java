@@ -1,12 +1,8 @@
 package com.fera.metalurgica.controller;
 
-import com.fera.metalurgica.dto.OrcamentoAdminDTO;
-import com.fera.metalurgica.dto.PedidoDTO;
-import com.fera.metalurgica.dto.UsuarioDTO;
+import com.fera.metalurgica.dto.*;
 import com.fera.metalurgica.exception.BusinessException;
-import com.fera.metalurgica.model.Atividade;
-import com.fera.metalurgica.model.Pedido;
-import com.fera.metalurgica.model.Usuario;
+import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.service.OrcamentoPdfService;
 import com.fera.metalurgica.service.SistemaService;
 import org.springframework.http.HttpHeaders;
@@ -129,12 +125,15 @@ public class SistemaController {
         return "login";
     }
 
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("orcamentos", service.listarOrcamentos());
-        model.addAttribute("atividades", service.listarAtividades());
-        return "dashboard";
-    }
+	@GetMapping("/dashboard")
+	public String dashboard(Model model) {
+		List<Pedido> todos = service.listarOrcamentos();
+		LocalDate agora = LocalDate.now();
+		model.addAttribute("orcamentosMes", todos.stream().filter(p -> p.getDataCriacao() != null && p.getDataCriacao().getMonthValue() == agora.getMonthValue()).count());
+		model.addAttribute("orcamentosConcluidos", todos.stream().filter(p -> p.getItens() != null && !p.getItens().isEmpty()).count());
+		model.addAttribute("atividades", service.listarAtividades());
+		return "dashboard";
+	}
 
     @GetMapping("/midia")
     public String midia(Model model) {
@@ -166,8 +165,9 @@ public class SistemaController {
         return atividade;
     }
 
-    @GetMapping("/usuarios")
-    public String usuarios(Model model) {
+	// ── USUÁRIOS ─────────────────────────────────────────
+	@GetMapping("/usuarios")
+	public String usuarios(Model model) {
 		model.addAttribute("usuarios", service.listarUsuarios());
 
 		if (!model.containsAttribute("usuarioDTO")) {
@@ -233,10 +233,14 @@ public class SistemaController {
         return "ambientes/banheiro";
     }
 
-    @GetMapping("/catalogo/biblioteca")
-    public String biblioteca(Model model) {
-        return "ambientes/biblioteca";
-    }
+	@GetMapping("/catalogo/ambiente/{slug}")
+	public String catalogoAmbiente(@PathVariable String slug, Model model) {
+		var categoria = service.listarCategorias().stream().filter(c -> c.getNome().equalsIgnoreCase(slug)).findFirst().orElse(null);
+		if (categoria == null) return "redirect:/catalogo";
+		model.addAttribute("categoria", categoria);
+		model.addAttribute("midias", service.listarMidiasPorCategoria(categoria.getId()));
+		return "catalogo-ambiente";
+	}
 
     @GetMapping("/catalogo/closet")
     public String closet(Model model) {

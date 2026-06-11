@@ -10,7 +10,6 @@
 </head>
 <body class="catalogo-page">
 
-<!-- NAV igual o home.html -->
 <nav class="top-nav top-nav--overlay">
     <div class="logo">
         <h2 style="color: var(--fera-orange);">FERA</h2>
@@ -24,49 +23,35 @@
     </div>
 </nav>
 
-<!-- SPLIT SCREEN PRINCIPAL -->
 <main class="catalogo-split">
 
-    <!-- PAINEL ESQUERDO: laranja -->
     <aside class="painel-esquerdo">
         <div class="painel-label">
             <span class="label-barra">|</span>
             <span class="label-texto">Ambientes</span>
         </div>
-        <!-- "F" grande decorativo no fundo -->
         <div class="letra-decorativa-wrapper">
             <span class="letra-decorativa">F</span>
         </div>
     </aside>
 
-    <!-- PAINEL DIREITO: foto de fundo + lista de ambientes -->
     <section class="painel-direito" style="background-image: url('/imagens/imagem.catalogo.jpg');">
         <div class="painel-direito-overlay"></div>
         <nav class="ambiente-lista">
 
-            <!-- Thymeleaf: lista dinâmica (quando ligar ao back-end) -->
-            <a th:each="ambiente : ${ambientes}"
-               th:href="@{'/catalogo/' + ${ambiente.slug}}"
-               th:text="${ambiente.nome}"
+            <a th:each="cat : ${categorias}"
+               th:href="@{'/catalogo/ambiente/' + ${cat.nome}}"
+               th:text="${cat.nome}"
                class="ambiente-item">
             </a>
 
-            <!-- MOCK estático — remova quando ligar ao back-end -->
-            <a href="/catalogo/adega"              class="ambiente-item">Adega</a>
-            <a href="/catalogo/banheiro"            class="ambiente-item">Banheiro</a>
-            <a href="/catalogo/biblioteca"          class="ambiente-item">Biblioteca</a>
-            <a href="/catalogo/closet"              class="ambiente-item">Closet</a>
-            <a href="/catalogo/cozinha"             class="ambiente-item">Cozinha</a>
-            <a href="/catalogo/corporativo"         class="ambiente-item">Corporativo</a>
-            <a href="/catalogo/dormitorio"          class="ambiente-item">Dormitório</a>
-            <a href="/catalogo/espacos-comerciais"  class="ambiente-item">Espaços Comerciais</a>
-            <a href="/catalogo/lavanderia"          class="ambiente-item">Lavanderia</a>
-            <a href="/catalogo/studio"              class="ambiente-item">Studio</a>
-            <a href="/catalogo/suite"               class="ambiente-item">Suíte</a>
+            <span th:if="${categorias == null or #lists.isEmpty(categorias)}"
+                  style="color: rgba(255,255,255,0.6); font-size: 14px; font-style: italic;">
+                Nenhum ambiente cadastrado ainda.
+            </span>
 
         </nav>
     </section>
-
 
 </main>
 

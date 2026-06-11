@@ -25,7 +25,7 @@
 
         <div class="sidebar-user">
             <i class="fas fa-user-circle"></i>
-            Lucas Stibbe
+            <span th:text="${#authentication.name}">Nome do Usuário</span>
             <form th:action="@{/logout}" method="POST">
                 <input type="hidden"
                        th:name="${_csrf.parameterName}"

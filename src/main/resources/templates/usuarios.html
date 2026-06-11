@@ -23,7 +23,18 @@
             <li class="active"><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
 
-        <div class="sidebar-user"><i class="fas fa-user-circle"></i> Lucas Stibbe <form th:action="@{/logout}" method="POST"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit"><i class="fas fa-sign-out-alt"></i> Sair</button></form></div>
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i>
+            <span th:text="${#authentication.name}">Nome do Usuário</span>
+            <form th:action="@{/logout}" method="POST">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button type="submit">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </form>
+        </div>
     </aside>
 
     <main class="main-content">
@@ -83,7 +94,7 @@
             <div class="input-group">
                 <label>Nome:</label>
                 <input type="text" name="nome" class="input-gray" required
-                    th:value="${nomePreenchido}">
+                       th:value="${nomePreenchido}">
             </div>
 
             <div class="input-group">
@@ -136,61 +147,9 @@
     window.onclick = function(event) {
         var modal = document.getElementById("modalCadastroUsuario");
         if (event.target == modal) {
-            modal.style.display = "none";
+            fecharModalUsuario();
         }
-    }
-
-    function filtrarUsuarios() {
-        var input = document.getElementById("inputPesquisa");
-        var filtro = input.value.toLowerCase();
-
-        var tabela = document.querySelector(".users-table tbody");
-        var linhas = tabela.getElementsByTagName("tr");
-
-        for (var i = 0; i < linhas.length; i++) {
-            var colunaNome = linhas[i].getElementsByTagName("td")[1];
-            var colunaCargo = linhas[i].getElementsByTagName("td")[2];
-
-            if (colunaNome || colunaCargo) {
-                var textoNome = colunaNome.textContent || colunaNome.innerText;
-                var textoCargo = colunaCargo.textContent || colunaCargo.innerText;
-
-                if (textoNome.toLowerCase().indexOf(filtro) > -1 || textoCargo.toLowerCase().indexOf(filtro) > -1) {
-                    linhas[i].style.display = "";
-                } else {
-                    linhas[i].style.display = "none";
-                }
-            }
-        }
-    }
-
-    window.onload = function () {
-        // Some o toast após 3.5s
-        const toast = document.getElementById("toastSucesso");
-        if (toast) {
-            setTimeout(() => {
-                toast.style.transition = "opacity 0.5s";
-                toast.style.opacity = "0";
-                setTimeout(() => toast.remove(), 500);
-            }, 3500);
-        }
-
-        // Reabre modal se houve erro
-        const temErro = document.body.getAttribute("data-erro") === "true";
-        if (temErro) {
-            document.getElementById("modalCadastroUsuario").style.display = "flex";
-        }
-
-        // Fecha modal ao clicar fora
-        const modal = document.getElementById("modalCadastroUsuario");
-        modal.addEventListener("click", function (event) {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        });
     }
 </script>
-
 </body>
 </html>
-

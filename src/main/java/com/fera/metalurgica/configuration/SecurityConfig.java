@@ -17,14 +17,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/login",
+								"/login/**",
                                 "/css/**",
-                                "/",
                                 "/js/**",
                                 "/imagens/**",
+                                "/",
                                 "/orcamento",
                                 "/catalogo",
+								"/catalogo/**",
                                 "/pedido"
-
                         ).permitAll()
                         .requestMatchers(
                                 "/dashboard",
@@ -34,15 +35,16 @@ public class SecurityConfig {
                                 "/orcamentos",
                                 "/orcamentos/**",
                                 "/usuarios",
-								"novo-usuario",
-								"nova-imagem",
+								"/novo-usuario",
+								"/nova-imagem",
 								"/nova-categoria"
                                 ).authenticated()
-                        .anyRequest().permitAll()
+                        		.anyRequest().permitAll()
                 )
 
                 .formLogin(form -> form
                         .loginPage("/login")
+						.loginProcessingUrl("/login-process")
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .defaultSuccessUrl("/dashboard", false)
@@ -50,8 +52,10 @@ public class SecurityConfig {
                 )
 
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
-                );
+						.logoutUrl("/logout")
+						.logoutSuccessUrl("/login?logout")
+						.permitAll()
+				);
 
         return http.build();
     }

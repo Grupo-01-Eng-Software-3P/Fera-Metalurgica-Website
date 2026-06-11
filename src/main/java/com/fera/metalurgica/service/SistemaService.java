@@ -47,18 +47,9 @@ public class SistemaService {
 
 	@PostConstruct
 	public void garantirUsuarioAdmin() {
-		boolean adminExiste = false;
+		boolean adminExiste = usuarioRepository.findByEmailIgnoreCase("admin@fera.com").isPresent();
 
 		for (Usuario usuario : usuarioRepository.findAll()) {
-			if ("admin@fera.com".equalsIgnoreCase(usuario.getEmail())) {
-				adminExiste = true;
-				if (usuario.getSenha() == null || usuario.getSenha().isBlank()) {
-					usuario.setSenha(passwordEncoder.encode("1234"));
-					usuarioRepository.save(usuario);
-					continue;
-				}
-			}
-
 			String senhaAtual = usuario.getSenha();
 			if (senhaAtual != null && !senhaAtual.isBlank() && !senhaAtual.startsWith("$2")) {
 				usuario.setSenha(passwordEncoder.encode(senhaAtual));
@@ -68,9 +59,7 @@ public class SistemaService {
 
 		if (!adminExiste) {
 			Usuario admin = new Usuario(
-				null,
-				"Lucas Stibbe",
-				"Administrador",
+				null, "Lucas Stibbe", "Administrador",
 				LocalDate.of(2007, 1, 19),
 				"admin@fera.com",
 				passwordEncoder.encode("1234")
@@ -101,18 +90,6 @@ public class SistemaService {
         }
     }
 
-    @PostConstruct
-    public void criarAdmin() {
-        if (usuarioRepository.findByEmail("admin@fera.com") == null) {
-            Usuario admin = new Usuario();
-            admin.setNome("Lucas Stibbe");
-            admin.setCargo("Administrador");
-            admin.setDataNascimento(LocalDate.of(2007, 1, 19));
-            admin.setEmail("admin@fera.com");
-            admin.setSenha(passwordEncoder.encode("1234"));
-            usuarioRepository.save(admin);
-        }
-    }
 
 
 	// USUARIO
@@ -123,7 +100,7 @@ public class SistemaService {
 
     public void adicionarUsuario(Usuario usuario) {
 
-		if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
+		if (usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()).isPresent()) {
 			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
 		}
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));

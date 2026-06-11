@@ -61,16 +61,59 @@ public class SistemaController {
 		return "orcamentos";
 	}
 
+	@PostMapping("/pedido")
+	public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
+	                           BindingResult result,
+	                           Model model) {
+
+		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
+			if (!isCPFValido(dto.getCpf())) {
+				model.addAttribute("erroCpf", "CPF Inválido. Por favor, verifique os números digitados.");
+			}
+			model.addAttribute("pedidoDTO", dto);
+			return "pedido";
+		}
+
+		Pedido novoPedido = new Pedido();
+		novoPedido.setCliente(dto.getCliente());
+		novoPedido.setTelefone(dto.getTelefone());
+		novoPedido.setCpf(dto.getCpf());
+		novoPedido.setMaterial(dto.getMaterial());
+		novoPedido.setMedidas(dto.getMedidas());
+		novoPedido.setDescricao(dto.getDescricao());
+		novoPedido.setCriadoPor("CLIENTE");
+
+		service.adicionarPedido(novoPedido);
+
+		return "redirect:/";
+	}
+
+	@GetMapping("/pedido")
+	public String pedidoForm(Model model) {
+		model.addAttribute("pedidoDTO", new PedidoDTO()); // inicializa vazio
+		return "pedido";
+	}
+
+	@GetMapping("/orcamentos/{id}/pdf")
+	public ResponseEntity<byte[]> baixarPdfOrcamento(@PathVariable Long id) {
+		Pedido pedido = service.buscarPedidoPorId(id);
+		byte[] pdf = pdfService.gerarPdf(pedido);
+		String nomeArquivo = "orcamento-" + id + ".pdf";
+
+		return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_PDF)
+			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nomeArquivo + "\"")
+			.contentLength(pdf.length)
+			.body(pdf);
+	}
+
 	@PostMapping("/orcamentos/salvar")
-	public String salvarOrcamento(@RequestParam(required = false) Long pedidoId, @RequestParam String cliente,
-								  @RequestParam String telefone, @RequestParam String cpf, @RequestParam String material,
-								  @RequestParam(required = false) String medidas, @RequestParam String descricao,
-								  @RequestParam(required = false) List<String> itemNome, @RequestParam(required = false) List<String> itemQuantidade,
-								  @RequestParam(required = false) List<String> itemValorUnitario, @RequestParam(required = false) String frete,
-								  @RequestParam(required = false) String maoObra, @RequestParam(required = false) String observacoesAdmin,
-								  RedirectAttributes ra) {
-		service.salvarOrcamentoAdmin(pedidoId, cliente, telefone, cpf, material, medidas, descricao, itemNome, itemQuantidade, itemValorUnitario, frete, maoObra, observacoesAdmin);
-		ra.addFlashAttribute("orcamentoSalvo", "Orçamento processado!");
+	public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
+	                              RedirectAttributes redirectAttributes) {
+
+		service.salvarOrcamentoAdmin(dto);
+
+		redirectAttributes.addFlashAttribute("orcamentoSalvo", "Orçamento salvo com sucesso.");
 		return "redirect:/orcamentos";
 	}
 
@@ -93,7 +136,6 @@ public class SistemaController {
 	@PostMapping("/agenda")
 	@ResponseBody
 	public String salvarAgendamento(@RequestBody Atividade atividade) {
-		// Certifique-se de que no seu service existe o método salvarAtividade
 		service.salvarAtividade(atividade);
 		return "Sucesso";
 	}
@@ -144,9 +186,9 @@ public class SistemaController {
 			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
 			redirectAttributes.addFlashAttribute("erroCampo", "email");
 			redirectAttributes.addFlashAttribute("usuarioDTO", dto);
+			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.usuarioDTO",
+				new org.springframework.validation.BeanPropertyBindingResult(dto, "usuarioDTO"));
 		}
-
-
 		return "redirect:/usuarios";
 	}
 
@@ -198,3 +240,4 @@ public class SistemaController {
 		ra.addFlashAttribute("descricaoPreenchido", descricao);
 	}
 }
+

@@ -25,7 +25,7 @@ public class Midia {
 
 	@ManyToOne
 	@JoinColumn(name = "categoria_id")
-	private CategoriaEntity categoria;
+	private Categoria categoria;
 
 	@ManyToOne
 	@JoinColumn(name = "usuario_id")
@@ -49,8 +49,9 @@ public class Midia {
 	public String getTipo() { return tipo; }
 	public void setTipo(String tipo) { this.tipo = tipo; }
 	public LocalDateTime getDataUpload() { return dataUpload; }
-	public CategoriaEntity getCategoria() { return categoria; }
-	public void setCategoria(CategoriaEntity categoria) { this.categoria = categoria; }
+	public void setDataUpload(LocalDateTime dataUpload) { this.dataUpload = dataUpload; }
+	public Categoria getCategoria() { return categoria; }
+	public void setCategoria(Categoria categoria) { this.categoria = categoria; }
 	public Usuario getUsuario() { return usuario; }
 	public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 }

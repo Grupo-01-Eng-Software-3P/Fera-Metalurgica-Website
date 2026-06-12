@@ -6,14 +6,19 @@ import com.fera.metalurgica.dto.*;
 import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.repository.*;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
+import java.nio.file.*;
+import java.io.IOException;
 
 @Service
 public class SistemaService {
@@ -43,6 +48,21 @@ public class SistemaService {
 		this.atividadeRepository = atividadeRepository;
 		this.zApiService = zApiService;
 		this.passwordEncoder = passwordEncoder;
+	}
+
+	@PostConstruct
+	public void corrigirSlugsCategorias() {
+		for (Categoria categoria : categoriaRepository.findAll()) {
+			if (categoria.getSlug() == null || categoria.getSlug().isBlank()) {
+				String slug = categoria.getNome()
+					.toLowerCase()
+					.replaceAll("[^a-z0-9\\s]", "")
+					.trim()
+					.replaceAll("\\s+", "-");
+				categoria.setSlug(slug);
+				categoriaRepository.save(categoria);
+			}
+		}
 	}
 
 	@PostConstruct
@@ -117,22 +137,6 @@ public class SistemaService {
 
     public List<Produto> listarProdutos() {
         return produtoRepository.findAll();
-    }
-
-	public List<Categoria> listarCategorias() {
-		return categoriaRepository.findAll();
-	}
-
-	public List<Midia> listarMidiasPorCategoria(Long id) {
-		return midiaRepository.findByCategoriaId(id);
-	}
-
-    public void adicionarProduto(Produto produto) {
-
-		if (produto.getNome() == null || produto.getNome().isBlank()) {
-			throw new BusinessException("O nome do produto não pode ser vazio.");
-		}
-		produtoRepository.save(produto);
     }
 
 	public Produto buscarProdutoPorId(Long id) {
@@ -326,4 +330,72 @@ public class SistemaService {
             return BigDecimal.ZERO;
         }
     }
+
+
+	// MIDIA / CATEGORIA
+
+	public List<Categoria> listarCategorias() {
+		return categoriaRepository.findAll();
+	}
+
+	public Categoria adicionarCategoria(CategoriaDTO dto) {
+		if (categoriaRepository.findByNomeIgnoreCase(dto.getNome()).isPresent()) {
+			throw new BusinessException("Já existe uma categoria com o nome: " + dto.getNome());
+		}
+
+		String slug = dto.getNome()
+			.toLowerCase()
+			.replaceAll("[^a-z0-9\\s]", "")
+			.trim()
+			.replaceAll("\\s+", "-");
+
+		Categoria categoria = new Categoria(null, dto.getNome(), dto.getDescricao(), null);
+		categoria.setSlug(slug);
+		return categoriaRepository.save(categoria);
+	}
+
+	public List<Midia> listarMidiasPorCategoria(Long id) {
+		return midiaRepository.findByCategoriaId(id);
+	}
+
+	public void adicionarProduto(Produto produto) {
+
+		if (produto.getNome() == null || produto.getNome().isBlank()) {
+			throw new BusinessException("O nome do produto não pode ser vazio.");
+		}
+		produtoRepository.save(produto);
+	}
+
+	@Value("${upload.dir}")
+	private String uploadDir;
+
+	public void adicionarImagem(String nome, String descricao, Long categoriaId, MultipartFile arquivo) throws IOException {
+		Categoria categoria = categoriaRepository.findById(categoriaId)
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + categoriaId));
+
+		String nomeArquivo = UUID.randomUUID() + "_" + arquivo.getOriginalFilename();
+
+		Path destino = Paths.get(uploadDir + "/" + nomeArquivo);
+		Files.createDirectories(destino.getParent());
+		Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+
+		try {
+			Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new BusinessException("Erro ao salvar o arquivo: " + e.getMessage());
+		}
+
+		Midia midia = new Midia();
+		midia.setNome(nome);
+		midia.setDescricao(descricao);
+		midia.setCaminho("/imagens/" + nomeArquivo);
+		midia.setTipo(arquivo.getContentType());
+		midia.setCategoria(categoria);
+		midiaRepository.save(midia);
+	}
+
+	public Categoria buscarCategoriaPorId(Long id) {
+		return categoriaRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com id: " + id));
+	}
 }

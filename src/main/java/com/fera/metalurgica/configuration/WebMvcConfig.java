@@ -10,15 +10,13 @@ import java.nio.file.Paths;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-	@Value("${upload.dir:uploads/}")
+	@Value("${upload.dir}")
 	private String uploadDir;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		// Serve os arquivos da pasta de uploads como recursos estáticos em /uploads/**
-		String caminho = Paths.get(uploadDir).toAbsolutePath().normalize().toUri().toString();
-
-		registry.addResourceHandler("/uploads/**")
-			.addResourceLocations(caminho);
+		String caminho = Paths.get(uploadDir).toAbsolutePath().toString();
+		registry.addResourceHandler("/imagens/**")
+			.addResourceLocations("file:" + caminho + "/");
 	}
 }

@@ -49,67 +49,49 @@
 
         <div class="categorias-lista" id="categoriaLista">
 
-            <a href="/midia/adega" class="categoria-item">
+            <a th:each="categoria : ${categorias}"
+               th:href="@{/midia/{slug}(slug=${categoria.nome})}"
+               class="categoria-item">
+
                 <div class="categoria-carrossel-wrapper">
-                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+
                     <div class="carrossel-track">
-                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Adega 1">
-                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Adega 2">
-                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Adega 3">
+                        <!-- Se não tiver mídias, mostra placeholder -->
+                        <th:block th:if="${categoria.midias == null or categoria.midias.isEmpty()}">
+                            <img src="/imagens/placeholder.png" alt="Sem imagens">
+                        </th:block>
+
+                        <th:block th:unless="${categoria.midias == null or categoria.midias.isEmpty()}">
+                            <img th:each="midia : ${categoria.midias}"
+                                 th:src="${midia.caminho}"
+                                 th:alt="${midia.nome}">
+                        </th:block>
                     </div>
-                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
+
+                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
+
                 <div class="categoria-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Adega</span>
-                    <span class="categoria-meta">5MB · faz 2 dias</span>
+            <span class="categoria-nome">
+                <i class="fas fa-pencil-alt"></i>
+                <span th:text="${categoria.nome}">Nome</span>
+            </span>
+                    <span class="categoria-meta"
+                          th:text="${categoria.midias != null ? categoria.midias.size() + ' arquivo(s)' : '0 arquivo(s)'}">
+            </span>
                 </div>
             </a>
 
-            <a href="/midia/banheiro" class="categoria-item">
-                <div class="categoria-carrossel-wrapper">
-                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                    <div class="carrossel-track">
-                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Banheiro 1">
-                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Banheiro 2">
-                    </div>
-                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div class="categoria-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Banheiro</span>
-                    <span class="categoria-meta">3MB · faz 2 dias</span>
-                </div>
-            </a>
-
-            <a href="/midia/biblioteca" class="categoria-item">
-                <div class="categoria-carrossel-wrapper">
-                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                    <div class="carrossel-track">
-                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Biblioteca 1">
-                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Biblioteca 2">
-                        <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Biblioteca 3">
-                    </div>
-                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div class="categoria-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Biblioteca</span>
-                    <span class="categoria-meta">8MB · faz 2 dias</span>
-                </div>
-            </a>
-
-            <a href="/midia/closet" class="categoria-item">
-                <div class="categoria-carrossel-wrapper">
-                    <button class="carrossel-btn esq" onclick="rolar(event, this, -1)"><i class="fas fa-chevron-left"></i></button>
-                    <div class="carrossel-track">
-                        <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Closet 1">
-                        <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Closet 2">
-                    </div>
-                    <button class="carrossel-btn dir" onclick="rolar(event, this, 1)"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div class="categoria-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> Closet</span>
-                    <span class="categoria-meta">6MB · faz 2 dias</span>
-                </div>
-            </a>
+            <!-- Mensagem se não houver categorias -->
+            <p th:if="${categorias == null or categorias.isEmpty()}"
+               style="color: var(--text-muted); padding: 20px;">
+                Nenhuma categoria cadastrada ainda.
+            </p>
 
         </div>
     </main>
@@ -120,6 +102,7 @@
     <div class="modal-form-content">
         <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Nova Categoria</h3>
         <form action="/nova-categoria" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="input-group">
                 <label>Nome da Categoria:</label>
                 <input type="text" name="nome" class="input-field" placeholder="Ex: Sala de Estar" required>

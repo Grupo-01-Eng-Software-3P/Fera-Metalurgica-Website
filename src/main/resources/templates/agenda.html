@@ -10,6 +10,9 @@
 </head>
 <body>
 
+<input type="hidden" id="csrfToken"  th:value="${_csrf.token}">
+<input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
@@ -37,22 +40,27 @@
         </div>
 
         <div class="agenda-wrapper">
+
             <div class="calendar-section">
                 <div class="calendar-header-nav">
                     <i class="fas fa-chevron-left nav-seta" onclick="mudarMes(-1)"></i>
                     <h2 id="mesAnoAtual"></h2>
                     <i class="fas fa-chevron-right nav-seta" onclick="mudarMes(1)"></i>
                 </div>
+
                 <div class="weekdays">
                     <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                 </div>
+
                 <div class="days-grid" id="diasCalendario"></div>
             </div>
 
             <div class="appointments-section">
-                <h3 id="tituloDiaCompromisso"></h3>
-                <p id="subtituloDia" style="color:#888; margin-bottom:25px; font-weight:500;"></p>
-                <ul class="compromissos-list" id="listaCompromissos"></ul>
+                <h3 id="tituloDiaCompromisso">14 de Maio</h3>
+                <p id="subtituloDia" style="color: #888; margin-bottom: 25px; font-weight: 500;">Quinta-feira</p>
+
+                <ul class="compromissos-list" id="listaCompromissos">
+                </ul>
             </div>
         </div>
     </main>
@@ -64,19 +72,22 @@
             <h3><i class="fas fa-calendar-plus"></i> Novo Agendamento</h3>
             <span class="fechar-modal-x" onclick="fecharModalAgendamento()">&times;</span>
         </div>
+
         <form id="formAgendamento" onsubmit="salvarAgendamento(event)">
             <div class="form-row">
                 <div class="input-group">
-                    <label>Título</label>
+                    <label>Título do Compromisso</label>
                     <input type="text" id="inputTitulo" class="input-premium" placeholder="Ex: Entrega de Móvel Industrial" required>
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="input-group">
-                    <label>Descrição</label>
-                    <textarea id="inputDescricao" class="input-premium" rows="2" placeholder="Detalhes..."></textarea>
+                    <label>Descrição / Observações</label>
+                    <textarea id="inputDescricao" class="input-premium" rows="2" placeholder="Detalhes extras sobre o serviço..."></textarea>
                 </div>
             </div>
+
             <div class="form-row split">
                 <div class="input-group">
                     <label>Data</label>
@@ -84,19 +95,21 @@
                 </div>
                 <div class="input-group">
                     <label>Horário</label>
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="time" id="inputHoraInicio" class="input-premium" required>
-                        <span style="font-weight:bold; color:#666;">até</span>
+                        <span style="font-weight: bold; color: #666;">até</span>
                         <input type="time" id="inputHoraFim" class="input-premium" required>
                     </div>
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="input-group">
                     <label>Local ou Evento</label>
-                    <input type="text" id="inputEvento" class="input-premium" placeholder="Ex: Galpão A" required>
+                    <input type="text" id="inputEvento" class="input-premium" placeholder="Ex: Galpão A ou Endereço do Cliente" required>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" onclick="fecharModalAgendamento()">Cancelar</button>
                 <button type="submit" class="btn-salvar">Confirmar Agendamento</button>
@@ -111,17 +124,21 @@
             <h3><i class="fas fa-calendar-check"></i> Detalhes do Compromisso</h3>
             <span class="fechar-modal-x" onclick="fecharDetalhes()">&times;</span>
         </div>
-        <div style="padding:30px 40px;">
-            <h4 id="detalheTitulo" style="color:var(--fera-orange); font-size:22px; margin-bottom:20px;"></h4>
-            <div style="display:flex; flex-direction:column; gap:15px; font-size:16px;">
-                <p><strong><i class="fas fa-clock" style="color:#A09A92; width:25px;"></i> Horário:</strong> <span id="detalheHorario"></span></p>
-                <p><strong><i class="fas fa-calendar-day" style="color:#A09A92; width:25px;"></i> Data:</strong> <span id="detalheData"></span></p>
-                <p><strong><i class="fas fa-map-marker-alt" style="color:#A09A92; width:25px;"></i> Local:</strong> <span id="detalheEvento"></span></p>
-                <div style="background:#F8F8F8; padding:15px; border-radius:10px;">
-                    <strong style="display:block; margin-bottom:5px;"><i class="fas fa-align-left" style="color:#A09A92;"></i> Descrição:</strong>
-                    <span id="detalheDescricao" style="color:#666; font-size:15px; line-height:1.5;"></span>
+
+        <div style="padding: 30px 40px;">
+            <h4 id="detalheTitulo" style="color: var(--fera-orange); font-size: 22px; margin-bottom: 20px;">Título do Evento</h4>
+
+            <div style="display: flex; flex-direction: column; gap: 15px; font-size: 16px; color: var(--text-dark);">
+                <p><strong><i class="fas fa-clock" style="color: #A09A92; width: 25px;"></i> Horário:</strong> <span id="detalheHorario"></span></p>
+                <p><strong><i class="fas fa-calendar-day" style="color: #A09A92; width: 25px;"></i> Data:</strong> <span id="detalheData"></span></p>
+                <p><strong><i class="fas fa-map-marker-alt" style="color: #A09A92; width: 25px;"></i> Local:</strong> <span id="detalheEvento"></span></p>
+
+                <div style="background-color: #F8F8F8; padding: 15px; border-radius: 10px; margin-top: 10px;">
+                    <strong style="display: block; margin-bottom: 5px;"><i class="fas fa-align-left" style="color: #A09A92;"></i> Descrição:</strong>
+                    <span id="detalheDescricao" style="color: #666; font-size: 15px; line-height: 1.5;"></span>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn-salvar" onclick="fecharDetalhes()">Fechar</button>
             </div>
@@ -131,27 +148,46 @@
 
 <script>
     let compromissos = [];
+
     let dataAtual = new Date();
     let mesAtual = dataAtual.getMonth();
     let anoAtual = dataAtual.getFullYear();
     let diaSelecionado = dataAtual.getDate();
 
-    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-    const diasSemana = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
+    const diasSemana = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira",
+        "Quinta-feira","Sexta-feira","Sábado"];
+
+
+    // =====================
+    // HELPER — evita bug de UTC
+    // =====================
     function parsarData(dataStr) {
         const [ano, mes, dia] = dataStr.split("-").map(Number);
         return new Date(ano, mes - 1, dia);
     }
 
+
+    // =====================
+    // CARREGAR DO BACKEND
+    // =====================
     async function carregarAgenda() {
         const res = await fetch("/agenda/dados");
         compromissos = await res.json();
         renderizarCalendario();
     }
 
+
+    // =====================
+    // CALENDÁRIO
+    // =====================
     function renderizarCalendario() {
-        document.getElementById("mesAnoAtual").innerText = `${meses[mesAtual]} ${anoAtual}`;
+
+        document.getElementById("mesAnoAtual").innerText =
+            `${meses[mesAtual]} ${anoAtual}`;
+
         const grid = document.getElementById("diasCalendario");
         grid.innerHTML = "";
 
@@ -164,42 +200,72 @@
         }
 
         for (let i = 1; i <= ultimoDia; i++) {
+
             let classe = (i === diaSelecionado) ? "day active" : "day";
+
             let tem = compromissos.some(c => {
                 const d = parsarData(c.data);
-                return d.getDate() === i && d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+                return d.getDate() === i &&
+                    d.getMonth() === mesAtual &&
+                    d.getFullYear() === anoAtual;
             });
+
             let dot = tem ? `<div style="width:6px;height:6px;background:var(--fera-orange);border-radius:50%;position:absolute;bottom:3px;"></div>` : "";
-            grid.innerHTML += `<div class="${classe}" style="position:relative;" onclick="selecionarDia(${i})">${i}${dot}</div>`;
+
+            grid.innerHTML += `
+                <div class="${classe}" style="position:relative;" onclick="selecionarDia(${i})">
+                    ${i}
+                    ${dot}
+                </div>
+            `;
         }
 
         atualizarPainel(diaSelecionado);
     }
 
+
+    // =====================
+    // SELECIONAR DIA
+    // =====================
     function selecionarDia(dia) {
         diaSelecionado = dia;
         renderizarCalendario();
     }
 
-    function mudarMes(dir) {
-        mesAtual += dir;
+
+    // =====================
+    // MUDAR MÊS
+    // =====================
+    function mudarMes(direcao) {
+        mesAtual += direcao;
         if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
         if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
         diaSelecionado = 1;
         renderizarCalendario();
     }
 
+
+    // =====================
+    // PAINEL LATERAL
+    // =====================
     function atualizarPainel(dia) {
+
         const data = new Date(anoAtual, mesAtual, dia);
-        document.getElementById("tituloDiaCompromisso").innerText = `${dia} de ${meses[mesAtual]}`;
-        document.getElementById("subtituloDia").innerText = diasSemana[data.getDay()];
+
+        document.getElementById("tituloDiaCompromisso").innerText =
+            `${dia} de ${meses[mesAtual]}`;
+
+        document.getElementById("subtituloDia").innerText =
+            diasSemana[data.getDay()];
 
         const lista = document.getElementById("listaCompromissos");
         lista.innerHTML = "";
 
-        const doDia = compromissos.filter(c => {
+        let doDia = compromissos.filter(c => {
             const d = parsarData(c.data);
-            return d.getDate() === dia && d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+            return d.getDate() === dia &&
+                d.getMonth() === mesAtual &&
+                d.getFullYear() === anoAtual;
         });
 
         if (doDia.length === 0) {
@@ -209,52 +275,97 @@
 
         doDia.forEach(c => {
             lista.innerHTML += `
-                <li class="compromisso-card" onclick='abrirDetalhes(${JSON.stringify(c).replace(/"/g, "&quot;")})'>
-                    <div><strong>${c.titulo}</strong><br><small>${c.horario}</small><br><small>${c.evento}</small></div>
-                </li>`;
+                <li class="compromisso-card" onclick="abrirDetalhes(${JSON.stringify(c).replace(/"/g, '&quot;')})">
+                    <div>
+                        <strong>${c.titulo}</strong><br>
+                        <small>${c.horario}</small><br>
+                        <small>${c.evento}</small>
+                    </div>
+                </li>
+            `;
         });
     }
 
+
+    // =====================
+    // DETALHES DO COMPROMISSO
+    // =====================
     function abrirDetalhes(c) {
-        document.getElementById("detalheTitulo").innerText  = c.titulo;
-        document.getElementById("detalheHorario").innerText = c.horario;
-        document.getElementById("detalheEvento").innerText  = c.evento;
+        document.getElementById("detalheTitulo").innerText   = c.titulo;
+        document.getElementById("detalheHorario").innerText  = c.horario;
+        document.getElementById("detalheEvento").innerText   = c.evento;
         document.getElementById("detalheDescricao").innerText = c.descricao || "—";
+
         const d = parsarData(c.data);
-        document.getElementById("detalheData").innerText = `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+        document.getElementById("detalheData").innerText =
+            `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+
         document.getElementById("modalDetalhes").style.display = "flex";
     }
 
-    function fecharDetalhes() { document.getElementById("modalDetalhes").style.display = "none"; }
-
-    async function salvarAgendamento(event) {
-        event.preventDefault();
-        await fetch("/agenda", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                titulo:   document.getElementById("inputTitulo").value,
-                descricao: document.getElementById("inputDescricao").value,
-                evento:   document.getElementById("inputEvento").value,
-                data:     document.getElementById("inputData").value,
-                horario:  document.getElementById("inputHoraInicio").value + " - " + document.getElementById("inputHoraFim").value
-            })
-        });
-        fecharModalAgendamento();
-        document.getElementById("formAgendamento").reset();
-        await carregarAgenda();
+    function fecharDetalhes() {
+        document.getElementById("modalDetalhes").style.display = "none";
     }
 
-    function abrirModalAgendamento()  { document.getElementById("modalAgendamento").style.display = "flex"; }
-    function fecharModalAgendamento() { document.getElementById("modalAgendamento").style.display = "none"; }
+
+    // =====================
+    // SALVAR NO BACKEND
+    // =====================
+    function salvarAgendamento(event) {
+        event.preventDefault();
+
+        const titulo    = document.getElementById("inputTitulo").value;
+        const descricao = document.getElementById("inputDescricao").value;
+        const evento    = document.getElementById("inputEvento").value;
+        const data      = document.getElementById("inputData").value;
+        const h1        = document.getElementById("inputHoraInicio").value;
+        const h2        = document.getElementById("inputHoraFim").value;
+
+        const csrfToken  = document.getElementById("csrfToken").value;
+        const csrfHeader = document.getElementById("csrfHeader").value;
+
+        fetch("/agenda", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken
+                },
+            body: JSON.stringify({
+                titulo,
+                descricao,
+                evento,
+                data,
+                horario: `${h1} - ${h2}`
+            })
+        }).then(() => {
+            fecharModalAgendamento();
+            document.getElementById("formAgendamento").reset();
+            carregarAgenda();
+        });
+    }
+
+
+    // =====================
+    // MODAL AGENDAMENTO
+    // =====================
+    function abrirModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "flex";
+    }
+    function fecharModalAgendamento() {
+        document.getElementById("modalAgendamento").style.display = "none";
+    }
 
     window.onclick = function(e) {
-        ["modalAgendamento","modalDetalhes"].forEach(id => {
+        ["modalAgendamento", "modalDetalhes"].forEach(id => {
             const m = document.getElementById(id);
             if (e.target === m) m.style.display = "none";
         });
     };
 
+
+    // =====================
+    // INIT
+    // =====================
     carregarAgenda();
 </script>
 </body>

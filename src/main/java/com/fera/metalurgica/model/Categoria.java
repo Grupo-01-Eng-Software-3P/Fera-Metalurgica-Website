@@ -2,6 +2,8 @@ package com.fera.metalurgica.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "categoria")
 public class Categoria {
@@ -13,6 +15,10 @@ public class Categoria {
 	private String nome;
 	private String descricao;
 	private String meta;
+
+	@OneToMany(mappedBy = "categoria", fetch = FetchType.EAGER)
+	private List<Midia> midias;
+	private String slug;
 
 	public Categoria() {}
 
@@ -31,4 +37,8 @@ public class Categoria {
 	public void setDescricao(String descricao) { this.descricao = descricao; }
 	public String getMeta() { return meta; }
 	public void setMeta(String meta) { this.meta = meta; }
+	public List<Midia> getMidias() { return midias; }
+	public void setMidias(List<Midia> midias) { this.midias = midias; }
+	public String getSlug() { return slug; }
+	public void setSlug(String slug) { this.slug = slug; }
 }

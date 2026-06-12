@@ -259,9 +259,10 @@
             formOrcamento.elements['maoObra'].value = '';
             formOrcamento.elements['observacoesAdmin'].value = pedidoData.observacoesAdmin || '';
 
-            const quantidadeInputs = formOrcamento.querySelectorAll('input[name="itemQuantidade"]');
-            const nomeInputs = formOrcamento.querySelectorAll('input[name="itemNome"]');
-            const valorInputs = formOrcamento.querySelectorAll('input[name="itemValorUnitario"]');
+            const quantidadeInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".quantidade"]');
+            const nomeInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".nome"]');
+            const valorInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".valorUnitario"]');
+
             const itens = [
                 { nome: pedidoData.item1Nome, quantidade: pedidoData.item1Quantidade, valor: pedidoData.item1ValorUnitario },
                 { nome: pedidoData.item2Nome, quantidade: pedidoData.item2Quantidade, valor: pedidoData.item2ValorUnitario },
@@ -357,8 +358,9 @@
             return;
         }
 
-        const quantidades = form.querySelectorAll('input[name="itemQuantidade"]');
-        const valores = form.querySelectorAll('input[name="itemValorUnitario"]');
+        const quantidades = form.querySelectorAll('input[name^="itens"][name$=".quantidade"]');
+        const valores = form.querySelectorAll('input[name^="itens"][name$=".valorUnitario"]');
+
         let totalMateriais = 0;
 
         for (let i = 0; i < Math.max(quantidades.length, valores.length); i++) {
@@ -391,3 +393,4 @@
 </script>
 </body>
 </html>
+

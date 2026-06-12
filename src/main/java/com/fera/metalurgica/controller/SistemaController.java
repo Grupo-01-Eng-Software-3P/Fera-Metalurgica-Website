@@ -2,6 +2,7 @@ package com.fera.metalurgica.controller;
 
 import com.fera.metalurgica.dto.*;
 import com.fera.metalurgica.exception.BusinessException;
+import com.fera.metalurgica.exception.ResourceNotFoundException;
 import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.service.OrcamentoPdfService;
 import com.fera.metalurgica.service.SistemaService;
@@ -14,8 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -119,7 +122,75 @@ public class SistemaController {
 
 	// ── MÍDIA E AGENDA ───────────────────────────────────
 	@GetMapping("/midia")
-	public String midia() { return "midia"; }
+	public String midia(Model model) {
+		model.addAttribute("categorias", service.listarCategorias());
+		return "midia";
+	}
+
+	@GetMapping("/nova-categoria")
+	public String novaCategoriaForm(Model model) {
+		if (!model.containsAttribute("categoriaDTO")) {
+			model.addAttribute("categoriaDTO", new CategoriaDTO());
+		}
+		return "nova-categoria";
+	}
+
+	@GetMapping("/midia/{slug}")
+	public String midiaCategoria(@PathVariable String slug, Model model) {
+		Categoria categoria = service.listarCategorias().stream()
+			.filter(c -> c.getSlug() != null && c.getSlug().equals(slug))
+			.findFirst()
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + slug));
+
+		model.addAttribute("categoria", categoria);
+		model.addAttribute("midias", categoria.getMidias());
+		model.addAttribute("categoriaId", categoria.getId());
+		return "midia-categoria";
+	}
+
+	@PostMapping("/nova-imagem")
+	public String salvarImagem(@RequestParam("nome") String nome,
+	                           @RequestParam("descricao") String descricao,
+	                           @RequestParam("categoriaId") Long categoriaId,
+	                           @RequestParam("arquivo") MultipartFile arquivo,
+	                           RedirectAttributes redirectAttributes) {
+		try {
+			service.adicionarImagem(nome, descricao, categoriaId, arquivo);
+			redirectAttributes.addFlashAttribute("sucesso", "Imagem adicionada com sucesso!");
+		} catch (BusinessException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		Categoria categoria = service.buscarCategoriaPorId(categoriaId);
+		return "redirect:/midia/" + categoria.getSlug();
+	}
+
+	@PostMapping("/nova-categoria")
+	public String salvarCategoria(@Valid @ModelAttribute("categoriaDTO") CategoriaDTO dto,
+	                              BindingResult result,
+	                              RedirectAttributes redirectAttributes) {
+
+		if (result.hasErrors()) {
+			FieldError fieldError = result.getFieldError();
+			redirectAttributes.addFlashAttribute("categoriaDTO", dto);
+			redirectAttributes.addFlashAttribute("erro", fieldError != null
+				? fieldError.getDefaultMessage()
+				: "Verifique os campos preenchidos.");
+			return "redirect:/nova-categoria";
+		}
+
+		try {
+			service.adicionarCategoria(dto);
+			redirectAttributes.addFlashAttribute("sucesso", "Categoria criada com sucesso!");
+		} catch (BusinessException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			redirectAttributes.addFlashAttribute("categoriaDTO", dto);
+		}
+
+		return "redirect:/catalogo";
+	}
 
 	@GetMapping("/agenda")
 	public String agenda(Model model) {

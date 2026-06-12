@@ -180,7 +180,7 @@ public class SistemaController {
 			redirectAttributes.addFlashAttribute("erro", fieldError != null
 				? fieldError.getDefaultMessage()
 				: "Verifique os campos preenchidos.");
-			return "redirect:/nova-categoria";
+			return "redirect:/midia";
 		}
 
 		try {
@@ -191,7 +191,7 @@ public class SistemaController {
 			redirectAttributes.addFlashAttribute("categoriaDTO", dto);
 		}
 
-		return "redirect:/catalogo";
+		return "redirect:/midia";
 	}
 
 	@GetMapping("/agenda")

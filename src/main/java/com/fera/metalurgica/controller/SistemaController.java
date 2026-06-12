@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -66,8 +67,8 @@ public class SistemaController {
 
 	@PostMapping("/pedido")
 	public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
-	                           BindingResult result,
-	                           Model model) {
+							   BindingResult result,
+							   Model model) {
 
 		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
 			if (!isCPFValido(dto.getCpf())) {
@@ -93,7 +94,7 @@ public class SistemaController {
 
 	@GetMapping("/pedido")
 	public String pedidoForm(Model model) {
-		model.addAttribute("pedidoDTO", new PedidoDTO()); // inicializa vazio
+		model.addAttribute("pedidoDTO", new PedidoDTO());
 		return "pedido";
 	}
 
@@ -112,7 +113,7 @@ public class SistemaController {
 
 	@PostMapping("/orcamentos/salvar")
 	public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
-	                              RedirectAttributes redirectAttributes) {
+								  RedirectAttributes redirectAttributes) {
 
 		service.salvarOrcamentoAdmin(dto);
 
@@ -122,8 +123,9 @@ public class SistemaController {
 
 	// ── MÍDIA E AGENDA ───────────────────────────────────
 	@GetMapping("/midia")
-	public String midia(Model model) {
+	public String midia(Model model, Principal principal) {
 		model.addAttribute("categorias", service.listarCategorias());
+		model.addAttribute("nomeUsuario", principal != null ? principal.getName() : "Visitante");
 		return "midia";
 	}
 
@@ -150,10 +152,10 @@ public class SistemaController {
 
 	@PostMapping("/nova-imagem")
 	public String salvarImagem(@RequestParam("nome") String nome,
-	                           @RequestParam("descricao") String descricao,
-	                           @RequestParam("categoriaId") Long categoriaId,
-	                           @RequestParam("arquivo") MultipartFile arquivo,
-	                           RedirectAttributes redirectAttributes) {
+							   @RequestParam("descricao") String descricao,
+							   @RequestParam("categoriaId") Long categoriaId,
+							   @RequestParam("arquivo") MultipartFile arquivo,
+							   RedirectAttributes redirectAttributes) {
 		try {
 			service.adicionarImagem(nome, descricao, categoriaId, arquivo);
 			redirectAttributes.addFlashAttribute("sucesso", "Imagem adicionada com sucesso!");
@@ -169,8 +171,8 @@ public class SistemaController {
 
 	@PostMapping("/nova-categoria")
 	public String salvarCategoria(@Valid @ModelAttribute("categoriaDTO") CategoriaDTO dto,
-	                              BindingResult result,
-	                              RedirectAttributes redirectAttributes) {
+								  BindingResult result,
+								  RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			FieldError fieldError = result.getFieldError();
@@ -193,11 +195,11 @@ public class SistemaController {
 	}
 
 	@GetMapping("/agenda")
-	public String agenda(Model model) {
+	public String agenda(Model model, Principal principal) {
+		model.addAttribute("nomeUsuario", principal != null ? principal.getName() : "Visitante");
 		return "agenda";
 	}
 
-	// Novos métodos para a API da Agenda (JSON)
 	@GetMapping("/agenda/dados")
 	@ResponseBody
 	public List<Atividade> listarDadosAgenda() {
@@ -225,8 +227,8 @@ public class SistemaController {
 
 	@PostMapping("/novo-usuario")
 	public String salvarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO dto,
-	                            BindingResult result,
-	                            RedirectAttributes redirectAttributes) {
+								BindingResult result,
+								RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			FieldError fieldError = result.getFieldError();
@@ -311,4 +313,3 @@ public class SistemaController {
 		ra.addFlashAttribute("descricaoPreenchido", descricao);
 	}
 }
-

@@ -40,18 +40,25 @@ public class Midia {
 
 	public Long getId() { return id; }
 	public void setId(Long id) { this.id = id; }
+
 	public String getNome() { return nome; }
 	public void setNome(String nome) { this.nome = nome; }
+
 	public String getDescricao() { return descricao; }
 	public void setDescricao(String descricao) { this.descricao = descricao; }
+
 	public String getCaminho() { return caminho; }
 	public void setCaminho(String caminho) { this.caminho = caminho; }
+
 	public String getTipo() { return tipo; }
 	public void setTipo(String tipo) { this.tipo = tipo; }
+
 	public LocalDateTime getDataUpload() { return dataUpload; }
 	public void setDataUpload(LocalDateTime dataUpload) { this.dataUpload = dataUpload; }
+
 	public Categoria getCategoria() { return categoria; }
 	public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+
 	public Usuario getUsuario() { return usuario; }
 	public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 }

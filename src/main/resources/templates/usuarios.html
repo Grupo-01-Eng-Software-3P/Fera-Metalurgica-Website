@@ -23,7 +23,7 @@
             <li class="active"><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
 
-        <div class="sidebar-user"><i class="fas fa-user-circle"></i> Lucas Stibbe <form th:action="@{/logout}" method="POST"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit"><i class="fas fa-sign-out-alt"></i> Sair</button></form></div>
+        <div th:replace="~{fragments/sidebar-user :: sidebarUser('Lucas Stibbe')}"></div>
     </aside>
 
     <main class="main-content">
@@ -75,46 +75,61 @@
 
         <h3><i class="fas fa-user"></i> Cadastro de Funcionário</h3>
 
-        <form th:action="@{/novo-usuario}" method="post">
-            <input type="hidden"
-                   th:name="${_csrf.parameterName}"
-                   th:value="${_csrf.token}">
+        <form th:action="@{/novo-usuario}" th:object="${usuarioDTO}" method="post">
 
             <div class="input-group">
                 <label>Nome:</label>
-                <input type="text" name="nome" class="input-gray" required
-                    th:value="${nomePreenchido}">
+                <input type="text" th:field="*{nome}" class="input-gray" required
+                       th:classappend="${erro != null and erroCampo == 'nome'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'nome'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>Cargo:</label>
-                <select name="cargo" class="input-gray" style="cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; padding-right: 40px;" required>
-                    <option value="" disabled selected>Selecione um cargo</option>
-                    <option value="Gerente" th:selected="${cargoPreenchido == 'Gerente'}">Gerente</option>
-                    <option value="Atendente" th:selected="${cargoPreenchido == 'Atendente'}">Atendente</option>
-                    <option value="Marceneiro" th:selected="${cargoPreenchido == 'Marceneiro'}">Marceneiro</option>
-                    <option value="Marketing" th:selected="${cargoPreenchido == 'Marketing'}">Marketing</option>
+                <select th:field="*{cargo}" class="input-gray" required
+                        style="cursor: pointer; appearance: none; -webkit-appearance: none;
+                               background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+                               background-repeat: no-repeat; background-position: right 15px top 50%;
+                               background-size: 12px auto; padding-right: 40px;">
+                    <option value="" disabled>Selecione um cargo</option>
+                    <option value="Gerente">Gerente</option>
+                    <option value="Atendente">Atendente</option>
+                    <option value="Marceneiro">Marceneiro</option>
+                    <option value="Marketing">Marketing</option>
                 </select>
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'cargo'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>Data de Nascimento:</label>
-                <input type="date" name="dataNascimento" class="input-gray date-short" required
-                       th:value="${dataNascimentoPreenchido}">
+                <input type="date" th:field="*{dataNascimento}" class="input-gray date-short" required
+                       th:classappend="${erro != null and erroCampo == 'dataNascimento'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'dataNascimento'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>E-mail Corporativo:</label>
-                <input type="email" name="email" id="inputEmail" class="input-gray"
-                       placeholder="exemplo@ferametalurgica.com" required
-                       th:value="${emailPreenchido}"
-                       th:classappend="${erro} ? 'input-erro' : ''">
-                <span class="mensagem-erro" th:if="${erro}" th:text="${erro}"></span>
+                <input type="email" th:field="*{email}" id="inputEmail" class="input-gray"
+                       placeholder="admin@fera.com" required
+                       th:classappend="${erro != null and erroCampo == 'email'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'email'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div class="input-group">
                 <label>Senha de Acesso:</label>
-                <input type="password" name="senha" id="inputSenha" class="input-gray" required>
+                <input type="password" th:field="*{senha}" id="inputSenha" class="input-gray" required
+                       th:classappend="${erro != null and erroCampo == 'senha'} ? 'input-erro' : ''">
+                <span class="mensagem-erro"
+                      th:if="${erro != null and erroCampo == 'senha'}"
+                      th:text="${erro}"></span>
             </div>
 
             <div style="text-align: center; margin-top: 30px;">

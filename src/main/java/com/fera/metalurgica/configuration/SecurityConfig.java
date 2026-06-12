@@ -10,31 +10,59 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.csrf(csrf -> csrf.ignoringRequestMatchers(
-				"/orcamentos/salvar", "/pedido", "/novo-usuario", "/nova-imagem", "/nova-categoria",
-				"/agenda", "/agenda/dados" // Adicionado para permitir o fetch do JS
-			))
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/login", "/css/**", "/js/**", "/imagens/**", "/").permitAll()
-				.anyRequest().authenticated()
-			)
-			.formLogin(form -> form
-				.loginPage("/login")
-				.usernameParameter("email")
-				.passwordParameter("password")
-				.defaultSuccessUrl("/dashboard", true)
-				.permitAll()
-			)
-			.logout(logout -> logout.logoutSuccessUrl("/login?logout"));
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		return http.build();
-	}
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/login",
+								"/login/**",
+                                "/css/**",
+                                "/js/**",
+                                "/imagens/**",
+                                "/",
+                                "/orcamento",
+                                "/catalogo",
+								"/catalogo/**",
+                                "/pedido"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/dashboard",
+								"/agenda",
+								"/agenda/**",
+                                "/midia",
+                                "/orcamentos",
+                                "/orcamentos/**",
+                                "/usuarios",
+								"/novo-usuario",
+								"/nova-imagem",
+								"/nova-categoria"
+                                ).authenticated()
+                        		.anyRequest().permitAll()
+                )
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+                .formLogin(form -> form
+                        .loginPage("/login")
+						.loginProcessingUrl("/login-process")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/dashboard", false)
+                        .permitAll()
+                )
+
+                .logout(logout -> logout
+						.logoutUrl("/logout")
+						.logoutSuccessUrl("/login?logout")
+						.permitAll()
+				);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
 }

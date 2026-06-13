@@ -88,44 +88,43 @@ public class SistemaService {
 		}
 	}
 
-    @PostConstruct
-    public void criarAtividadesIniciais() {
-        if (atividadeRepository.count() == 0) {
-            atividadeRepository.save(new Atividade(
-                    "Alerta de Estoque", "Aço 2mm está fora de estoque!", "ALERTA",
-                    LocalDate.now(), "Há 17h"
-            ));
-            atividadeRepository.save(new Atividade(
-                    "Reunião", "Reunião marcada para amanhã às 9:00.", "REUNIAO",
-                    LocalDate.now().plusDays(1), "Ontem"
-            ));
-        }
-    }
+	@PostConstruct
+	public void criarAtividadesIniciais() {
+		if (atividadeRepository.count() == 0) {
+			atividadeRepository.save(new Atividade(
+				"Alerta de Estoque", "Aço 2mm está fora de estoque!", "ALERTA",
+				LocalDate.now(), "Há 17h"
+			));
+			atividadeRepository.save(new Atividade(
+				"Reunião", "Reunião marcada para amanhã às 9:00.", "REUNIAO",
+				LocalDate.now().plusDays(1), "Ontem"
+			));
+		}
+	}
 
-    @PostConstruct
-    public void criarProdutosIniciais() {
-        if (produtoRepository.count() == 0) {
-            produtoRepository.save(new Produto(null, "Mesa de Ferro", "Mesas"));
-            produtoRepository.save(new Produto(null, "Estante de Metal", "Estantes"));
-        }
-    }
-
+	@PostConstruct
+	public void criarProdutosIniciais() {
+		if (produtoRepository.count() == 0) {
+			produtoRepository.save(new Produto(null, "Mesa de Ferro", "Mesas"));
+			produtoRepository.save(new Produto(null, "Estante de Metal", "Estantes"));
+		}
+	}
 
 
 	// USUARIO
 
-    public List<Usuario> listarUsuarios() {
-        return usuarioRepository.findAll();
-    }
+	public List<Usuario> listarUsuarios() {
+		return usuarioRepository.findAll();
+	}
 
-    public void adicionarUsuario(Usuario usuario) {
+	public void adicionarUsuario(Usuario usuario) {
 
 		if (usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()).isPresent()) {
 			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
 		}
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuarioRepository.save(usuario);
-    }
+		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+		usuarioRepository.save(usuario);
+	}
 
 	public Usuario buscarUsuarioPorId(Long id) {
 		return usuarioRepository.findById(id)
@@ -135,9 +134,9 @@ public class SistemaService {
 
 	// PRODUTO
 
-    public List<Produto> listarProdutos() {
-        return produtoRepository.findAll();
-    }
+	public List<Produto> listarProdutos() {
+		return produtoRepository.findAll();
+	}
 
 	public Produto buscarProdutoPorId(Long id) {
 		return produtoRepository.findById(id)
@@ -147,28 +146,28 @@ public class SistemaService {
 
 	// PEDIDO
 
-    public List<Pedido> listarOrcamentos() {
-        return pedidoRepository.findAllByOrderByDataCriacaoDesc();
-    }
+	public List<Pedido> listarOrcamentos() {
+		return pedidoRepository.findAllByOrderByDataCriacaoDesc();
+	}
 
-    public OrcamentosDTO organizarOrcamentos() {
-        List<Pedido> pedidos = listarOrcamentos();
-        List<Pedido> meusPedidos = new ArrayList<>();
-        List<Pedido> clientesComOrcamento = new ArrayList<>();
-        List<Pedido> clientesPendentes = new ArrayList<>();
+	public OrcamentosDTO organizarOrcamentos() {
+		List<Pedido> pedidos = listarOrcamentos();
+		List<Pedido> meusPedidos = new ArrayList<>();
+		List<Pedido> clientesComOrcamento = new ArrayList<>();
+		List<Pedido> clientesPendentes = new ArrayList<>();
 
-        for (Pedido pedido : pedidos) {
-            if (pedido.isCriadoPorAdmin()) {
-                meusPedidos.add(pedido);
-            } else if (pedido.isOrcamentoFinalizado()) {
-                clientesComOrcamento.add(pedido);
-            } else {
-                clientesPendentes.add(pedido);
-            }
-        }
+		for (Pedido pedido : pedidos) {
+			if (pedido.isCriadoPorAdmin()) {
+				meusPedidos.add(pedido);
+			} else if (pedido.isOrcamentoFinalizado()) {
+				clientesComOrcamento.add(pedido);
+			} else {
+				clientesPendentes.add(pedido);
+			}
+		}
 
-        return new OrcamentosDTO(meusPedidos, clientesComOrcamento, clientesPendentes);
-    }
+		return new OrcamentosDTO(meusPedidos, clientesComOrcamento, clientesPendentes);
+	}
 
 
 	@Transactional
@@ -229,7 +228,6 @@ public class SistemaService {
 		pedido.calcularTotais();
 		pedidoRepository.save(pedido);
 
-		// Notificação WhatsApp
 		zApiService.enviarNotificacaoOrcamento(
 			pedido.getCliente(),
 			pedido.getTelefone(),
@@ -249,87 +247,87 @@ public class SistemaService {
 		atividadeRepository.save(atividade);
 	}
 
-    public List<Atividade> listarAtividades() {
-        return atividadeRepository.findAllByOrderByIdDesc();
-    }
+	public List<Atividade> listarAtividades() {
+		return atividadeRepository.findAllByOrderByIdDesc();
+	}
 
-    public Atividade adicionarAtividade(Atividade atividade) {
+	public Atividade adicionarAtividade(Atividade atividade) {
 
-        if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
+		if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
 			throw new BusinessException("O título da atividade não pode ser vazio.");
 		}
 		return atividadeRepository.save(atividade);
-    }
+	}
 
-    public List<Atividade> listarPorData(LocalDate data) {
-        return atividadeRepository.findAll().stream()
-                .filter(a -> data.equals(a.getData()))
-                .toList();
-    }
+	public List<Atividade> listarPorData(LocalDate data) {
+		return atividadeRepository.findAll().stream()
+			.filter(a -> data.equals(a.getData()))
+			.toList();
+	}
 
-    private int tamanho(List<?> lista) {
-        return lista == null ? 0 : lista.size();
-    }
+	private int tamanho(List<?> lista) {
+		return lista == null ? 0 : lista.size();
+	}
 
-    private String valorOuVazio(List<String> lista, int indice) {
-        if (lista == null || indice >= lista.size() || lista.get(indice) == null) {
-            return "";
-        }
-        return lista.get(indice).trim();
-    }
+	private String valorOuVazio(List<String> lista, int indice) {
+		if (lista == null || indice >= lista.size() || lista.get(indice) == null) {
+			return "";
+		}
+		return lista.get(indice).trim();
+	}
 
-    private Integer parseInteiro(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
+	private Integer parseInteiro(String valor) {
+		if (valor == null || valor.isBlank()) {
+			return null;
+		}
 
-        String normalizado = valor.replaceAll("[^0-9-]", "");
-        if (normalizado.isBlank() || normalizado.equals("-")) {
-            return null;
-        }
+		String normalizado = valor.replaceAll("[^0-9-]", "");
+		if (normalizado.isBlank() || normalizado.equals("-")) {
+			return null;
+		}
 
-        try {
-            return Integer.parseInt(normalizado);
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
+		try {
+			return Integer.parseInt(normalizado);
+		} catch (NumberFormatException ex) {
+			return null;
+		}
+	}
 
-    private BigDecimal parseMoeda(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return BigDecimal.ZERO;
-        }
+	private BigDecimal parseMoeda(String valor) {
+		if (valor == null || valor.isBlank()) {
+			return BigDecimal.ZERO;
+		}
 
-        String normalizado = valor.trim()
-                .replace("R$", "")
-                .replaceAll("\\s+", "")
-                .replaceAll("[^0-9,.-]", "");
+		String normalizado = valor.trim()
+			.replace("R$", "")
+			.replaceAll("\\s+", "")
+			.replaceAll("[^0-9,.-]", "");
 
-        if (normalizado.isBlank()) {
-            return BigDecimal.ZERO;
-        }
+		if (normalizado.isBlank()) {
+			return BigDecimal.ZERO;
+		}
 
-        if (normalizado.contains(",") && normalizado.contains(".")) {
-            if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
-                normalizado = normalizado.replace(".", "").replace(",", ".");
-            } else {
-                normalizado = normalizado.replace(",", "");
-            }
-        } else if (normalizado.contains(",")) {
-            normalizado = normalizado.replace(".", "").replace(",", ".");
-        } else if (normalizado.indexOf('.') != normalizado.lastIndexOf('.')) {
-            int ultimaPosicao = normalizado.lastIndexOf('.');
-            normalizado = normalizado.substring(0, ultimaPosicao).replace(".", "")
-                    + "."
-                    + normalizado.substring(ultimaPosicao + 1);
-        }
+		if (normalizado.contains(",") && normalizado.contains(".")) {
+			if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
+				normalizado = normalizado.replace(".", "").replace(",", ".");
+			} else {
+				normalizado = normalizado.replace(",", "");
+			}
+		} else if (normalizado.contains(",")) {
+			normalizado = normalizado.replace(".", "").replace(",", ".");
+		} else if (normalizado.indexOf('.') != normalizado.lastIndexOf('.')) {
+			int ultimaPosicao = normalizado.lastIndexOf('.');
+			normalizado = normalizado.substring(0, ultimaPosicao).replace(".", "")
+				+ "."
+				+ normalizado.substring(ultimaPosicao + 1);
+		}
 
-        try {
-            return new BigDecimal(normalizado);
-        } catch (NumberFormatException ex) {
-            return BigDecimal.ZERO;
-        }
-    }
+		try {
+			return new BigDecimal(normalizado);
+		} catch (NumberFormatException ex) {
+			return BigDecimal.ZERO;
+		}
+	}
 
 
 	// MIDIA / CATEGORIA

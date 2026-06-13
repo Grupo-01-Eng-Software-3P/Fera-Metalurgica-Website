@@ -23,7 +23,7 @@
             <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
 
-        <div th:replace="~{fragments/sidebar-user :: sidebarUser('Lucas Stibbe')}"></div>
+        <div th:replace="~{fragments/sidebar-user :: sidebarUser(${#authentication?.name ?: 'Visitante'})}"></div>
     </aside>
 
     <main class="main-content">

@@ -372,16 +372,10 @@ public class SistemaService {
 			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + categoriaId));
 
 		String nomeArquivo = UUID.randomUUID() + "_" + arquivo.getOriginalFilename();
-
-		Path destino = Paths.get(uploadDir + "/" + nomeArquivo);
-		Files.createDirectories(destino.getParent());
+		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+		Path destino = uploadPath.resolve(nomeArquivo);
+		Files.createDirectories(uploadPath);
 		Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-
-		try {
-			Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			throw new BusinessException("Erro ao salvar o arquivo: " + e.getMessage());
-		}
 
 		Midia midia = new Midia();
 		midia.setNome(nome);

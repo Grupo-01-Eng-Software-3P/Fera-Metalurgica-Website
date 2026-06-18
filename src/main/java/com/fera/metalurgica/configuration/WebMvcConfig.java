@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
@@ -15,8 +16,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		String caminho = Paths.get(uploadDir).toAbsolutePath().toString();
+		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+		Path legacyUploadPath = Paths.get("uploads").toAbsolutePath().normalize();
 		registry.addResourceHandler("/imagens/**")
-			.addResourceLocations("file:" + caminho + "/");
+			.addResourceLocations(
+				uploadPath.toUri().toString(),
+				legacyUploadPath.toUri().toString(),
+				"classpath:/static/imagens/"
+			);
 	}
 }

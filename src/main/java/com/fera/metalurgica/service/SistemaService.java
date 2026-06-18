@@ -157,10 +157,10 @@ public class SistemaService {
 		List<Pedido> clientesPendentes = new ArrayList<>();
 
 		for (Pedido pedido : pedidos) {
-			if (pedido.isCriadoPorAdmin()) {
-				meusPedidos.add(pedido);
-			} else if (pedido.isOrcamentoFinalizado()) {
+			if (pedido.isOrcamentoGerado()) {
 				clientesComOrcamento.add(pedido);
+			} else if (pedido.isCriadoPorAdmin()) {
+				meusPedidos.add(pedido);
 			} else {
 				clientesPendentes.add(pedido);
 			}

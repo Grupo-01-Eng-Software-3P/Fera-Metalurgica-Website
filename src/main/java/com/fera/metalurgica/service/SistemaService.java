@@ -1,15 +1,24 @@
 package com.fera.metalurgica.service;
 
-import com.fera.metalurgica.exception.ResourceNotFoundException;
-import com.fera.metalurgica.dto.OrcamentosDTO;
 import com.fera.metalurgica.exception.BusinessException;
+import com.fera.metalurgica.exception.ResourceNotFoundException;
+import com.fera.metalurgica.dto.*;
 import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.repository.*;
 import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
+import java.nio.file.*;
+import java.io.IOException;
 
 @Service
 public class SistemaService {
@@ -42,19 +51,25 @@ public class SistemaService {
 	}
 
 	@PostConstruct
+	public void corrigirSlugsCategorias() {
+		for (Categoria categoria : categoriaRepository.findAll()) {
+			if (categoria.getSlug() == null || categoria.getSlug().isBlank()) {
+				String slug = categoria.getNome()
+					.toLowerCase()
+					.replaceAll("[^a-z0-9\\s]", "")
+					.trim()
+					.replaceAll("\\s+", "-");
+				categoria.setSlug(slug);
+				categoriaRepository.save(categoria);
+			}
+		}
+	}
+
+	@PostConstruct
 	public void garantirUsuarioAdmin() {
-		boolean adminExiste = false;
+		boolean adminExiste = usuarioRepository.findByEmailIgnoreCase("admin@fera.com").isPresent();
 
 		for (Usuario usuario : usuarioRepository.findAll()) {
-			if ("admin@fera.com".equalsIgnoreCase(usuario.getEmail())) {
-				adminExiste = true;
-				if (usuario.getSenha() == null || usuario.getSenha().isBlank()) {
-					usuario.setSenha(passwordEncoder.encode("1234"));
-					usuarioRepository.save(usuario);
-					continue;
-				}
-			}
-
 			String senhaAtual = usuario.getSenha();
 			if (senhaAtual != null && !senhaAtual.isBlank() && !senhaAtual.startsWith("$2")) {
 				usuario.setSenha(passwordEncoder.encode(senhaAtual));
@@ -64,9 +79,7 @@ public class SistemaService {
 
 		if (!adminExiste) {
 			Usuario admin = new Usuario(
-				null,
-				"Lucas Stibbe",
-				"Administrador",
+				null, "Lucas Stibbe", "Administrador",
 				LocalDate.of(2007, 1, 19),
 				"admin@fera.com",
 				passwordEncoder.encode("1234")
@@ -75,46 +88,132 @@ public class SistemaService {
 		}
 	}
 
-	// ── MÉTODOS DE ATIVIDADE (AGENDA) ──
-	public List<Atividade> listarAtividades() {
-		return atividadeRepository.findAll();
+	@PostConstruct
+	public void criarAtividadesIniciais() {
+		if (atividadeRepository.count() == 0) {
+			atividadeRepository.save(new Atividade(
+				"Alerta de Estoque", "Aço 2mm está fora de estoque!", "ALERTA",
+				LocalDate.now(), "Há 17h"
+			));
+			atividadeRepository.save(new Atividade(
+				"Reunião", "Reunião marcada para amanhã às 9:00.", "REUNIAO",
+				LocalDate.now().plusDays(1), "Ontem"
+			));
+		}
 	}
 
-	public void salvarAtividade(Atividade atividade) {
-		atividadeRepository.save(atividade);
+	@PostConstruct
+	public void criarProdutosIniciais() {
+		if (produtoRepository.count() == 0) {
+			produtoRepository.save(new Produto(null, "Mesa de Ferro", "Mesas"));
+			produtoRepository.save(new Produto(null, "Estante de Metal", "Estantes"));
+		}
 	}
 
-	// ── MÉTODOS DE USUÁRIOS ──
+
+	// USUARIO
+
 	public List<Usuario> listarUsuarios() {
 		return usuarioRepository.findAll();
 	}
 
 	public void adicionarUsuario(Usuario usuario) {
-		if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-			throw new BusinessException("E-mail já cadastrado!");
+
+		if (usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()).isPresent()) {
+			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
 		}
 		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 		usuarioRepository.save(usuario);
 	}
 
-	// ── MÉTODOS DE ORÇAMENTOS ──
+	public Usuario buscarUsuarioPorId(Long id) {
+		return usuarioRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+	}
+
+
+	// PRODUTO
+
+	public List<Produto> listarProdutos() {
+		return produtoRepository.findAll();
+	}
+
+	public Produto buscarProdutoPorId(Long id) {
+		return produtoRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));
+	}
+
+
+	// PEDIDO
+
 	public List<Pedido> listarOrcamentos() {
-		return pedidoRepository.findAll();
+		return pedidoRepository.findAllByOrderByDataCriacaoDesc();
 	}
 
 	public OrcamentosDTO organizarOrcamentos() {
-		List<Pedido> todos = pedidoRepository.findAll();
-		return new OrcamentosDTO(
-			todos.stream().filter(p -> "ADM".equals(p.getCriadoPor())).toList(),
-			todos.stream().filter(p -> p.getValorTotal() != null).toList(),
-			todos.stream().filter(p -> p.getValorTotal() == null).toList()
-		);
+		List<Pedido> pedidos = listarOrcamentos();
+		List<Pedido> meusPedidos = new ArrayList<>();
+		List<Pedido> clientesComOrcamento = new ArrayList<>();
+		List<Pedido> clientesPendentes = new ArrayList<>();
+
+		for (Pedido pedido : pedidos) {
+			if (pedido.isCriadoPorAdmin()) {
+				meusPedidos.add(pedido);
+			} else if (pedido.isOrcamentoFinalizado()) {
+				clientesComOrcamento.add(pedido);
+			} else {
+				clientesPendentes.add(pedido);
+			}
+		}
+
+		return new OrcamentosDTO(meusPedidos, clientesComOrcamento, clientesPendentes);
 	}
 
-	public void salvarOrcamentoAdmin(Long id, String cliente, String tel, String cpf, String mat,
-									 String med, String desc, List<String> itens, List<String> qtds,
-									 List<String> vals, String frete, String maoObra, String obs) {
-		// Mantenha aqui sua lógica de persistência existente
+
+	@Transactional
+	public Pedido salvarOrcamentoAdmin(OrcamentoAdminDTO dto) {
+
+		Pedido pedido = (dto.getPedidoId() != null)
+			? pedidoRepository.findById(dto.getPedidoId())
+			.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
+			: new Pedido();
+
+		pedido.setCliente(dto.getCliente());
+		pedido.setTelefone(dto.getTelefone());
+		pedido.setCpf(dto.getCpf());
+		pedido.setMaterial(dto.getMaterial());
+		pedido.setMedidas(dto.getMedidas());
+		pedido.setDescricao(dto.getDescricao());
+
+		if (pedido.getCriadoPor() == null) {
+			pedido.setCriadoPor("ADMIN");
+		}
+
+		List<ItemPedido> itens = new ArrayList<>();
+
+		for (ItemPedidoDTO itemDTO : dto.getItens()) {
+			String nome        = itemDTO.getNome() != null ? itemDTO.getNome().trim() : "";
+			Integer quantidade = parseInteiro(itemDTO.getQuantidade());
+			BigDecimal valor   = parseMoeda(itemDTO.getValorUnitario());
+
+			if (nome.isBlank() && (quantidade == null || quantidade <= 0) && valor.compareTo(BigDecimal.ZERO) == 0) {
+				continue;
+			}
+
+			ItemPedido item = new ItemPedido();
+			item.setNomeItem(nome);
+			item.setMaterial(nome);
+			item.setQuantidade(quantidade != null ? quantidade : 0);
+			item.setValorUnitario(valor);
+			itens.add(item);
+		}
+
+		pedido.setItens(itens);
+		pedido.setValorAdicionais(parseMoeda(dto.getFrete()).add(parseMoeda(dto.getMaoObra())));
+		pedido.setObservacoesAdmin(dto.getObservacoesAdmin());
+		pedido.calcularTotais();
+
+		return pedidoRepository.save(pedido);
 	}
 
 	public void adicionarPedido(Pedido pedido) {
@@ -129,7 +228,6 @@ public class SistemaService {
 		pedido.calcularTotais();
 		pedidoRepository.save(pedido);
 
-		// Notificação WhatsApp
 		zApiService.enviarNotificacaoOrcamento(
 			pedido.getCliente(),
 			pedido.getTelefone(),
@@ -138,20 +236,158 @@ public class SistemaService {
 	}
 
 	public Pedido buscarPedidoPorId(Long id) {
-    return pedidoRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
-    }
-
-	// ── MÉTODOS DE PRODUTOS E CATÁLOGO ──
-	public List<Produto> listarProdutos() {
-		return produtoRepository.findAll();
+		return pedidoRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
 	}
+
+
+	// ATIVIDADE
+
+	public void salvarAtividade(Atividade atividade) {
+		atividadeRepository.save(atividade);
+	}
+
+	public List<Atividade> listarAtividades() {
+		return atividadeRepository.findAllByOrderByIdDesc();
+	}
+
+	public Atividade adicionarAtividade(Atividade atividade) {
+
+		if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
+			throw new BusinessException("O título da atividade não pode ser vazio.");
+		}
+		return atividadeRepository.save(atividade);
+	}
+
+	public List<Atividade> listarPorData(LocalDate data) {
+		return atividadeRepository.findAll().stream()
+			.filter(a -> data.equals(a.getData()))
+			.toList();
+	}
+
+	private int tamanho(List<?> lista) {
+		return lista == null ? 0 : lista.size();
+	}
+
+	private String valorOuVazio(List<String> lista, int indice) {
+		if (lista == null || indice >= lista.size() || lista.get(indice) == null) {
+			return "";
+		}
+		return lista.get(indice).trim();
+	}
+
+	private Integer parseInteiro(String valor) {
+		if (valor == null || valor.isBlank()) {
+			return null;
+		}
+
+		String normalizado = valor.replaceAll("[^0-9-]", "");
+		if (normalizado.isBlank() || normalizado.equals("-")) {
+			return null;
+		}
+
+		try {
+			return Integer.parseInt(normalizado);
+		} catch (NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	private BigDecimal parseMoeda(String valor) {
+		if (valor == null || valor.isBlank()) {
+			return BigDecimal.ZERO;
+		}
+
+		String normalizado = valor.trim()
+			.replace("R$", "")
+			.replaceAll("\\s+", "")
+			.replaceAll("[^0-9,.-]", "");
+
+		if (normalizado.isBlank()) {
+			return BigDecimal.ZERO;
+		}
+
+		if (normalizado.contains(",") && normalizado.contains(".")) {
+			if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
+				normalizado = normalizado.replace(".", "").replace(",", ".");
+			} else {
+				normalizado = normalizado.replace(",", "");
+			}
+		} else if (normalizado.contains(",")) {
+			normalizado = normalizado.replace(".", "").replace(",", ".");
+		} else if (normalizado.indexOf('.') != normalizado.lastIndexOf('.')) {
+			int ultimaPosicao = normalizado.lastIndexOf('.');
+			normalizado = normalizado.substring(0, ultimaPosicao).replace(".", "")
+				+ "."
+				+ normalizado.substring(ultimaPosicao + 1);
+		}
+
+		try {
+			return new BigDecimal(normalizado);
+		} catch (NumberFormatException ex) {
+			return BigDecimal.ZERO;
+		}
+	}
+
+
+	// MIDIA / CATEGORIA
 
 	public List<Categoria> listarCategorias() {
 		return categoriaRepository.findAll();
 	}
 
+	public Categoria adicionarCategoria(CategoriaDTO dto) {
+		if (categoriaRepository.findByNomeIgnoreCase(dto.getNome()).isPresent()) {
+			throw new BusinessException("Já existe uma categoria com o nome: " + dto.getNome());
+		}
+
+		String slug = dto.getNome()
+			.toLowerCase()
+			.replaceAll("[^a-z0-9\\s]", "")
+			.trim()
+			.replaceAll("\\s+", "-");
+
+		Categoria categoria = new Categoria(null, dto.getNome(), dto.getDescricao(), null);
+		categoria.setSlug(slug);
+		return categoriaRepository.save(categoria);
+	}
+
 	public List<Midia> listarMidiasPorCategoria(Long id) {
 		return midiaRepository.findByCategoriaId(id);
+	}
+
+	public void adicionarProduto(Produto produto) {
+
+		if (produto.getNome() == null || produto.getNome().isBlank()) {
+			throw new BusinessException("O nome do produto não pode ser vazio.");
+		}
+		produtoRepository.save(produto);
+	}
+
+	@Value("${upload.dir}")
+	private String uploadDir;
+
+	public void adicionarImagem(String nome, String descricao, Long categoriaId, MultipartFile arquivo) throws IOException {
+		Categoria categoria = categoriaRepository.findById(categoriaId)
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + categoriaId));
+
+		String nomeArquivo = UUID.randomUUID() + "_" + arquivo.getOriginalFilename();
+		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+		Path destino = uploadPath.resolve(nomeArquivo);
+		Files.createDirectories(uploadPath);
+		Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+
+		Midia midia = new Midia();
+		midia.setNome(nome);
+		midia.setDescricao(descricao);
+		midia.setCaminho("/imagens/" + nomeArquivo);
+		midia.setTipo(arquivo.getContentType());
+		midia.setCategoria(categoria);
+		midiaRepository.save(midia);
+	}
+
+	public Categoria buscarCategoriaPorId(Long id) {
+		return categoriaRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com id: " + id));
 	}
 }

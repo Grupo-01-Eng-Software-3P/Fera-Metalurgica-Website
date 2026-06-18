@@ -36,8 +36,9 @@ public class GlobalExceptionHandler {
 
 	// STATUS 500 (FALLBACK)
 	@ExceptionHandler(Exception.class)
-	public String handleGeneric(Exception ex, RedirectAttributes redirectAttributes) {
-		redirectAttributes.addFlashAttribute("erro", "Erro inesperado. Tente novamente mais tarde.");
-		return "redirect:/dashboard";
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String handleGeneric(Exception ex, Model model) {
+		model.addAttribute("mensagem", "Erro inesperado. Tente novamente mais tarde.");
+		return "error/404";
 	}
 }

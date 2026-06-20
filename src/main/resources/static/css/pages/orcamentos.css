@@ -292,6 +292,129 @@
 .btn-salvar-orcamento { background-color: #5C3817; color: white; border: none; padding: 15px 60px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(92, 56, 23, 0.2); }
 .btn-salvar-orcamento:hover { background-color: #C06014; transform: scale(1.05); }
 
+.anexo-modal-content {
+    background-color: #FFFFFF;
+    border-radius: 18px;
+    width: min(100%, 980px);
+    max-height: 90vh;
+    padding: 22px 22px 18px;
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.anexo-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #5C3817;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.anexo-modal-header i {
+    color: #C06014;
+}
+
+.anexo-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    border: none;
+    background: transparent;
+    color: #A09A92;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.anexo-modal-close:hover {
+    color: #C06014;
+}
+
+.anexo-preview-media {
+    width: 100%;
+    max-height: calc(90vh - 120px);
+    object-fit: contain;
+    border-radius: 12px;
+    background-color: #fafafa;
+}
+
+.anexo-preview-frame {
+    width: 100%;
+    height: calc(90vh - 120px);
+    border: none;
+    border-radius: 12px;
+    background-color: #fafafa;
+}
+
+.orc-anexo-group {
+    margin-top: 6px;
+}
+
+.orc-anexo-vazio {
+    border: 1px dashed #D9CFC4;
+    border-radius: 12px;
+    padding: 14px 16px;
+    background-color: #FBFAF8;
+    color: #8F857A;
+    font-size: 14px;
+    text-align: center;
+}
+
+.orc-anexo-botao {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.orc-anexo-botao:focus-visible {
+    outline: 2px solid #C06014;
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
+.orc-anexo-imagem {
+    display: block;
+    width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: 12px;
+    border: 1px solid #E8E1D7;
+    background-color: #fafafa;
+    cursor: zoom-in;
+}
+
+.orc-anexo-arquivo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #E8E1D7;
+    background-color: #FBFAF8;
+    color: #5C3817;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.orc-anexo-arquivo-link i {
+    color: #C06014;
+}
+
+.orc-anexo-botao:hover .orc-anexo-imagem,
+.orc-anexo-botao:hover .orc-anexo-arquivo-link {
+    border-color: #C06014;
+}
+
 /* FLIP CARD CSS */
 .flip-card {
     background-color: transparent;

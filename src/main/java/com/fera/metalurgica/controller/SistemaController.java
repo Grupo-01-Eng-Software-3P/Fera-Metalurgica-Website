@@ -6,6 +6,9 @@ import com.fera.metalurgica.exception.ResourceNotFoundException;
 import com.fera.metalurgica.model.*;
 import com.fera.metalurgica.service.OrcamentoPdfService;
 import com.fera.metalurgica.service.SistemaService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -68,6 +72,7 @@ public class SistemaController {
 	@PostMapping("/pedido")
 	public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
 							   BindingResult result,
+							   @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
 							   Model model) {
 
 		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
@@ -87,7 +92,13 @@ public class SistemaController {
 		novoPedido.setDescricao(dto.getDescricao());
 		novoPedido.setCriadoPor("CLIENTE");
 
-		service.adicionarPedido(novoPedido);
+		try {
+			service.adicionarPedido(novoPedido, arquivo);
+		} catch (BusinessException ex) {
+			model.addAttribute("erro", ex.getMessage());
+			model.addAttribute("pedidoDTO", dto);
+			return "pedido";
+		}
 
 		return "redirect:/";
 	}
@@ -109,6 +120,41 @@ public class SistemaController {
 			.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nomeArquivo + "\"")
 			.contentLength(pdf.length)
 			.body(pdf);
+	}
+
+	@GetMapping("/orcamentos/{id}/anexo")
+	public ResponseEntity<Resource> visualizarAnexoOrcamento(@PathVariable Long id) throws IOException {
+		Pedido pedido = service.buscarPedidoPorId(id);
+		var arquivoPath = service.localizarArquivoAnexoPedido(pedido);
+		Resource resource = new UrlResource(arquivoPath.toUri());
+
+		if (!resource.exists() || !resource.isReadable()) {
+			throw new ResourceNotFoundException("Anexo não encontrado para o pedido: " + id);
+		}
+
+		MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+		String tipoArquivo = pedido.getAnexoTipo();
+		if (tipoArquivo != null && !tipoArquivo.isBlank()) {
+			try {
+				mediaType = MediaType.parseMediaType(tipoArquivo);
+			} catch (IllegalArgumentException ignored) {
+				mediaType = MediaType.APPLICATION_OCTET_STREAM;
+			}
+		}
+
+		String nomeArquivo = pedido.getAnexoNomeOriginal();
+		if (nomeArquivo == null || nomeArquivo.isBlank()) {
+			nomeArquivo = arquivoPath.getFileName().toString();
+		}
+
+		ContentDisposition contentDisposition = ContentDisposition.inline()
+			.filename(nomeArquivo, StandardCharsets.UTF_8)
+			.build();
+
+		return ResponseEntity.ok()
+			.contentType(mediaType)
+			.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+			.body(resource);
 	}
 
 	@PostMapping("/orcamentos/salvar")

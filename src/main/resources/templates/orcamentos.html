@@ -129,6 +129,17 @@
                             <label>Descrição do Projeto:</label>
                             <textarea name="descricao" class="input-field" rows="4" placeholder="Descreva a ideia do móvel..."></textarea>
                         </div>
+                        <div class="input-group orc-anexo-group">
+                            <label>Anexo do cliente:</label>
+                            <div id="anexoPedidoVazio" class="orc-anexo-vazio">Nenhum anexo enviado.</div>
+                            <button id="anexoPedidoBotao" type="button" class="orc-anexo-botao" hidden>
+                                <img id="anexoPedidoImagem" class="orc-anexo-imagem" alt="Imagem anexada pelo cliente">
+                                <span id="anexoPedidoArquivoLink" class="orc-anexo-arquivo-link" hidden>
+                                    <i class="fas fa-paperclip"></i>
+                                    <span id="anexoPedidoArquivoNome">Anexo do cliente</span>
+                                </span>
+                            </button>
+                        </div>
                         <div class="orc-footer">
                             <button type="button" class="btn-flip" onclick="flipCard()">Virar para Orçamento</button>
                         </div>
@@ -228,6 +239,18 @@
     </div>
 </div>
 
+<div id="modalAnexoPedido" class="modal-form-overlay anexo-modal-overlay">
+    <div class="anexo-modal-content">
+        <button type="button" class="anexo-modal-close" onclick="fecharAnexoPedido()">&times;</button>
+        <div class="anexo-modal-header">
+            <i class="fas fa-paperclip"></i>
+            <span id="anexoPreviewNome">Anexo</span>
+        </div>
+        <img id="anexoPreviewImagem" class="anexo-preview-media" alt="" hidden>
+        <iframe id="anexoPreviewFrame" class="anexo-preview-frame" title="Anexo do pedido" hidden></iframe>
+    </div>
+</div>
+
 <script>
     function abrirModalNovoOrcamento(pedido) {
         const modal = document.getElementById("modalOrcamento");
@@ -295,8 +318,90 @@
             document.getElementById('pedido-numero-back').innerText = 'Pedido novo';
         }
 
+        renderizarAnexoPedido(pedidoData);
         atualizarTotalOrcamento();
         modal.style.display = "flex";
+    }
+
+    function renderizarAnexoPedido(pedidoData) {
+        const anexoVazio = document.getElementById('anexoPedidoVazio');
+        const anexoBotao = document.getElementById('anexoPedidoBotao');
+        const anexoImagem = document.getElementById('anexoPedidoImagem');
+        const anexoArquivoLink = document.getElementById('anexoPedidoArquivoLink');
+        const anexoArquivoNome = document.getElementById('anexoPedidoArquivoNome');
+
+        anexoVazio.hidden = true;
+        anexoBotao.hidden = true;
+        anexoArquivoLink.hidden = true;
+        anexoImagem.hidden = true;
+        anexoImagem.removeAttribute('src');
+        anexoImagem.removeAttribute('alt');
+        anexoArquivoNome.textContent = '';
+        anexoBotao.onclick = null;
+
+        const caminho = pedidoData && pedidoData.anexoCaminho ? String(pedidoData.anexoCaminho) : '';
+        if (!caminho) {
+            anexoVazio.hidden = false;
+            return;
+        }
+
+        const tipo = pedidoData.anexoTipo ? String(pedidoData.anexoTipo).toLowerCase() : '';
+        const nomeOriginal = pedidoData.anexoNomeOriginal ? String(pedidoData.anexoNomeOriginal) : '';
+        const nomeExibicao = nomeOriginal || caminho.split('/').pop() || 'Anexo do cliente';
+        const anexoUrl = pedidoData.anexoUrl || caminho;
+        const ehImagem = tipo.startsWith('image/')
+            || /\.(png|jpe?g|gif|webp|bmp)$/i.test(caminho);
+
+        anexoBotao.title = nomeExibicao;
+        anexoBotao.onclick = function() {
+            abrirAnexoPedido(anexoUrl, nomeExibicao, ehImagem);
+        };
+
+        if (ehImagem) {
+            anexoImagem.src = anexoUrl;
+            anexoImagem.alt = nomeExibicao;
+            anexoImagem.hidden = false;
+            anexoArquivoLink.hidden = true;
+        } else {
+            anexoImagem.hidden = true;
+            anexoArquivoNome.textContent = nomeExibicao;
+            anexoArquivoLink.hidden = false;
+        }
+
+        anexoBotao.hidden = false;
+    }
+
+    function abrirAnexoPedido(url, nome, ehImagem) {
+        const modal = document.getElementById('modalAnexoPedido');
+        const previewNome = document.getElementById('anexoPreviewNome');
+        const previewImagem = document.getElementById('anexoPreviewImagem');
+        const previewFrame = document.getElementById('anexoPreviewFrame');
+
+        previewNome.textContent = nome || 'Anexo';
+        previewImagem.hidden = true;
+        previewFrame.hidden = true;
+        previewImagem.removeAttribute('src');
+        previewFrame.removeAttribute('src');
+
+        if (ehImagem) {
+            previewImagem.src = url;
+            previewImagem.alt = nome || 'Anexo';
+            previewImagem.hidden = false;
+        } else {
+            previewFrame.src = url;
+            previewFrame.hidden = false;
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function fecharAnexoPedido() {
+        const modal = document.getElementById('modalAnexoPedido');
+        const previewImagem = document.getElementById('anexoPreviewImagem');
+        const previewFrame = document.getElementById('anexoPreviewFrame');
+        modal.style.display = 'none';
+        previewImagem.removeAttribute('src');
+        previewFrame.removeAttribute('src');
     }
 
     function salvarOrcamento(event) {
@@ -385,9 +490,13 @@
     }
 
     window.onclick = function(event) {
-        var modal = document.getElementById("modalOrcamento");
-        if (event.target == modal) {
+        var modalOrcamento = document.getElementById("modalOrcamento");
+        var modalAnexo = document.getElementById("modalAnexoPedido");
+        if (event.target == modalOrcamento) {
             fecharModalOrcamento();
+        }
+        if (event.target == modalAnexo) {
+            fecharAnexoPedido();
         }
     }
 </script>

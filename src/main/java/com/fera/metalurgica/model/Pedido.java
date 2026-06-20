@@ -29,6 +29,15 @@ public class Pedido {
 	@Column(name = "observacao", columnDefinition = "TEXT")
 	private String descricao;
 
+	@Column(name = "anexo_caminho")
+	private String anexoCaminho;
+
+	@Column(name = "anexo_nome_original")
+	private String anexoNomeOriginal;
+
+	@Column(name = "anexo_tipo")
+	private String anexoTipo;
+
 	private String criadoPor; // "CLIENTE" ou "ADMIN"
 
 	@Column(name = "data_criacao")
@@ -91,6 +100,15 @@ public class Pedido {
 	public String getDescricao() { return descricao; }
 	public void setDescricao(String descricao) { this.descricao = descricao; }
 
+	public String getAnexoCaminho() { return anexoCaminho; }
+	public void setAnexoCaminho(String anexoCaminho) { this.anexoCaminho = anexoCaminho; }
+
+	public String getAnexoNomeOriginal() { return anexoNomeOriginal; }
+	public void setAnexoNomeOriginal(String anexoNomeOriginal) { this.anexoNomeOriginal = anexoNomeOriginal; }
+
+	public String getAnexoTipo() { return anexoTipo; }
+	public void setAnexoTipo(String anexoTipo) { this.anexoTipo = anexoTipo; }
+
 	public String getCriadoPor() { return criadoPor; }
 	public void setCriadoPor(String criadoPor) { this.criadoPor = criadoPor; }
 
@@ -144,6 +162,16 @@ public class Pedido {
 	@Transient
 	public boolean isOrcamentoPendente() {
 		return isCriadoPorCliente() && !isOrcamentoGerado();
+	}
+
+	@Transient
+	public boolean isTemAnexo() {
+		return anexoCaminho != null && !anexoCaminho.isBlank();
+	}
+
+	@Transient
+	public boolean isAnexoImagem() {
+		return isTemAnexo() && anexoTipo != null && anexoTipo.startsWith("image/");
 	}
 
 	@Transient

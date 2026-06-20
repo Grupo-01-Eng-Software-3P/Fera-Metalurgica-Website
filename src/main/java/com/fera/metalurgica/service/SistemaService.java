@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.nio.file.*;
 import java.io.IOException;
@@ -216,6 +217,11 @@ public class SistemaService {
 	}
 
 	public void adicionarPedido(Pedido pedido) {
+		adicionarPedido(pedido, null);
+	}
+
+	@Transactional
+	public void adicionarPedido(Pedido pedido, MultipartFile arquivo) {
 		if (pedido.getItens() != null) {
 			for (ItemPedido item : pedido.getItens()) {
 				item.setPedido(pedido);
@@ -224,6 +230,11 @@ public class SistemaService {
 		if (pedido.getCriadoPor() == null) {
 			pedido.setCriadoPor("CLIENTE");
 		}
+
+		if (arquivo != null && !arquivo.isEmpty()) {
+			salvarAnexoPedido(pedido, arquivo);
+		}
+
 		pedido.calcularTotais();
 		pedidoRepository.save(pedido);
 
@@ -409,6 +420,141 @@ public class SistemaService {
 		}
 	}
 
+
+	private void salvarAnexoPedido(Pedido pedido, MultipartFile arquivo) {
+		String nomeOriginal = limparNomeArquivoOriginal(arquivo.getOriginalFilename());
+		String tipoArquivo = detectarTipoArquivoAnexo(arquivo, nomeOriginal);
+
+		if (!anexoEhSuportado(tipoArquivo, nomeOriginal)) {
+			throw new BusinessException("O anexo do pedido deve ser uma imagem ou PDF.");
+		}
+
+		String nomeArquivo = UUID.randomUUID() + "_" + gerarNomeArquivoAnexo(nomeOriginal, tipoArquivo);
+		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize().resolve("pedidos");
+
+		try {
+			Files.createDirectories(uploadPath);
+			Files.copy(arquivo.getInputStream(), uploadPath.resolve(nomeArquivo), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new BusinessException("Erro ao salvar o anexo do pedido: " + e.getMessage());
+		}
+
+		pedido.setAnexoCaminho("/imagens/pedidos/" + nomeArquivo);
+		pedido.setAnexoNomeOriginal(nomeOriginal);
+		pedido.setAnexoTipo(tipoArquivo);
+	}
+
+	private boolean anexoEhSuportado(String tipoArquivo, String nomeOriginal) {
+		return anexoEhImagem(tipoArquivo, nomeOriginal)
+			|| "application/pdf".equalsIgnoreCase(tipoArquivo);
+	}
+
+	private boolean anexoEhImagem(String tipoArquivo, String nomeOriginal) {
+		if (tipoArquivo != null && tipoArquivo.toLowerCase(Locale.ROOT).startsWith("image/")) {
+			return true;
+		}
+
+		if (nomeOriginal == null) {
+			return false;
+		}
+
+		String nome = nomeOriginal.toLowerCase(Locale.ROOT);
+		return nome.endsWith(".png")
+			|| nome.endsWith(".jpg")
+			|| nome.endsWith(".jpeg")
+			|| nome.endsWith(".gif")
+			|| nome.endsWith(".webp")
+			|| nome.endsWith(".bmp");
+	}
+
+	private String detectarTipoArquivoAnexo(MultipartFile arquivo, String nomeOriginal) {
+		String tipo = arquivo.getContentType();
+		if (tipo != null && !tipo.isBlank()) {
+			return tipo.toLowerCase(Locale.ROOT);
+		}
+
+		if (nomeOriginal == null) {
+			return null;
+		}
+
+		String nome = nomeOriginal.toLowerCase(Locale.ROOT);
+		if (nome.endsWith(".png")) return "image/png";
+		if (nome.endsWith(".jpg") || nome.endsWith(".jpeg")) return "image/jpeg";
+		if (nome.endsWith(".gif")) return "image/gif";
+		if (nome.endsWith(".webp")) return "image/webp";
+		if (nome.endsWith(".bmp")) return "image/bmp";
+		if (nome.endsWith(".pdf")) return "application/pdf";
+		return null;
+	}
+
+	private String limparNomeArquivoOriginal(String nomeOriginal) {
+		if (nomeOriginal == null || nomeOriginal.isBlank()) {
+			return "anexo";
+		}
+
+		String nome = nomeOriginal.replace("\\", "/");
+		int indice = nome.lastIndexOf('/');
+		if (indice >= 0 && indice < nome.length() - 1) {
+			nome = nome.substring(indice + 1);
+		}
+
+		nome = nome.trim();
+		return nome.isBlank() ? "anexo" : nome;
+	}
+
+	private String sanitizarNomeArquivo(String nomeOriginal) {
+		String nome = nomeOriginal
+			.replaceAll("[^a-zA-Z0-9._-]", "_")
+			.replaceAll("_+", "_");
+		return nome.isBlank() ? "anexo" : nome;
+	}
+
+	private String gerarNomeArquivoAnexo(String nomeOriginal, String tipoArquivo) {
+		String base = removerExtensao(sanitizarNomeArquivo(nomeOriginal));
+		String extensao = extensaoPadrao(tipoArquivo);
+		return extensao.isBlank() ? base : base + extensao;
+	}
+
+	private String removerExtensao(String nomeArquivo) {
+		int indice = nomeArquivo.lastIndexOf('.');
+		if (indice <= 0) {
+			return nomeArquivo;
+		}
+
+		return nomeArquivo.substring(0, indice);
+	}
+
+	private String extensaoPadrao(String tipoArquivo) {
+		if (tipoArquivo == null || tipoArquivo.isBlank()) {
+			return "";
+		}
+
+		return switch (tipoArquivo.toLowerCase(Locale.ROOT)) {
+			case "image/png" -> ".png";
+			case "image/jpeg" -> ".jpg";
+			case "image/gif" -> ".gif";
+			case "image/webp" -> ".webp";
+			case "image/bmp" -> ".bmp";
+			case "application/pdf" -> ".pdf";
+			default -> "";
+		};
+	}
+
+	public Path localizarArquivoAnexoPedido(Pedido pedido) {
+		if (pedido == null || !pedido.isTemAnexo()) {
+			throw new ResourceNotFoundException("Pedido não possui anexo.");
+		}
+
+		String nomeArquivo = Paths.get(pedido.getAnexoCaminho()).getFileName().toString();
+		Path baseDir = Paths.get(uploadDir).toAbsolutePath().normalize().resolve("pedidos");
+		Path arquivo = baseDir.resolve(nomeArquivo).normalize();
+
+		if (!arquivo.startsWith(baseDir)) {
+			throw new BusinessException("Caminho de anexo inválido.");
+		}
+
+		return arquivo;
+	}
 
 	// MIDIA / CATEGORIA
 

@@ -14,7 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.nio.file.*;
@@ -22,6 +25,9 @@ import java.io.IOException;
 
 @Service
 public class SistemaService {
+
+	private static final DateTimeFormatter DATA_BR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	private static final DateTimeFormatter HORA_BR = DateTimeFormatter.ofPattern("HH:mm");
 
 	private final ProdutoRepository produtoRepository;
 	private final PedidoRepository pedidoRepository;
@@ -89,17 +95,10 @@ public class SistemaService {
 	}
 
 	@PostConstruct
-	public void criarAtividadesIniciais() {
-		if (atividadeRepository.count() == 0) {
-			atividadeRepository.save(new Atividade(
-				"Alerta de Estoque", "Aço 2mm está fora de estoque!", "ALERTA",
-				LocalDate.now(), "Há 17h"
-			));
-			atividadeRepository.save(new Atividade(
-				"Reunião", "Reunião marcada para amanhã às 9:00.", "REUNIAO",
-				LocalDate.now().plusDays(1), "Ontem"
-			));
-		}
+	public void removerAtividadesIniciaisAntigas() {
+		atividadeRepository.findAll().stream()
+			.filter(this::isAtividadeInicialAntiga)
+			.forEach(atividadeRepository::delete);
 	}
 
 	@PostConstruct
@@ -244,11 +243,73 @@ public class SistemaService {
 	// ATIVIDADE
 
 	public void salvarAtividade(Atividade atividade) {
+		if (atividade.getId() != null && atividade.getDataCriacao() == null) {
+			atividadeRepository.findById(atividade.getId())
+				.map(Atividade::getDataCriacao)
+				.ifPresent(atividade::setDataCriacao);
+		}
 		atividadeRepository.save(atividade);
 	}
 
 	public List<Atividade> listarAtividades() {
 		return atividadeRepository.findAllByOrderByIdDesc();
+	}
+
+	public List<Atividade> listarAtividadesRecentesDashboard() {
+		LocalDate hoje = LocalDate.now();
+		LocalDateTime agora = LocalDateTime.now();
+		List<Atividade> atividades = new ArrayList<>();
+
+		for (Atividade atividade : atividadeRepository.findAll()) {
+			if (atividade.getData() == null) {
+				continue;
+			}
+
+			if (atividade.getData().equals(hoje)) {
+				atividades.add(criarAtividadeRecente(
+					atividade.getTitulo(),
+					"Compromisso: " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
+					atividade.getEvento(),
+					atividade.getData(),
+					valorOuPadrao(atividade.getHorario(), "Hoje")
+				));
+			} else if (atividade.getData().isAfter(hoje) && foiCriadaNasUltimas24Horas(atividade, agora)) {
+				atividades.add(criarAtividadeRecente(
+					atividade.getTitulo(),
+					"Compromisso criado para o dia " + DATA_BR.format(atividade.getData())
+						+ ": " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
+					atividade.getEvento(),
+					atividade.getData(),
+					DATA_BR.format(atividade.getData())
+				));
+			}
+		}
+
+		for (Pedido pedido : pedidoRepository.findAllByOrderByDataCriacaoDesc()) {
+			if (pedido.getDataCriacao() == null || !pedido.getDataCriacao().toLocalDate().equals(hoje)) {
+				continue;
+			}
+
+			String numero = pedido.getId() != null ? pedido.getId().toString() : "-";
+			String descricao = pedido.isOrcamentoGerado()
+				? "Orçamento Nº" + numero + " criado"
+				: "Pedido Nº" + numero + " realizado";
+
+			atividades.add(criarAtividadeRecente(
+				descricao,
+				descricao,
+				pedido.isOrcamentoGerado() ? "ORCAMENTO" : "PEDIDO",
+				hoje,
+				HORA_BR.format(pedido.getDataCriacao())
+			));
+		}
+
+		return atividades.stream()
+			.sorted(Comparator
+				.comparing((Atividade atividade) -> atividade.getData() == null ? LocalDate.MIN : atividade.getData())
+				.reversed()
+				.thenComparing(Atividade::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+			.toList();
 	}
 
 	public Atividade adicionarAtividade(Atividade atividade) {
@@ -263,6 +324,25 @@ public class SistemaService {
 		return atividadeRepository.findAll().stream()
 			.filter(a -> data.equals(a.getData()))
 			.toList();
+	}
+
+	private boolean isAtividadeInicialAntiga(Atividade atividade) {
+		return ("Alerta de Estoque".equals(atividade.getTitulo()) && "ALERTA".equals(atividade.getEvento()))
+			|| ("Reunião".equals(atividade.getTitulo()) && "REUNIAO".equals(atividade.getEvento()));
+	}
+
+	private boolean foiCriadaNasUltimas24Horas(Atividade atividade, LocalDateTime agora) {
+		return atividade.getDataCriacao() != null
+			&& !atividade.getDataCriacao().isAfter(agora)
+			&& !atividade.getDataCriacao().isBefore(agora.minusHours(24));
+	}
+
+	private Atividade criarAtividadeRecente(String titulo, String descricao, String evento, LocalDate data, String horario) {
+		return new Atividade(titulo, descricao, evento, data, horario);
+	}
+
+	private String valorOuPadrao(String valor, String padrao) {
+		return valor == null || valor.isBlank() ? padrao : valor;
 	}
 
 	private int tamanho(List<?> lista) {

@@ -2,6 +2,7 @@ package com.fera.metalurgica.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "atividade")
@@ -16,6 +17,7 @@ public class Atividade {
     private String evento;
     private LocalDate data;
     private String horario;
+    private LocalDateTime dataCriacao;
 
     public Atividade() {}
 
@@ -25,6 +27,13 @@ public class Atividade {
         this.evento = evento;
         this.data = data;
         this.horario = horario;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.dataCriacao == null) {
+            this.dataCriacao = LocalDateTime.now();
+        }
     }
 
     public Long getId() { return id; }
@@ -44,4 +53,7 @@ public class Atividade {
 
     public String getHorario() { return horario; }
     public void setHorario(String horario) { this.horario = horario; }
+
+    public LocalDateTime getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
 }

@@ -50,7 +50,7 @@ public class SistemaController {
 		LocalDate agora = LocalDate.now();
 		model.addAttribute("orcamentosMes", todos.stream().filter(p -> p.getDataCriacao() != null && p.getDataCriacao().getMonthValue() == agora.getMonthValue()).count());
 		model.addAttribute("orcamentosConcluidos", todos.stream().filter(p -> p.getItens() != null && !p.getItens().isEmpty()).count());
-		model.addAttribute("atividades", service.listarAtividades());
+		model.addAttribute("atividades", service.listarAtividadesRecentesDashboard());
 		return "dashboard";
 	}
 

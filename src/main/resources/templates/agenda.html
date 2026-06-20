@@ -69,11 +69,12 @@
 <div id="modalAgendamento" class="modal-form-overlay">
     <div class="modal-form-content modal-premium">
         <div class="modal-header">
-            <h3><i class="fas fa-calendar-plus"></i> Novo Agendamento</h3>
+            <h3 id="tituloModalAgendamento"><i class="fas fa-calendar-plus"></i> Novo Agendamento</h3>
             <span class="fechar-modal-x" onclick="fecharModalAgendamento()">&times;</span>
         </div>
 
         <form id="formAgendamento" onsubmit="salvarAgendamento(event)">
+            <input type="hidden" id="inputId">
             <div class="form-row">
                 <div class="input-group">
                     <label>Título do Compromisso</label>
@@ -112,7 +113,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" onclick="fecharModalAgendamento()">Cancelar</button>
-                <button type="submit" class="btn-salvar">Confirmar Agendamento</button>
+                <button type="submit" class="btn-salvar" id="btnSalvarAgendamento">Confirmar Agendamento</button>
             </div>
         </form>
     </div>
@@ -127,6 +128,7 @@
 
         <div style="padding: 30px 40px;">
             <h4 id="detalheTitulo" style="color: var(--fera-orange); font-size: 22px; margin-bottom: 20px;">Título do Evento</h4>
+            <input type="hidden" id="detalheId">
 
             <div style="display: flex; flex-direction: column; gap: 15px; font-size: 16px; color: var(--text-dark);">
                 <p><strong><i class="fas fa-clock" style="color: #A09A92; width: 25px;"></i> Horário:</strong> <span id="detalheHorario"></span></p>
@@ -139,7 +141,10 @@
                 </div>
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer detalhes-footer">
+                <button type="button" class="btn-editar-detalhes" onclick="editarCompromissoSelecionado()" title="Editar compromisso" aria-label="Editar compromisso">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
                 <button type="button" class="btn-salvar" onclick="fecharDetalhes()">Fechar</button>
             </div>
         </div>
@@ -153,6 +158,7 @@
     let mesAtual = dataAtual.getMonth();
     let anoAtual = dataAtual.getFullYear();
     let diaSelecionado = dataAtual.getDate();
+    let compromissoSelecionado = null;
 
     const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
         "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -167,6 +173,27 @@
     function parsarData(dataStr) {
         const [ano, mes, dia] = dataStr.split("-").map(Number);
         return new Date(ano, mes - 1, dia);
+    }
+
+    function formatarDataInput(data) {
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, "0");
+        const dia = String(data.getDate()).padStart(2, "0");
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function dataSelecionadaInput() {
+        return formatarDataInput(new Date(anoAtual, mesAtual, diaSelecionado));
+    }
+
+    function separarHorario(horario) {
+        if (!horario) return ["", ""];
+        const partes = horario.split("-").map(p => p.trim());
+        return [partes[0] || "", partes[1] || ""];
+    }
+
+    function encontrarCompromisso(id) {
+        return compromissos.find(c => String(c.id) === String(id));
     }
 
 
@@ -275,8 +302,8 @@
 
         doDia.forEach(c => {
             lista.innerHTML += `
-                <li class="compromisso-card" onclick="abrirDetalhes(${JSON.stringify(c).replace(/"/g, '&quot;')})">
-                    <div>
+                <li class="compromisso-card" onclick="abrirDetalhesPorId('${c.id}')">
+                    <div class="compromisso-info">
                         <strong>${c.titulo}</strong><br>
                         <small>${c.horario}</small><br>
                         <small>${c.evento}</small>
@@ -290,7 +317,12 @@
     // =====================
     // DETALHES DO COMPROMISSO
     // =====================
-    function abrirDetalhes(c) {
+    function abrirDetalhesPorId(id) {
+        const c = encontrarCompromisso(id);
+        if (!c) return;
+
+        compromissoSelecionado = c;
+        document.getElementById("detalheId").value = c.id || "";
         document.getElementById("detalheTitulo").innerText   = c.titulo;
         document.getElementById("detalheHorario").innerText  = c.horario;
         document.getElementById("detalheEvento").innerText   = c.evento;
@@ -305,6 +337,8 @@
 
     function fecharDetalhes() {
         document.getElementById("modalDetalhes").style.display = "none";
+        document.getElementById("detalheId").value = "";
+        compromissoSelecionado = null;
     }
 
 
@@ -320,6 +354,7 @@
         const data      = document.getElementById("inputData").value;
         const h1        = document.getElementById("inputHoraInicio").value;
         const h2        = document.getElementById("inputHoraFim").value;
+        const id        = document.getElementById("inputId").value;
 
         const csrfToken  = document.getElementById("csrfToken").value;
         const csrfHeader = document.getElementById("csrfHeader").value;
@@ -331,6 +366,7 @@
                     [csrfHeader]: csrfToken
                 },
             body: JSON.stringify({
+                id: id || null,
                 titulo,
                 descricao,
                 evento,
@@ -340,6 +376,10 @@
         }).then(() => {
             fecharModalAgendamento();
             document.getElementById("formAgendamento").reset();
+            const dataSalva = parsarData(data);
+            anoAtual = dataSalva.getFullYear();
+            mesAtual = dataSalva.getMonth();
+            diaSelecionado = dataSalva.getDate();
             carregarAgenda();
         });
     }
@@ -349,10 +389,45 @@
     // MODAL AGENDAMENTO
     // =====================
     function abrirModalAgendamento() {
+        compromissoSelecionado = null;
+        document.getElementById("formAgendamento").reset();
+        document.getElementById("inputId").value = "";
+        document.getElementById("inputData").value = dataSelecionadaInput();
+        document.getElementById("tituloModalAgendamento").innerHTML = '<i class="fas fa-calendar-plus"></i> Novo Agendamento';
+        document.getElementById("btnSalvarAgendamento").innerText = "Confirmar Agendamento";
         document.getElementById("modalAgendamento").style.display = "flex";
     }
+
+    function editarCompromissoPorId(id) {
+        const c = encontrarCompromisso(id);
+        if (!c) return;
+
+        compromissoSelecionado = c;
+        const [horaInicio, horaFim] = separarHorario(c.horario);
+
+        document.getElementById("inputId").value = c.id || "";
+        document.getElementById("inputTitulo").value = c.titulo || "";
+        document.getElementById("inputDescricao").value = c.descricao || "";
+        document.getElementById("inputData").value = c.data || dataSelecionadaInput();
+        document.getElementById("inputHoraInicio").value = horaInicio;
+        document.getElementById("inputHoraFim").value = horaFim;
+        document.getElementById("inputEvento").value = c.evento || "";
+        document.getElementById("tituloModalAgendamento").innerHTML = '<i class="fas fa-calendar-check"></i> Editar Agendamento';
+        document.getElementById("btnSalvarAgendamento").innerText = "Salvar Alterações";
+        document.getElementById("modalAgendamento").style.display = "flex";
+    }
+
+    function editarCompromissoSelecionado() {
+        const id = document.getElementById("detalheId").value;
+        if (!id) return;
+
+        fecharDetalhes();
+        editarCompromissoPorId(id);
+    }
+
     function fecharModalAgendamento() {
         document.getElementById("modalAgendamento").style.display = "none";
+        compromissoSelecionado = null;
     }
 
     window.onclick = function(e) {

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Orçamento Confirmado - Fera Metalúrgica</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/pedido-confirmacao.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="confirmacao-page">
+ 
+<!-- NAV -->
+<nav class="top-nav">
+    <div class="logo">
+        <h2 style="color: var(--fera-orange);">FERA</h2>
+    </div>
+    <div class="nav-links">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="/pedido" class="btn-outline">Criar Orçamento</a>
+        <a href="/login"><i class="fas fa-user-circle"></i> Perfil</a>
+    </div>
+</nav>
+ 
+<!-- HERO SECTION -->
+<section class="confirmacao-hero">
+    <div class="confirmacao-hero-overlay"></div>
+    <div class="confirmacao-hero-content">
+        <div class="icone-check">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1>Orçamento Realizado<br>com Sucesso!</h1>
+        <p th:if="${nomeCliente}">
+            Obrigado, <strong th:text="${nomeCliente}">Cliente</strong>!
+            Sua solicitação foi recebida.
+        </p>
+        <p th:unless="${nomeCliente}">
+            Sua solicitação foi recebida com sucesso!
+        </p>
+    </div>
+</section>
+ 
+<!-- INFORMAÇÕES -->
+<section class="confirmacao-info">
+    <div class="info-card">
+        <div class="info-icone">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h3>Prazo de Resposta</h3>
+        <p>Nossa equipe entrará em contato em até <strong>24 horas</strong> com o orçamento detalhado.</p>
+    </div>
+ 
+    <div class="info-card destaque">
+        <div class="info-icone">
+            <i class="fab fa-whatsapp"></i>
+        </div>
+        <h3>Precisa falar agora?</h3>
+        <p>Caso necessite, entre em contato diretamente pelo WhatsApp.</p>
+        <a href="https://wa.me/5544997544888?text=Olá!%20Acabei%20de%20realizar%20um%20orçamento%20e%20gostaria%20de%20mais%20informações."
+           target="_blank"
+           class="btn-whatsapp">
+            <i class="fab fa-whatsapp"></i>
+            Falar no WhatsApp
+        </a>
+    </div>
+ 
+    <div class="info-card">
+        <div class="info-icone">
+            <i class="fas fa-star"></i>
+        </div>
+        <h3>Qualidade Garantida</h3>
+        <p>Todos os nossos projetos são feitos sob medida com os melhores materiais do mercado.</p>
+    </div>
+</section>
+ 
+<!-- CTA VOLTAR -->
+<section class="confirmacao-cta">
+    <div class="cta-content">
+        <h2>Conheça mais sobre a Fera</h2>
+        <p>Explore nosso catálogo e inspire-se com os projetos que já realizamos.</p>
+        <div class="cta-botoes">
+            <a href="/catalogo" class="btn-catalogo">Ver Catálogo</a>
+            <a href="/" class="btn-home">
+                <i class="fas fa-home"></i> Voltar ao Início
+            </a>
+        </div>
+    </div>
+</section>
+ 
+<!-- FOOTER -->
+<footer class="main-footer">
+    <div class="footer-left">
+        <h3>Fera Metalurgica</h3>
+        <p>Fera Metalúrgica é sinônimo de força, precisão e qualidade. Especializada em soluções metálicas sob medida, unimos tecnologia, experiência e dedicação para entregar resultados resistentes, confiáveis e feitos para durar.</p>
+        <div class="social-icons-footer">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+    </div>
+    <div class="footer-links-container">
+        <div class="footer-column">
+            <h4>Veja mais</h4>
+            <ul>
+                <li><a href="/catalogo">Catálogo</a></li>
+                <li><a href="/pedido">Orçamento</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Suporte</h4>
+            <ul>
+                <li><a href="#">Contato</a></li>
+                <li><a href="#">Suporte</a></li>
+                <li><a href="#">Diretrizes</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+ 
+</body>
+</html>
+ 

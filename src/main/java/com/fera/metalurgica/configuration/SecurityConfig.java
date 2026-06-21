@@ -16,7 +16,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/login",
+							"/h2-console/**",
+								"/login",
 								"/login/**",
                                 "/css/**",
                                 "/js/**",
@@ -42,7 +43,15 @@ public class SecurityConfig {
                         		.anyRequest().permitAll()
                 )
 
-                .formLogin(form -> form
+				.csrf(csrf -> csrf
+				.ignoringRequestMatchers("/h2-console/**")
+				)
+
+				.headers(headers -> headers
+					.frameOptions(frame -> frame.disable())
+				)
+
+			.formLogin(form -> form
                         .loginPage("/login")
 						.loginProcessingUrl("/login-process")
                         .usernameParameter("email")

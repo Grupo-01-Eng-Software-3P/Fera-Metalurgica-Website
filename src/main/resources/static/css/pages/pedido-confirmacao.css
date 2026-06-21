@@ -1,104 +1,94 @@
-/* =============================================
-   pedido-confirmacao.css — Fera Metalúrgica
-   Coloque em: src/main/resources/static/css/pages/
-   ============================================= */
- 
 .confirmacao-page {
     margin: 0;
     padding: 0;
     background-color: var(--bg-beige);
 }
- 
+
 /* ---- HERO ---- */
 .confirmacao-hero {
     position: relative;
-    min-height: 40vh; /* era 70vh, reduzi */
-    background-color: var(--fera-orange); /* fundo laranja sólido */
-    background-image: none; /* remove a foto */
+    min-height: 40vh;
+    background-color: var(--fera-orange);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 80px 40px 60px;
+    padding: 100px 40px 60px;
 }
 
-.confirmacao-hero-overlay {
-    display: none; /* remove o overlay escuro */
-}
- 
 .confirmacao-hero-content {
     position: relative;
     z-index: 2;
     color: #fff;
     max-width: 700px;
 }
- 
+
 .icone-check {
     width: 90px;
     height: 90px;
-    background-color: var(--fera-orange);
+    background-color: rgba(255,255,255,0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 28px;
-    box-shadow: 0 0 0 12px rgba(192, 96, 20, 0.2);
     animation: pulse 2s infinite;
 }
- 
+
 @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(192, 96, 20, 0.4); }
-    70%  { box-shadow: 0 0 0 20px rgba(192, 96, 20, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(192, 96, 20, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+    70%  { box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
 }
- 
+
 .icone-check i {
     font-size: 42px;
-    color: #fff;
+    color: #ffffff;
 }
- 
+
 .confirmacao-hero-content h1 {
     font-size: 2.8rem;
     font-weight: 900;
     line-height: 1.2;
     margin-bottom: 16px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
- 
+
 .confirmacao-hero-content p {
     font-size: 1.15rem;
     opacity: 0.9;
     line-height: 1.6;
 }
- 
+
 .confirmacao-hero-content strong {
-    color: var(--fera-orange);
+    color: #fff;
+    font-weight: 800;
 }
- 
+
 /* ---- INFO CARDS ---- */
 .confirmacao-info {
     display: flex;
     gap: 0;
-    background: #fff;
+    background: var(--bg-beige);
 }
- 
+
 .info-card {
     flex: 1;
     padding: 48px 40px;
     text-align: center;
-    border-right: 1px solid #f0e6dd;
-    transition: background 0.2s;
+    background: var(--bg-beige);
+    border-right: 3px solid var(--fera-orange); /* troca a cor */
 }
- 
+
 .info-card:last-child {
     border-right: none;
 }
- 
+
 .info-card.destaque {
-    background-color: var(--fera-orange);
-    color: #fff;
+    flex: 2;
+    background-color: var(--bg-beige);
+    border-left: 4px solid var(--fera-orange);
 }
- 
+
 .info-icone {
     width: 64px;
     height: 64px;
@@ -111,141 +101,160 @@
     background-color: rgba(192, 96, 20, 0.1);
     color: var(--fera-orange);
 }
- 
+
 .info-card.destaque .info-icone {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
 }
- 
+
 .info-card h3 {
     font-size: 1.15rem;
     font-weight: 700;
     margin-bottom: 12px;
     color: var(--text-dark);
 }
- 
+
 .info-card.destaque h3 {
-    color: #fff;
+    font-size: 1.4rem;
 }
- 
+
 .info-card p {
     font-size: 0.92rem;
     line-height: 1.7;
     color: #666;
     margin-bottom: 0;
 }
- 
+
 .info-card.destaque p {
-    color: rgba(255,255,255,0.9);
     margin-bottom: 24px;
 }
- 
+
 /* Botão WhatsApp */
 .btn-whatsapp {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background-color: #fff;
-    color: var(--fera-orange);
-    padding: 12px 24px;
+    background-color: #25D366;
+    color: #fff !important;
+    padding: 14px 32px;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: background 0.2s, transform 0.2s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(37,211,102,0.3);
 }
- 
+
 .btn-whatsapp:hover {
-    background-color: #f0f0f0;
+    background-color: #1ebe5d;
     transform: translateY(-2px);
 }
- 
+
 .btn-whatsapp i {
     font-size: 1.2rem;
-    color: #25D366;
 }
- 
+
 /* ---- CTA SECTION ---- */
 .confirmacao-cta {
-    background-color: var(--bg-beige);
-    padding: 80px 40px;
+    background-color: #c36b19;
+    padding: 60px 40px;
     text-align: center;
 }
- 
+
 .cta-content h2 {
     font-size: 2rem;
     font-weight: 800;
-    color: var(--text-dark);
+    color: #fff;
     margin-bottom: 12px;
 }
- 
+
 .cta-content p {
     font-size: 1rem;
-    color: #777;
+    color: rgba(255,255,255,0.8);
     margin-bottom: 36px;
 }
- 
+
 .cta-botoes {
     display: flex;
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
 }
- 
+
 .btn-catalogo {
-    background-color: var(--fera-orange);
-    color: #fff;
-    padding: 14px 32px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: opacity 0.2s, transform 0.2s;
-}
- 
-.btn-catalogo:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
- 
-.btn-home {
     background-color: transparent;
-    color: var(--fera-orange);
-    border: 2px solid var(--fera-orange);
+    color: #fff !important;
+    border: 2px solid #fff;
     padding: 14px 32px;
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 700;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: background 0.2s, color 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
- 
-.btn-home:hover {
-    background-color: var(--fera-orange);
-    color: #fff;
+
+.btn-catalogo:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
 }
- 
+
+.btn-home {
+    background-color: transparent;
+    color: #fff !important;
+    border: 2px solid #fff;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: background 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-home:hover {
+    background-color: #fff;
+    color: #5C3817 !important;
+}
+
 /* ---- RESPONSIVO ---- */
 @media (max-width: 768px) {
     .confirmacao-hero-content h1 {
         font-size: 1.8rem;
     }
- 
+
     .confirmacao-info {
         flex-direction: column;
     }
- 
+
     .info-card {
         border-right: none;
-        border-bottom: 1px solid #f0e6dd;
+        border-bottom: 1px solid #e0d5cb;
     }
- 
+
     .confirmacao-cta {
-        padding: 60px 24px;
+        padding: 40px 24px;
     }
+    }
+
+    /* Nav laranja */
+    .confirmacao-page .top-nav {
+    background-color: var(--fera-orange) !important;
 }
- 
+
+/* Links da nav brancos */
+    .confirmacao-page .top-nav a,
+    .confirmacao-page .top-nav .nav-links a {
+    color: #ffffff !important;
+}
+
+/* Botão outline branco */
+    .confirmacao-page .top-nav .btn-outline {
+    border-color: #fff !important;
+    color: #fff !important;
+}

@@ -100,7 +100,7 @@ public class SistemaController {
 			return "pedido";
 		}
 
-		return "redirect:/";
+		return "redirect:/pedido/confirmacao?nome=" + novoPedido.getCliente();
 	}
 
 	@GetMapping("/pedido")
@@ -323,6 +323,12 @@ public class SistemaController {
 		model.addAttribute("midias", service.listarMidiasPorCategoria(categoria.getId()));
 		return "catalogo-ambiente";
 	}
+
+	@GetMapping("/pedido/confirmacao")
+	public String pedidoConfirmacao(@RequestParam(value = "nome", required = false) String nome, Model model) {
+    model.addAttribute("nomeCliente", nome);
+    return "pedido-confirmacao";
+}
 
 	// ── AUXILIARES ───────────────────────────────────────
 	private boolean isCPFValido(String cpf) {

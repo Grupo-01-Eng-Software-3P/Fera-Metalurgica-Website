@@ -19,9 +19,9 @@
             <li><a href="/agenda"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
             <li><a href="/midia"><i class="fas fa-image"></i> Mídia</a></li>
             <li class="active"><a href="/orcamentos"><i class="fas fa-file-invoice"></i> Orçamentos</a></li>
-            <li><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
+            <li th:if="${usuarioEhAdmin}"><a href="/usuarios"><i class="fas fa-user"></i> Usuários</a></li>
         </ul>
-        <div th:replace="~{fragments/sidebar-user :: sidebarUser('Lucas Stibbe')}"></div>
+        <div th:replace="~{fragments/sidebar-user :: sidebarUser(${nomeUsuario})}"></div>
     </aside>
 
     <main class="main-content">

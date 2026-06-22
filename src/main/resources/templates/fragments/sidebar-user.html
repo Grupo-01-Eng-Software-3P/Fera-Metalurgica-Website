@@ -1,7 +1,7 @@
 <div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebarUser(nomeUsuario)" class="sidebar-user">
     <div class="sidebar-user-info">
         <i class="fas fa-user-circle"></i>
-        <span th:text="${nomeUsuario}">Lucas Stibbe</span>
+        <span th:text="${nomeUsuario}">Visitante</span>
     </div>
 
     <form th:action="@{/logout}" method="POST" class="sidebar-logout-form">

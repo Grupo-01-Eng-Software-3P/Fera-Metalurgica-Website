@@ -33,15 +33,20 @@ public class SecurityConfig {
 								"/agenda",
 								"/agenda/**",
                                 "/midia",
+                                "/midia/**",
                                 "/orcamentos",
                                 "/orcamentos/**",
-                                "/usuarios",
-								"/novo-usuario",
-								"/nova-imagem",
-								"/nova-categoria"
+                                "/nova-imagem",
+                                "/nova-categoria"
                                 ).authenticated()
-                        		.anyRequest().permitAll()
+                        .requestMatchers(
+                                "/usuarios",
+								"/usuarios/**",
+								"/novo-usuario"
+                                ).hasRole("ADMIN")
+                        	.anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex.accessDeniedPage("/dashboard"))
 
 				.csrf(csrf -> csrf
 				.ignoringRequestMatchers("/h2-console/**")

@@ -1,19 +1,35 @@
 package com.fera.metalurgica.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 @Service
 public class ZApiService {
 
-    private static final String INSTANCE_ID = "3F44D0B81CC1B1E17D5BFE743DE93AC5";
-    private static final String TOKEN = "FC292ECA4C7B66FF7C0D2679";
-    private static final String CLIENT_TOKEN = "Fe5dcb05195e64af1bc9eeb80200053a3S";
-    private static final String NUMERO_ADMIN = "120363425141616950-group";
-    private static final String URL = "https://api.z-api.io/instances/" + INSTANCE_ID + "/token/" + TOKEN + "/send-text";
+	@Value("${zapi.instance-id}")
+	private String instanceId;
+
+	@Value("${zapi.token}")
+	private String token;
+
+	@Value("${zapi.client-token}")
+	private String clientToken;
+
+	@Value("${zapi.numero-admin}")
+	private String numeroAdmin;
+
+	private final HttpClient client = HttpClient.newHttpClient();
+	private final ObjectMapper mapper = new ObjectMapper();
+
+	private String getUrl() {
+		return "https://api.z-api.io/instances/" + instanceId + "/token/" + token + "/send-text";
+	}
 
     public void enviarNotificacaoOrcamento(String nomeCliente, String telefoneCliente, String descricao) {
         try {
@@ -25,8 +41,6 @@ public class ZApiService {
                     + "📋 *Descrição:* " + descricao + "\n\n"
                     + "Em breve nossa equipe entrará em contato. Obrigado!";
 
-            enviar(numeroCliente, mensagemCliente);
-
             // Mensagem para o ADMINISTRADOR
             String mensagemAdmin = "🔔 *Novo Orçamento Recebido!*\n\n"
                     + "👤 *Cliente:* " + nomeCliente + "\n"
@@ -34,25 +48,37 @@ public class ZApiService {
                     + "📋 *Descrição:* " + descricao + "\n\n"
                     + "Acesse o painel para visualizar o pedido completo.";
 
-            enviar(NUMERO_ADMIN, mensagemAdmin);
+			enviar(numeroCliente, mensagemCliente);
+
+			Thread.sleep(1000); //Delay entre envios da API para não ter problemas com rate limit. Poderíamos
+									 //usar @Async, mas, como é um uso pequeno, sleep já serve (eu acho ne)
+
+            enviar(numeroAdmin, mensagemAdmin);
 
         } catch (Exception e) {
             System.err.println("Erro ao enviar notificação Z-API: " + e.getMessage());
         }
     }
 
-    private void enviar(String numero, String mensagem) throws Exception {
-        String body = "{\"phone\":\"" + numero + "\",\"message\":\"" + mensagem + "\"}";
+	private void enviar(String numero, String mensagem) throws Exception {
+		String body = mapper.writeValueAsString(Map.of(
+			"phone", numero,
+			"message", mensagem
+		));
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL))
-                .header("Content-Type", "application/json")
-                .header("Client-Token", CLIENT_TOKEN)
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+		HttpRequest request = HttpRequest.newBuilder()
+			.uri(URI.create(getUrl()))
+			.header("Content-Type", "application/json")
+			.header("Client-Token", clientToken)
+			.POST(HttpRequest.BodyPublishers.ofString(body))
+			.build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("Z-API response: " + response.body());
-    }
+		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+		if (response.statusCode() < 200 || response.statusCode() >= 300) {
+			throw new RuntimeException("Erro Z-API [" + response.statusCode() + "]: " + response.body());
+		}
+
+		System.out.println("Z-API response: " + response.body());
+	}
 }

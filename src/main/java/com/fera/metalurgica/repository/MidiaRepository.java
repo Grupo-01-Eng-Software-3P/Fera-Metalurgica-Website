@@ -8,4 +8,5 @@ import java.util.List;
 public interface MidiaRepository extends JpaRepository<Midia, Long> {
 	List<Midia> findByCategoria(Categoria categoria);
 	List<Midia> findByCategoriaId(Long categoriaId);
+	List<Midia> findByFavoritaTrueOrderByDataUploadDesc();
 }

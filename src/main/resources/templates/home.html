@@ -88,13 +88,19 @@
     <h2 class="section-title">Galeria de Projetos</h2>
 
     <div class="gallery-container">
-        <button class="nav-btn"><i class="fas fa-arrow-left"></i></button>
-        <div class="gallery-images">
+        <button class="nav-btn" type="button" onclick="moverGaleria(-1)"><i class="fas fa-arrow-left"></i></button>
+        <div class="gallery-images" id="galeriaHome">
             <img src="/imagens/Projeto_Galeria_1.jpeg" alt="Projeto 1" onclick="abrirModal(this)">
             <img src="/imagens/Projeto_Galeria_2.jpeg" alt="Projeto 2" onclick="abrirModal(this)">
             <img src="/imagens/Projeto_Galeria_3.jpeg" alt="Projeto 3" onclick="abrirModal(this)">
+            <th:block th:if="${midiasFavoritas != null and !#lists.isEmpty(midiasFavoritas)}">
+                <img th:each="m : ${midiasFavoritas}"
+                     th:src="${m.caminho}"
+                     th:alt="${m.nome}"
+                     onclick="abrirModal(this)">
+            </th:block>
         </div>
-        <button class="nav-btn"><i class="fas fa-arrow-right"></i></button>
+        <button class="nav-btn" type="button" onclick="moverGaleria(1)"><i class="fas fa-arrow-right"></i></button>
     </div>
 
     <div class="catalogo-btn-container">
@@ -164,6 +170,14 @@
         var imagemExpandida = document.getElementById("imagemExpandida");
         modal.style.display = "block";
         imagemExpandida.src = elementoImg.src;
+    }
+
+    function moverGaleria(direcao) {
+        var galeria = document.getElementById("galeriaHome");
+        if (!galeria) return;
+
+        var deslocamento = Math.max(260, Math.floor(galeria.clientWidth * 0.8));
+        galeria.scrollBy({ left: direcao * deslocamento, behavior: "smooth" });
     }
 
     function fecharModal() {

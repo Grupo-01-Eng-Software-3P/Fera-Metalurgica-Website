@@ -31,6 +31,9 @@ public class Midia {
 	@JoinColumn(name = "usuario_id")
 	private Usuario usuario;
 
+	@Column(nullable = false)
+	private boolean favorita;
+
 	@PrePersist
 	public void prePersist() {
 		this.dataUpload = LocalDateTime.now();
@@ -61,4 +64,7 @@ public class Midia {
 
 	public Usuario getUsuario() { return usuario; }
 	public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
+	public boolean isFavorita() { return favorita; }
+	public void setFavorita(boolean favorita) { this.favorita = favorita; }
 }

@@ -10,6 +10,9 @@
 </head>
 <body>
 
+<input type="hidden" id="csrfToken" th:value="${_csrf.token}">
+<input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
@@ -70,6 +73,15 @@
         <!-- Produto destaque -->
         <div class="produto-destaque" id="produtoDestaque">
             <div class="produto-destaque-img">
+                <button type="button"
+                        id="btnFavoritarMidia"
+                        class="btn-favoritar-midia"
+                        onclick="favoritarMidiaSelecionada(event)"
+                        aria-label="Favoritar imagem"
+                        title="Favoritar imagem"
+                        hidden>
+                    <i id="iconFavoritoMidia" class="fa-regular fa-star"></i>
+                </button>
                 <img id="imgDestaque"
                      th:src="${not #lists.isEmpty(midias)} ? ${midias[0].caminho} : ''"
                      alt="Produto">
@@ -98,9 +110,11 @@
             <div th:each="m : ${midias}"
                  class="produto-card"
                  onclick="selecionarProduto(this)"
+                 th:data-id="${m.id}"
                  th:data-nome="${m.nome}"
                  th:data-descricao="${m.descricao}"
                  th:data-img="${m.caminho}"
+                 th:data-favorita="${m.favorita}"
                  data-meta="—">
                 <div class="produto-card-img">
                     <img th:src="${m.caminho}" th:alt="${m.nome}">
@@ -177,6 +191,8 @@
 </div>
 
 <script>
+    let cardSelecionado = null;
+
     function ativarFiltro(btn) {
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
@@ -196,10 +212,17 @@
     }
 
     function selecionarImg(img) {
+        const caminho = img.getAttribute('src');
+        const card = Array.from(document.querySelectorAll('.produto-card[data-id]'))
+            .find(c => c.dataset.img === caminho);
+
+        if (card) {
+            selecionarProduto(card);
+            return;
+        }
+
         document.getElementById('imgDestaque').src = img.src;
     }
-
-    let cardSelecionado = null;
 
     function selecionarProduto(card) {
         document.querySelectorAll('.produto-card').forEach(c => c.classList.remove('selecionado'));
@@ -219,6 +242,58 @@
                 '<a href="#" onclick="abrirModalDescricao(event)" style="color:var(--fera-orange);font-weight:bold;font-size:13px;">+ Adicionar descrição</a>';
         } else {
             descEl.textContent = desc;
+        }
+
+        atualizarBotaoFavorito();
+    }
+
+    function atualizarBotaoFavorito() {
+        const btn = document.getElementById('btnFavoritarMidia');
+        const icon = document.getElementById('iconFavoritoMidia');
+
+        if (!btn || !icon || !cardSelecionado || !cardSelecionado.dataset.id) {
+            if (btn) {
+                btn.hidden = true;
+            }
+            return;
+        }
+
+        const favorita = String(cardSelecionado.dataset.favorita) === 'true';
+        btn.hidden = false;
+        btn.classList.toggle('is-favorita', favorita);
+        icon.className = favorita ? 'fa-solid fa-star' : 'fa-regular fa-star';
+        btn.title = favorita ? 'Remover dos favoritos' : 'Favoritar imagem';
+        btn.setAttribute('aria-label', btn.title);
+    }
+
+    async function favoritarMidiaSelecionada(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!cardSelecionado || !cardSelecionado.dataset.id) {
+            return;
+        }
+
+        try {
+            const csrfToken = document.getElementById('csrfToken').value;
+            const csrfHeader = document.getElementById('csrfHeader').value;
+
+            const resposta = await fetch(`/midia/${cardSelecionado.dataset.id}/favoritar`, {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            });
+
+            if (!resposta.ok) {
+                return;
+            }
+
+            const dados = await resposta.json();
+            cardSelecionado.dataset.favorita = String(dados.favorita);
+            atualizarBotaoFavorito();
+        } catch (erro) {
+            console.error('Erro ao atualizar favorito da mídia:', erro);
         }
     }
 
@@ -255,6 +330,15 @@
             if (e.target === m) m.style.display = 'none';
         });
     };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const primeiroCard = document.querySelector('.produto-card[data-id]');
+        if (primeiroCard) {
+            selecionarProduto(primeiroCard);
+        } else {
+            atualizarBotaoFavorito();
+        }
+    });
 </script>
 
 </body>

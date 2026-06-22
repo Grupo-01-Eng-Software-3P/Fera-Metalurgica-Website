@@ -592,6 +592,19 @@ public class SistemaService {
 		return midiaRepository.findByCategoriaId(id);
 	}
 
+	public List<Midia> listarMidiasFavoritas() {
+		return midiaRepository.findByFavoritaTrueOrderByDataUploadDesc();
+	}
+
+	@Transactional
+	public Midia alternarFavoritaMidia(Long midiaId) {
+		Midia midia = midiaRepository.findById(midiaId)
+			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + midiaId));
+
+		midia.setFavorita(!midia.isFavorita());
+		return midiaRepository.save(midia);
+	}
+
 	public void adicionarProduto(Produto produto) {
 
 		if (produto.getNome() == null || produto.getNome().isBlank()) {
@@ -618,6 +631,7 @@ public class SistemaService {
 		midia.setDescricao(descricao);
 		midia.setCaminho("/imagens/" + nomeArquivo);
 		midia.setTipo(arquivo.getContentType());
+		midia.setFavorita(false);
 		midia.setCategoria(categoria);
 		midiaRepository.save(midia);
 	}

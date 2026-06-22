@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class SistemaController {
@@ -68,6 +69,7 @@ public class SistemaController {
 	@GetMapping("/")
 	public String home(Model model) {
 		model.addAttribute("produtos", service.listarProdutos());
+		model.addAttribute("midiasFavoritas", service.listarMidiasFavoritas());
 		return "home";
 	}
 
@@ -216,6 +218,16 @@ public class SistemaController {
 		model.addAttribute("midias", categoria.getMidias());
 		model.addAttribute("categoriaId", categoria.getId());
 		return "midia-categoria";
+	}
+
+	@PostMapping("/midia/{id}/favoritar")
+	@ResponseBody
+	public Map<String, Object> alternarFavoritaMidia(@PathVariable Long id) {
+		Midia midia = service.alternarFavoritaMidia(id);
+		return Map.of(
+			"id", midia.getId(),
+			"favorita", midia.isFavorita()
+		);
 	}
 
 	@PostMapping("/nova-imagem")

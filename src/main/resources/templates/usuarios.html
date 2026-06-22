@@ -35,7 +35,7 @@
             <h2 class="page-title">Usuário</h2>
             <div class="header-actions">
                 <div class="search-box">
-                    <input type="text" id="inputPesquisa" onkeyup="filtrarUsuarios()" placeholder="Buscar Usuário...">
+                    <input type="text" id="inputPesquisa" oninput="filtrarUsuarios()" onkeyup="filtrarUsuarios()" placeholder="Buscar Usuário...">
                     <i class="fas fa-search"></i>
                 </div>
                 <button class="btn-brown" onclick="abrirModalUsuario()">+ Criar Usuário</button>
@@ -57,11 +57,16 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="u : ${usuarios}">
+                <tr th:each="u : ${usuarios}" data-usuario="true">
                     <td th:text="'#' + ${#numbers.formatInteger(u.id, 2)}" style="font-weight: bold; color: #666;"></td>
                     <td th:text="${u.nome}"></td>
                     <td th:text="${u.cargo}"></td>
                     <td th:text="${u.dataNascimento}"></td>
+                </tr>
+                <tr id="nenhumUsuarioEncontrado" style="display: none;">
+                    <td colspan="4" style="text-align: center; color: #888; padding: 18px;">
+                        Nenhum usuário encontrado.
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -140,6 +145,34 @@
 </div>
 
 <script>
+    function normalizarTexto(valor) {
+        return String(valor || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+    }
+
+    function filtrarUsuarios() {
+        const termo = normalizarTexto(document.getElementById("inputPesquisa").value);
+        const linhas = document.querySelectorAll(".users-table tbody tr[data-usuario='true']");
+        const mensagemVazia = document.getElementById("nenhumUsuarioEncontrado");
+
+        let encontrouAlgum = false;
+
+        linhas.forEach(linha => {
+            const mostrar = normalizarTexto(linha.textContent).includes(termo);
+            linha.style.display = mostrar ? "" : "none";
+            if (mostrar) {
+                encontrouAlgum = true;
+            }
+        });
+
+        if (mensagemVazia) {
+            mensagemVazia.style.display = encontrouAlgum ? "none" : "table-row";
+        }
+    }
+
     function abrirModalUsuario() {
         document.getElementById("modalCadastroUsuario").style.display = "flex";
     }
@@ -154,6 +187,8 @@
             fecharModalUsuario();
         }
     }
+
+    document.addEventListener("DOMContentLoaded", filtrarUsuarios);
 </script>
 </body>
 </html>

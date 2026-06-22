@@ -10,6 +10,9 @@
 </head>
 <body>
 
+<input type="hidden" id="csrfToken" th:value="${_csrf.token}">
+<input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+
 <div class="dashboard-layout">
     <aside class="sidebar">
         <h2>Fera</h2>
@@ -25,6 +28,8 @@
     </aside>
 
     <main class="main-content">
+        <div th:if="${sucesso}" class="midia-message sucesso" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="midia-message erro" th:text="${erro}"></div>
 
         <!-- Header -->
         <div class="midia-header">
@@ -62,7 +67,17 @@
             </div>
             <button class="carrossel-btn dir" onclick="rolarCat(1)"><i class="fas fa-chevron-right"></i></button>
             <div class="cat-carrossel-label">
-                <i class="fas fa-pencil-alt"></i>
+                <button type="button"
+                        class="btn-editar-icone btn-editar-categoria"
+                        th:data-id="${categoria.id}"
+                        th:data-nome="${categoria.nome}"
+                        th:data-descricao="${categoria.descricao}"
+                        data-modo="detalhe"
+                        onclick="abrirModalEditarCategoria(event, this)"
+                        aria-label="Editar categoria"
+                        title="Editar categoria">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
                 <span th:text="${categoria.nome}">Categoria</span>
             </div>
         </div>
@@ -70,6 +85,15 @@
         <!-- Produto destaque -->
         <div class="produto-destaque" id="produtoDestaque">
             <div class="produto-destaque-img">
+                <button type="button"
+                        id="btnFavoritarMidia"
+                        class="btn-favoritar-midia"
+                        onclick="favoritarMidiaSelecionada(event)"
+                        aria-label="Favoritar imagem"
+                        title="Favoritar imagem"
+                        hidden>
+                    <i id="iconFavoritoMidia" class="fa-regular fa-star"></i>
+                </button>
                 <img id="imgDestaque"
                      th:src="${not #lists.isEmpty(midias)} ? ${midias[0].caminho} : ''"
                      alt="Produto">
@@ -81,10 +105,17 @@
                 </p>
                 <div class="destaque-footer">
                     <span class="categoria-nome">
-                        <i class="fas fa-pencil-alt"></i>
                         <span id="nomeDestaque"
                               th:text="${not #lists.isEmpty(midias)} ? ${midias[0].nome} : ${categoria.nome}">
                         </span>
+                        <button type="button"
+                                th:if="${not #lists.isEmpty(midias)}"
+                                class="btn-editar-icone btn-editar-midia-selecionada"
+                                onclick="abrirModalEditarMidia(event, this)"
+                                aria-label="Editar mídia selecionada"
+                                title="Editar mídia selecionada">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
                     </span>
                     <span class="categoria-meta" th:text="${categoria.meta}">—</span>
                 </div>
@@ -98,15 +129,26 @@
             <div th:each="m : ${midias}"
                  class="produto-card"
                  onclick="selecionarProduto(this)"
+                 th:data-id="${m.id}"
                  th:data-nome="${m.nome}"
                  th:data-descricao="${m.descricao}"
                  th:data-img="${m.caminho}"
+                 th:data-favorita="${m.favorita}"
                  data-meta="—">
                 <div class="produto-card-img">
                     <img th:src="${m.caminho}" th:alt="${m.nome}">
                 </div>
                 <div class="produto-card-footer">
-                    <span class="categoria-nome"><i class="fas fa-pencil-alt"></i> <span th:text="${m.nome}"></span></span>
+                    <span class="categoria-nome">
+                        <span th:text="${m.nome}"></span>
+                        <button type="button"
+                                class="btn-editar-icone btn-editar-midia"
+                                onclick="abrirModalEditarMidia(event, this)"
+                                aria-label="Editar mídia"
+                                title="Editar mídia">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </span>
                     <span class="categoria-meta">—</span>
                 </div>
             </div>
@@ -176,16 +218,85 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR CATEGORIA -->
+<div id="modalEditarCategoria" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Editar Categoria</h3>
+        <form id="formEditarCategoria" th:action="@{/midia/categoria/0/editar}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="modo" id="editarCategoriaModo" value="detalhe">
+            <input type="hidden" name="midiaSelecionada" id="editarCategoriaMidiaSelecionada">
+            <div class="input-group">
+                <label>Nome da Categoria:</label>
+                <input type="text" name="nome" id="editarCategoriaNome" class="input-field" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição:</label>
+                <textarea name="descricao" id="editarCategoriaDescricao" class="input-field" rows="3"
+                          placeholder="Descreva esta categoria..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalEditarCategoria()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR MÍDIA -->
+<div id="modalEditarMidia" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Editar Mídia</h3>
+        <form id="formEditarMidia" th:action="@{/midia/0/editar}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" id="editarMidiaNome" class="input-field" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição (opcional):</label>
+                <textarea name="descricao" id="editarMidiaDescricao" class="input-field" rows="3"
+                          placeholder="Descreva esta imagem..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>Arquivo novo (opcional):</label>
+                <input type="file" name="arquivo" class="input-field" accept="image/*">
+                <small style="color:#888;">Deixe em branco para manter a imagem atual.</small>
+            </div>
+            <div class="input-group" style="margin-top: -4px;">
+                <label>Imagem atual:</label>
+                <div style="width: 120px; height: 120px; border-radius: 10px; overflow: hidden; background: #f0ece8;">
+                    <img id="editarMidiaPreview" alt="Pré-visualização" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalEditarMidia()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    let cardSelecionado = null;
+
+    function normalizarTexto(valor) {
+        return String(valor || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
     function ativarFiltro(btn) {
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
     }
 
     function filtrarProdutos() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
+        const termo = normalizarTexto(document.getElementById('inputBusca').value);
         document.querySelectorAll('.produto-card:not(.produto-add)').forEach(card => {
-            const nome = (card.dataset.nome || '').toLowerCase();
+            const nome = normalizarTexto(card.dataset.nome || '');
             card.style.display = nome.includes(termo) ? '' : 'none';
         });
     }
@@ -196,10 +307,17 @@
     }
 
     function selecionarImg(img) {
+        const caminho = img.getAttribute('src');
+        const card = Array.from(document.querySelectorAll('.produto-card[data-id]'))
+            .find(c => c.dataset.img === caminho);
+
+        if (card) {
+            selecionarProduto(card);
+            return;
+        }
+
         document.getElementById('imgDestaque').src = img.src;
     }
-
-    let cardSelecionado = null;
 
     function selecionarProduto(card) {
         document.querySelectorAll('.produto-card').forEach(c => c.classList.remove('selecionado'));
@@ -219,6 +337,58 @@
                 '<a href="#" onclick="abrirModalDescricao(event)" style="color:var(--fera-orange);font-weight:bold;font-size:13px;">+ Adicionar descrição</a>';
         } else {
             descEl.textContent = desc;
+        }
+
+        atualizarBotaoFavorito();
+    }
+
+    function atualizarBotaoFavorito() {
+        const btn = document.getElementById('btnFavoritarMidia');
+        const icon = document.getElementById('iconFavoritoMidia');
+
+        if (!btn || !icon || !cardSelecionado || !cardSelecionado.dataset.id) {
+            if (btn) {
+                btn.hidden = true;
+            }
+            return;
+        }
+
+        const favorita = String(cardSelecionado.dataset.favorita) === 'true';
+        btn.hidden = false;
+        btn.classList.toggle('is-favorita', favorita);
+        icon.className = favorita ? 'fa-solid fa-star' : 'fa-regular fa-star';
+        btn.title = favorita ? 'Remover dos favoritos' : 'Favoritar imagem';
+        btn.setAttribute('aria-label', btn.title);
+    }
+
+    async function favoritarMidiaSelecionada(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!cardSelecionado || !cardSelecionado.dataset.id) {
+            return;
+        }
+
+        try {
+            const csrfToken = document.getElementById('csrfToken').value;
+            const csrfHeader = document.getElementById('csrfHeader').value;
+
+            const resposta = await fetch(`/midia/${cardSelecionado.dataset.id}/favoritar`, {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            });
+
+            if (!resposta.ok) {
+                return;
+            }
+
+            const dados = await resposta.json();
+            cardSelecionado.dataset.favorita = String(dados.favorita);
+            atualizarBotaoFavorito();
+        } catch (erro) {
+            console.error('Erro ao atualizar favorito da mídia:', erro);
         }
     }
 
@@ -249,12 +419,81 @@
         fecharModalDescricao();
     }
 
-    window.onclick = function(e) {
-        ['modalImagem', 'modalDescricao'].forEach(id => {
+    function abrirModalEditarCategoria(event, botao) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const form = document.getElementById('formEditarCategoria');
+        form.action = `/midia/categoria/${botao.dataset.id}/editar`;
+        document.getElementById('editarCategoriaModo').value = botao.dataset.modo || 'detalhe';
+        document.getElementById('editarCategoriaNome').value = botao.dataset.nome || '';
+        document.getElementById('editarCategoriaDescricao').value = botao.dataset.descricao || '';
+        document.getElementById('editarCategoriaMidiaSelecionada').value = new URLSearchParams(window.location.search).get('midiaSelecionada') || '';
+        document.getElementById('modalEditarCategoria').style.display = 'flex';
+    }
+
+    function fecharModalEditarCategoria() {
+        document.getElementById('modalEditarCategoria').style.display = 'none';
+    }
+
+    function abrirModalEditarMidia(event, botao) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const card = botao.closest('.produto-card[data-id]');
+        const alvo = card || cardSelecionado;
+        if (!alvo || !alvo.dataset.id) {
+            return;
+        }
+
+        const form = document.getElementById('formEditarMidia');
+        form.action = `/midia/${alvo.dataset.id}/editar`;
+        document.getElementById('editarMidiaNome').value = alvo.dataset.nome || '';
+        document.getElementById('editarMidiaDescricao').value = alvo.dataset.descricao || '';
+        document.getElementById('editarMidiaPreview').src = alvo.dataset.img || '';
+        document.getElementById('modalEditarMidia').style.display = 'flex';
+
+        if (card) {
+            selecionarProduto(card);
+        }
+    }
+
+    function fecharModalEditarMidia() {
+        document.getElementById('modalEditarMidia').style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+        ['modalImagem', 'modalDescricao', 'modalEditarCategoria', 'modalEditarMidia'].forEach(id => {
             const m = document.getElementById(id);
             if (e.target === m) m.style.display = 'none';
         });
-    };
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const midiaSelecionada = params.get('midiaSelecionada');
+
+        if (midiaSelecionada) {
+            const cardAlvo = Array.from(document.querySelectorAll('.produto-card[data-id]'))
+                .find(card => String(card.dataset.id) === String(midiaSelecionada));
+
+            if (cardAlvo) {
+                selecionarProduto(cardAlvo);
+                return;
+            }
+        }
+
+        const primeiroCard = document.querySelector('.produto-card[data-id]');
+        if (primeiroCard) {
+            selecionarProduto(primeiroCard);
+        } else {
+            atualizarBotaoFavorito();
+        }
+    });
 </script>
 
 </body>

@@ -61,9 +61,30 @@
 .step-arrow { font-size: 30px; color: var(--fera-dark-orange); margin-bottom: 30px; }
 
 /* Imagens */
-.gallery-container { display: flex; justify-content: center; align-items: center; gap: 20px; }
-.gallery-images { display: flex; gap: 15px; overflow: hidden; }
-.gallery-images img { width: 250px; height: 250px; object-fit: cover; border-radius: 15px; cursor: pointer; transition: transform 0.3s; }
+.gallery-container { display: flex; justify-content: center; align-items: center; gap: 20px; width: 100%; }
+.gallery-images {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    flex: 0 1 auto;
+    width: min(100%, calc((250px * 3) + (15px * 2)));
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.gallery-images::-webkit-scrollbar { display: none; }
+.gallery-images img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
 .gallery-images img:hover { transform: scale(1.05); }
 .nav-btn { background-color: var(--fera-dark-orange); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; }
 

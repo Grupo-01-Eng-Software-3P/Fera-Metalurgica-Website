@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -37,6 +37,29 @@ public class SistemaController {
 	public SistemaController(SistemaService service, OrcamentoPdfService pdfService) {
 		this.service = service;
 		this.pdfService = pdfService;
+	}
+
+	@ModelAttribute("nomeUsuario")
+	public String nomeUsuarioLogado(Authentication authentication) {
+		if (!usuarioAutenticado(authentication)) {
+			return "Visitante";
+		}
+
+		return service.buscarNomeUsuarioLogado(authentication.getName());
+	}
+
+	@ModelAttribute("usuarioEhAdmin")
+	public boolean usuarioEhAdmin(Authentication authentication) {
+		return usuarioAutenticado(authentication)
+			&& authentication.getAuthorities().stream()
+			.anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+	}
+
+	private boolean usuarioAutenticado(Authentication authentication) {
+		return authentication != null
+			&& authentication.isAuthenticated()
+			&& authentication.getAuthorities().stream()
+			.noneMatch(authority -> "ROLE_ANONYMOUS".equals(authority.getAuthority()));
 	}
 
 	@GetMapping("/login")
@@ -169,9 +192,8 @@ public class SistemaController {
 
 	// ── MÍDIA E AGENDA ───────────────────────────────────
 	@GetMapping("/midia")
-	public String midia(Model model, Principal principal) {
+	public String midia(Model model) {
 		model.addAttribute("categorias", service.listarCategorias());
-		model.addAttribute("nomeUsuario", principal != null ? principal.getName() : "Visitante");
 		return "midia";
 	}
 
@@ -241,8 +263,7 @@ public class SistemaController {
 	}
 
 	@GetMapping("/agenda")
-	public String agenda(Model model, Principal principal) {
-		model.addAttribute("nomeUsuario", principal != null ? principal.getName() : "Visitante");
+	public String agenda(Model model) {
 		return "agenda";
 	}
 

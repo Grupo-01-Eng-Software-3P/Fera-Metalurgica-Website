@@ -74,8 +74,6 @@ public class SistemaService {
 
 	@PostConstruct
 	public void garantirUsuarioAdmin() {
-		boolean adminExiste = usuarioRepository.findByEmailIgnoreCase("admin@fera.com").isPresent();
-
 		for (Usuario usuario : usuarioRepository.findAll()) {
 			String senhaAtual = usuario.getSenha();
 			if (senhaAtual != null && !senhaAtual.isBlank() && !senhaAtual.startsWith("$2")) {
@@ -84,15 +82,16 @@ public class SistemaService {
 			}
 		}
 
-		if (!adminExiste) {
-			Usuario admin = new Usuario(
-				null, "Lucas Stibbe", "Administrador",
-				LocalDate.of(2007, 1, 19),
-				"admin@fera.com",
-				passwordEncoder.encode("1234")
-			);
-			usuarioRepository.save(admin);
-		}
+		Usuario admin = usuarioRepository.findByEmailIgnoreCase("admin@fera.com")
+			.orElseGet(Usuario::new);
+
+		admin.setNome("Lucas Stibbe");
+		admin.setCargo("Administrador");
+		admin.setDataNascimento(LocalDate.of(2007, 1, 19));
+		admin.setEmail("admin@fera.com");
+		admin.setSenha(passwordEncoder.encode("1234"));
+
+		usuarioRepository.save(admin);
 	}
 
 	@PostConstruct
@@ -115,6 +114,17 @@ public class SistemaService {
 
 	public List<Usuario> listarUsuarios() {
 		return usuarioRepository.findAll();
+	}
+
+	public String buscarNomeUsuarioLogado(String email) {
+		if (email == null || email.isBlank()) {
+			return "Visitante";
+		}
+
+		return usuarioRepository.findByEmailIgnoreCase(email)
+			.map(Usuario::getNome)
+			.filter(nome -> nome != null && !nome.isBlank())
+			.orElse(email);
 	}
 
 	public void adicionarUsuario(Usuario usuario) {

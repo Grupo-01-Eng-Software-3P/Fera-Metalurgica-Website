@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
+
 @Service
 public class UsuarioDetailsService implements UserDetailsService {
 
@@ -20,7 +22,19 @@ public class UsuarioDetailsService implements UserDetailsService {
 		return User.builder()
 			.username(usuario.getEmail())
 			.password(usuario.getSenha())
-			.roles("USER")
+			.roles(determinarRoles(usuario.getCargo()))
 			.build();
+	}
+
+	private String[] determinarRoles(String cargo) {
+		if (cargo == null) {
+			return new String[] {"USER"};
+		}
+
+		return switch (cargo.trim().toUpperCase(Locale.ROOT)) {
+			case "ADMINISTRADOR" -> new String[] {"ADMIN", "GERENTE"};
+			case "GERENTE" -> new String[] {"GERENTE"};
+			default -> new String[] {"USER"};
+		};
 	}
 }

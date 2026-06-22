@@ -27,6 +27,8 @@
     </aside>
 
     <main class="main-content">
+        <div th:if="${sucesso}" class="midia-message sucesso" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="midia-message erro" th:text="${erro}"></div>
 
         <div class="midia-header">
             <h2 class="page-title">Mídia</h2>
@@ -49,6 +51,7 @@
 
             <a th:each="categoria : ${categorias}"
                th:href="@{/midia/{slug}(slug=${categoria.slug})}"
+               th:data-nome="${categoria.nome}"
                class="categoria-item">
 
                 <div class="categoria-carrossel-wrapper">
@@ -75,8 +78,18 @@
 
                 <div class="categoria-footer">
                     <span class="categoria-nome">
-                        <i class="fas fa-pencil-alt"></i>
                         <span th:text="${categoria.nome}">Nome</span>
+                        <button type="button"
+                                class="btn-editar-icone"
+                                th:data-id="${categoria.id}"
+                                th:data-nome="${categoria.nome}"
+                                th:data-descricao="${categoria.descricao}"
+                                data-modo="lista"
+                                onclick="abrirModalEditarCategoria(event, this)"
+                                aria-label="Editar categoria"
+                                title="Editar categoria">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
                     </span>
                     <span class="categoria-meta"
                           th:text="${categoria.midias != null ? categoria.midias.size() + ' arquivo(s)' : '0 arquivo(s)'}">
@@ -116,16 +129,49 @@
     </div>
 </div>
 
+<div id="modalEditarCategoria" class="modal-form-overlay">
+    <div class="modal-form-content">
+        <h3 style="color: var(--fera-orange); margin-bottom: 20px;">Editar Categoria</h3>
+
+        <form id="formEditarCategoria" th:action="@{/midia/categoria/0/editar}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="modo" id="editarCategoriaModo" value="lista">
+
+            <div class="input-group">
+                <label>Nome da Categoria:</label>
+                <input type="text" name="nome" id="editarCategoriaNome" class="input-field" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição:</label>
+                <textarea name="descricao" id="editarCategoriaDescricao" class="input-field" rows="3"
+                          placeholder="Descreva esta categoria..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn-secondary-outline" onclick="fecharModalEditarCategoria()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function normalizarTexto(valor) {
+        return String(valor || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
     function ativarFiltro(btn) {
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
     }
 
     function filtrarCategorias() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
+        const termo = normalizarTexto(document.getElementById('inputBusca').value);
         document.querySelectorAll('.categoria-item').forEach(item => {
-            const nome = item.querySelector('.categoria-nome').textContent.toLowerCase();
+            const nome = normalizarTexto(item.dataset.nome || '');
             item.style.display = nome.includes(termo) ? '' : 'none';
         });
     }
@@ -143,10 +189,33 @@
     function fecharModalCategoria() {
         document.getElementById('modalCategoria').style.display = 'none';
     }
-    window.onclick = function(e) {
-        const m = document.getElementById('modalCategoria');
-        if (e.target === m) m.style.display = 'none';
-    };
+
+    function abrirModalEditarCategoria(event, botao) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const form = document.getElementById('formEditarCategoria');
+        form.action = `/midia/categoria/${botao.dataset.id}/editar`;
+        document.getElementById('editarCategoriaModo').value = botao.dataset.modo || 'lista';
+        document.getElementById('editarCategoriaNome').value = botao.dataset.nome || '';
+        document.getElementById('editarCategoriaDescricao').value = botao.dataset.descricao || '';
+        document.getElementById('modalEditarCategoria').style.display = 'flex';
+    }
+
+    function fecharModalEditarCategoria() {
+        document.getElementById('modalEditarCategoria').style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+        ['modalCategoria', 'modalEditarCategoria'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
 </script>
 
 </body>

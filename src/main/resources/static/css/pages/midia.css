@@ -102,6 +102,22 @@
     color: white;
 }
 
+.midia-message {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.midia-message.sucesso {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+}
+.midia-message.erro {
+    background-color: #FDECEC;
+    color: #B71C1C;
+}
+
 /* ═══════════════════════════════════════════
    PÁGINA LISTA — categorias
 ═══════════════════════════════════════════ */
@@ -190,8 +206,42 @@
     align-items: center;
     gap: 6px;
 }
-.categoria-nome i { font-size: 11px; color: #aaa; }
+.categoria-nome i { font-size: 11px; color: currentColor; }
 .categoria-meta { font-size: 11px; color: #aaa; }
+
+.btn-editar-icone {
+    border: none;
+    background: transparent;
+    color: #a7a7a7;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s, background 0.2s, transform 0.2s;
+}
+.btn-editar-icone:hover {
+    color: var(--fera-orange);
+    background: rgba(192, 96, 20, 0.08);
+    transform: translateY(-1px);
+}
+
+.cat-carrossel-label .btn-editar-icone {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.16);
+}
+.cat-carrossel-label .btn-editar-icone:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.produto-card-footer .btn-editar-icone,
+.destaque-footer .btn-editar-icone {
+    font-size: 12px;
+}
 
 /* ═══════════════════════════════════════════
    PÁGINA DETALHE — categoria

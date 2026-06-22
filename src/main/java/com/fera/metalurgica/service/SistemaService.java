@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -61,12 +62,7 @@ public class SistemaService {
 	public void corrigirSlugsCategorias() {
 		for (Categoria categoria : categoriaRepository.findAll()) {
 			if (categoria.getSlug() == null || categoria.getSlug().isBlank()) {
-				String slug = categoria.getNome()
-					.toLowerCase()
-					.replaceAll("[^a-z0-9\\s]", "")
-					.trim()
-					.replaceAll("\\s+", "-");
-				categoria.setSlug(slug);
+				categoria.setSlug(gerarSlugCategoria(categoria.getNome()));
 				categoriaRepository.save(categoria);
 			}
 		}
@@ -130,7 +126,7 @@ public class SistemaService {
 	public void adicionarUsuario(Usuario usuario) {
 
 		if (usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()).isPresent()) {
-			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
+			throw new BusinessException("E-mail jÃ¡ cadastrado: " + usuario.getEmail());
 		}
 		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 		usuarioRepository.save(usuario);
@@ -138,7 +134,7 @@ public class SistemaService {
 
 	public Usuario buscarUsuarioPorId(Long id) {
 		return usuarioRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("UsuÃ¡rio nÃ£o encontrado com id: " + id));
 	}
 
 
@@ -150,7 +146,7 @@ public class SistemaService {
 
 	public Produto buscarProdutoPorId(Long id) {
 		return produtoRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Produto nÃ£o encontrado com id: " + id));
 	}
 
 
@@ -185,7 +181,7 @@ public class SistemaService {
 
 		Pedido pedido = (dto.getPedidoId() != null)
 			? pedidoRepository.findById(dto.getPedidoId())
-			.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
+			.orElseThrow(() -> new IllegalArgumentException("Pedido nÃ£o encontrado"))
 			: new Pedido();
 
 		pedido.setCliente(dto.getCliente());
@@ -257,7 +253,7 @@ public class SistemaService {
 
 	public Pedido buscarPedidoPorId(Long id) {
 		return pedidoRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("OrÃ§amento nÃ£o encontrado com id: " + id));
 	}
 
 
@@ -289,7 +285,7 @@ public class SistemaService {
 			if (atividade.getData().equals(hoje)) {
 				atividades.add(criarAtividadeRecente(
 					atividade.getTitulo(),
-					"Compromisso: " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
+					"Compromisso: " + valorOuPadrao(atividade.getTitulo(), "Sem tÃ­tulo"),
 					atividade.getEvento(),
 					atividade.getData(),
 					valorOuPadrao(atividade.getHorario(), "Hoje")
@@ -298,7 +294,7 @@ public class SistemaService {
 				atividades.add(criarAtividadeRecente(
 					atividade.getTitulo(),
 					"Compromisso criado para o dia " + DATA_BR.format(atividade.getData())
-						+ ": " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
+						+ ": " + valorOuPadrao(atividade.getTitulo(), "Sem tÃ­tulo"),
 					atividade.getEvento(),
 					atividade.getData(),
 					DATA_BR.format(atividade.getData())
@@ -313,8 +309,8 @@ public class SistemaService {
 
 			String numero = pedido.getId() != null ? pedido.getId().toString() : "-";
 			String descricao = pedido.isOrcamentoGerado()
-				? "Orçamento Nº" + numero + " criado"
-				: "Pedido Nº" + numero + " realizado";
+				? "OrÃ§amento NÂº" + numero + " criado"
+				: "Pedido NÂº" + numero + " realizado";
 
 			atividades.add(criarAtividadeRecente(
 				descricao,
@@ -336,7 +332,7 @@ public class SistemaService {
 	public Atividade adicionarAtividade(Atividade atividade) {
 
 		if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
-			throw new BusinessException("O título da atividade não pode ser vazio.");
+			throw new BusinessException("O tÃ­tulo da atividade nÃ£o pode ser vazio.");
 		}
 		return atividadeRepository.save(atividade);
 	}
@@ -349,7 +345,7 @@ public class SistemaService {
 
 	private boolean isAtividadeInicialAntiga(Atividade atividade) {
 		return ("Alerta de Estoque".equals(atividade.getTitulo()) && "ALERTA".equals(atividade.getEvento()))
-			|| ("Reunião".equals(atividade.getTitulo()) && "REUNIAO".equals(atividade.getEvento()));
+			|| ("ReuniÃ£o".equals(atividade.getTitulo()) && "REUNIAO".equals(atividade.getEvento()));
 	}
 
 	private boolean foiCriadaNasUltimas24Horas(Atividade atividade, LocalDateTime agora) {
@@ -552,7 +548,7 @@ public class SistemaService {
 
 	public Path localizarArquivoAnexoPedido(Pedido pedido) {
 		if (pedido == null || !pedido.isTemAnexo()) {
-			throw new ResourceNotFoundException("Pedido não possui anexo.");
+			throw new ResourceNotFoundException("Pedido nÃ£o possui anexo.");
 		}
 
 		String nomeArquivo = Paths.get(pedido.getAnexoCaminho()).getFileName().toString();
@@ -560,7 +556,7 @@ public class SistemaService {
 		Path arquivo = baseDir.resolve(nomeArquivo).normalize();
 
 		if (!arquivo.startsWith(baseDir)) {
-			throw new BusinessException("Caminho de anexo inválido.");
+			throw new BusinessException("Caminho de anexo invÃ¡lido.");
 		}
 
 		return arquivo;
@@ -573,18 +569,17 @@ public class SistemaService {
 	}
 
 	public Categoria adicionarCategoria(CategoriaDTO dto) {
-		if (categoriaRepository.findByNomeIgnoreCase(dto.getNome()).isPresent()) {
-			throw new BusinessException("Já existe uma categoria com o nome: " + dto.getNome());
+		String nome = normalizarTexto(dto.getNome());
+		if (nome == null) {
+			throw new BusinessException("O nome da categoria não pode ser vazio.");
 		}
 
-		String slug = dto.getNome()
-			.toLowerCase()
-			.replaceAll("[^a-z0-9\\s]", "")
-			.trim()
-			.replaceAll("\\s+", "-");
+		if (categoriaRepository.findByNomeIgnoreCase(nome).isPresent()) {
+			throw new BusinessException("Já existe uma categoria com o nome: " + nome);
+		}
 
-		Categoria categoria = new Categoria(null, dto.getNome(), dto.getDescricao(), null);
-		categoria.setSlug(slug);
+		Categoria categoria = new Categoria(null, nome, normalizarTexto(dto.getDescricao()), null);
+		categoria.setSlug(gerarSlugCategoria(nome));
 		return categoriaRepository.save(categoria);
 	}
 
@@ -599,7 +594,7 @@ public class SistemaService {
 	@Transactional
 	public Midia alternarFavoritaMidia(Long midiaId) {
 		Midia midia = midiaRepository.findById(midiaId)
-			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + midiaId));
+			.orElseThrow(() -> new ResourceNotFoundException("MÃ­dia nÃ£o encontrada com id: " + midiaId));
 
 		midia.setFavorita(!midia.isFavorita());
 		return midiaRepository.save(midia);
@@ -608,7 +603,7 @@ public class SistemaService {
 	public void adicionarProduto(Produto produto) {
 
 		if (produto.getNome() == null || produto.getNome().isBlank()) {
-			throw new BusinessException("O nome do produto não pode ser vazio.");
+			throw new BusinessException("O nome do produto nÃ£o pode ser vazio.");
 		}
 		produtoRepository.save(produto);
 	}
@@ -620,16 +615,10 @@ public class SistemaService {
 		Categoria categoria = categoriaRepository.findById(categoriaId)
 			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + categoriaId));
 
-		String nomeArquivo = UUID.randomUUID() + "_" + arquivo.getOriginalFilename();
-		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-		Path destino = uploadPath.resolve(nomeArquivo);
-		Files.createDirectories(uploadPath);
-		Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-
 		Midia midia = new Midia();
-		midia.setNome(nome);
-		midia.setDescricao(descricao);
-		midia.setCaminho("/imagens/" + nomeArquivo);
+		midia.setNome(normalizarTexto(nome));
+		midia.setDescricao(normalizarTexto(descricao));
+		midia.setCaminho(salvarArquivoMidia(arquivo));
 		midia.setTipo(arquivo.getContentType());
 		midia.setFavorita(false);
 		midia.setCategoria(categoria);
@@ -638,6 +627,90 @@ public class SistemaService {
 
 	public Categoria buscarCategoriaPorId(Long id) {
 		return categoriaRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria nÃ£o encontrada com id: " + id));
+	}
+
+	@Transactional
+	public Categoria atualizarCategoria(Long id, String nome, String descricao) {
+		Categoria categoria = buscarCategoriaPorId(id);
+		String nomeLimpo = normalizarTexto(nome);
+
+		if (nomeLimpo == null) {
+			throw new BusinessException("O nome da categoria não pode ser vazio.");
+		}
+
+		categoriaRepository.findByNomeIgnoreCase(nomeLimpo)
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new BusinessException("Já existe uma categoria com o nome: " + nomeLimpo);
+			});
+
+		categoria.setNome(nomeLimpo);
+		categoria.setDescricao(normalizarTexto(descricao));
+		categoria.setSlug(gerarSlugCategoria(nomeLimpo));
+		return categoriaRepository.save(categoria);
+	}
+
+	public Midia buscarMidiaPorId(Long id) {
+		return midiaRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + id));
+	}
+
+	@Transactional
+	public Midia atualizarMidia(Long id, String nome, String descricao, MultipartFile arquivo) throws IOException {
+		Midia midia = buscarMidiaPorId(id);
+		String nomeLimpo = normalizarTexto(nome);
+
+		if (nomeLimpo == null) {
+			throw new BusinessException("O nome da imagem não pode ser vazio.");
+		}
+
+		midia.setNome(nomeLimpo);
+		midia.setDescricao(normalizarTexto(descricao));
+
+		if (arquivo != null && !arquivo.isEmpty()) {
+			midia.setCaminho(salvarArquivoMidia(arquivo));
+			midia.setTipo(arquivo.getContentType());
+		}
+
+		return midiaRepository.save(midia);
+	}
+
+	private String normalizarTexto(String valor) {
+		if (valor == null) {
+			return null;
+		}
+
+		String limpo = valor.trim();
+		return limpo.isBlank() ? null : limpo;
+	}
+
+	private String gerarSlugCategoria(String nome) {
+		String texto = normalizarTexto(nome);
+		if (texto == null) {
+			return "";
+		}
+
+		String semAcentos = Normalizer.normalize(texto, Normalizer.Form.NFD)
+			.replaceAll("\\p{M}+", "");
+
+		return semAcentos
+			.toLowerCase(Locale.ROOT)
+			.replaceAll("[^a-z0-9\\s]", "")
+			.trim()
+			.replaceAll("\\s+", "-");
+	}
+
+	private String salvarArquivoMidia(MultipartFile arquivo) throws IOException {
+		String nomeOriginal = limparNomeArquivoOriginal(arquivo.getOriginalFilename());
+		String nomeArquivo = UUID.randomUUID() + "_" + nomeOriginal;
+		Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+		Path destino = uploadPath.resolve(nomeArquivo);
+
+		Files.createDirectories(uploadPath);
+		Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+
+		return "/imagens/" + nomeArquivo;
 	}
 }
+

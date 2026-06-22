@@ -220,6 +220,73 @@ public class SistemaController {
 		return "midia-categoria";
 	}
 
+	@PostMapping("/midia/categoria/{id}/editar")
+	public String editarCategoria(@PathVariable Long id,
+								  @RequestParam("nome") String nome,
+								  @RequestParam(value = "descricao", required = false) String descricao,
+								  @RequestParam(value = "modo", required = false) String modo,
+								  @RequestParam(value = "midiaSelecionada", required = false) String midiaSelecionada,
+								  RedirectAttributes redirectAttributes) {
+		Categoria categoriaOriginal = null;
+
+		try {
+			categoriaOriginal = service.buscarCategoriaPorId(id);
+			Categoria categoriaAtualizada = service.atualizarCategoria(id, nome, descricao);
+			redirectAttributes.addFlashAttribute("sucesso", "Categoria atualizada com sucesso.");
+			if ("detalhe".equalsIgnoreCase(modo)) {
+				String destino = "/midia/" + categoriaAtualizada.getSlug();
+				if (midiaSelecionada != null && !midiaSelecionada.isBlank()) {
+					destino += "?midiaSelecionada=" + midiaSelecionada;
+				}
+				return "redirect:" + destino;
+			}
+			return "redirect:/midia";
+		} catch (BusinessException | ResourceNotFoundException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			if ("detalhe".equalsIgnoreCase(modo)) {
+				String destino = categoriaOriginal != null
+					? "/midia/" + categoriaOriginal.getSlug()
+					: "/midia";
+				if (midiaSelecionada != null && !midiaSelecionada.isBlank()) {
+					destino += "?midiaSelecionada=" + midiaSelecionada;
+				}
+				return "redirect:" + destino;
+			}
+			return "redirect:/midia";
+		}
+	}
+
+	@PostMapping("/midia/{id}/editar")
+	public String editarMidia(@PathVariable Long id,
+							  @RequestParam("nome") String nome,
+							  @RequestParam(value = "descricao", required = false) String descricao,
+							  @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
+							  RedirectAttributes redirectAttributes) {
+		Midia midiaOriginal = null;
+
+		try {
+			midiaOriginal = service.buscarMidiaPorId(id);
+			Midia midiaAtualizada = service.atualizarMidia(id, nome, descricao, arquivo);
+			redirectAttributes.addFlashAttribute("sucesso", "Imagem atualizada com sucesso.");
+			if (midiaAtualizada.getCategoria() != null && midiaAtualizada.getCategoria().getSlug() != null) {
+				return "redirect:/midia/" + midiaAtualizada.getCategoria().getSlug() + "?midiaSelecionada=" + midiaAtualizada.getId();
+			}
+			return "redirect:/midia";
+		} catch (BusinessException | ResourceNotFoundException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+			if (midiaOriginal != null && midiaOriginal.getCategoria() != null && midiaOriginal.getCategoria().getSlug() != null) {
+				return "redirect:/midia/" + midiaOriginal.getCategoria().getSlug();
+			}
+			return "redirect:/midia";
+		} catch (IOException ex) {
+			redirectAttributes.addFlashAttribute("erro", "Erro ao salvar a imagem: " + ex.getMessage());
+			if (midiaOriginal != null && midiaOriginal.getCategoria() != null && midiaOriginal.getCategoria().getSlug() != null) {
+				return "redirect:/midia/" + midiaOriginal.getCategoria().getSlug();
+			}
+			return "redirect:/midia";
+		}
+	}
+
 	@PostMapping("/midia/{id}/favoritar")
 	@ResponseBody
 	public Map<String, Object> alternarFavoritaMidia(@PathVariable Long id) {
@@ -242,7 +309,7 @@ public class SistemaController {
 		} catch (BusinessException ex) {
 			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			redirectAttributes.addFlashAttribute("erro", "Erro ao salvar a imagem: " + e.getMessage());
 		}
 
 		Categoria categoria = service.buscarCategoriaPorId(categoriaId);

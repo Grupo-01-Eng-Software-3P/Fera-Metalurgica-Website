@@ -25,7 +25,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 
@@ -96,9 +95,9 @@ public class SistemaController {
 
 	@PostMapping("/pedido")
 	public String salvarPedido(@Valid @ModelAttribute("pedidoDTO") PedidoDTO dto,
-							   BindingResult result,
-							   @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
-							   Model model) {
+	                           BindingResult result,
+	                           @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
+	                           Model model) {
 
 		if (result.hasErrors() || !isCPFValido(dto.getCpf())) {
 			if (!isCPFValido(dto.getCpf())) {
@@ -183,8 +182,8 @@ public class SistemaController {
 	}
 
 	@PostMapping("/orcamentos/salvar")
-	 public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
- 						  RedirectAttributes redirectAttributes) {
+	public String salvarOrcamento(@ModelAttribute OrcamentoAdminDTO dto,
+	                              RedirectAttributes redirectAttributes) {
 
 		service.salvarOrcamentoAdmin(dto);
 
@@ -222,11 +221,11 @@ public class SistemaController {
 
 	@PostMapping("/midia/categoria/{id}/editar")
 	public String editarCategoria(@PathVariable Long id,
-								  @RequestParam("nome") String nome,
-								  @RequestParam(value = "descricao", required = false) String descricao,
-								  @RequestParam(value = "modo", required = false) String modo,
-								  @RequestParam(value = "midiaSelecionada", required = false) String midiaSelecionada,
-								  RedirectAttributes redirectAttributes) {
+	                              @RequestParam("nome") String nome,
+	                              @RequestParam(value = "descricao", required = false) String descricao,
+	                              @RequestParam(value = "modo", required = false) String modo,
+	                              @RequestParam(value = "midiaSelecionada", required = false) String midiaSelecionada,
+	                              RedirectAttributes redirectAttributes) {
 		Categoria categoriaOriginal = null;
 
 		try {
@@ -258,10 +257,10 @@ public class SistemaController {
 
 	@PostMapping("/midia/{id}/editar")
 	public String editarMidia(@PathVariable Long id,
-							  @RequestParam("nome") String nome,
-							  @RequestParam(value = "descricao", required = false) String descricao,
-							  @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
-							  RedirectAttributes redirectAttributes) {
+	                          @RequestParam("nome") String nome,
+	                          @RequestParam(value = "descricao", required = false) String descricao,
+	                          @RequestParam(value = "arquivo", required = false) MultipartFile arquivo,
+	                          RedirectAttributes redirectAttributes) {
 		Midia midiaOriginal = null;
 
 		try {
@@ -297,12 +296,37 @@ public class SistemaController {
 		);
 	}
 
+	@PostMapping("/midia/{id}/principal")
+	@ResponseBody
+	public Map<String, Object> definirMidiaPrincipal(@PathVariable Long id) {
+		Midia midia = service.definirMidiaPrincipal(id);
+		return Map.of(
+			"id", midia.getId(),
+			"principal", midia.isPrincipal()
+		);
+	}
+
+	@PostMapping("/midia/{id}/deletar")
+	public String deletarMidia(@PathVariable Long id,
+	                           RedirectAttributes redirectAttributes) {
+		try {
+			String slug = service.deletarMidia(id);
+			redirectAttributes.addFlashAttribute("sucesso", "Imagem removida com sucesso.");
+			if (slug != null) {
+				return "redirect:/midia/" + slug;
+			}
+		} catch (ResourceNotFoundException ex) {
+			redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+		}
+		return "redirect:/midia";
+	}
+
 	@PostMapping("/nova-imagem")
 	public String salvarImagem(@RequestParam("nome") String nome,
-							   @RequestParam("descricao") String descricao,
-							   @RequestParam("categoriaId") Long categoriaId,
-							   @RequestParam("arquivo") MultipartFile arquivo,
-							   RedirectAttributes redirectAttributes) {
+	                           @RequestParam("descricao") String descricao,
+	                           @RequestParam("categoriaId") Long categoriaId,
+	                           @RequestParam("arquivo") MultipartFile arquivo,
+	                           RedirectAttributes redirectAttributes) {
 		try {
 			service.adicionarImagem(nome, descricao, categoriaId, arquivo);
 			redirectAttributes.addFlashAttribute("sucesso", "Imagem adicionada com sucesso!");
@@ -318,8 +342,8 @@ public class SistemaController {
 
 	@PostMapping("/nova-categoria")
 	public String salvarCategoria(@Valid @ModelAttribute("categoriaDTO") CategoriaDTO dto,
-								  BindingResult result,
-								  RedirectAttributes redirectAttributes) {
+	                              BindingResult result,
+	                              RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			FieldError fieldError = result.getFieldError();
@@ -373,8 +397,8 @@ public class SistemaController {
 
 	@PostMapping("/novo-usuario")
 	public String salvarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO dto,
-								BindingResult result,
-								RedirectAttributes redirectAttributes) {
+	                            BindingResult result,
+	                            RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			FieldError fieldError = result.getFieldError();
@@ -413,22 +437,37 @@ public class SistemaController {
 
 	// ── CATÁLOGO DINÂMICO ────────────────────────────────
 	@GetMapping("/catalogo")
-	public String catalogo(Model model) { model.addAttribute("categorias", service.listarCategorias()); return "catalogo"; }
+	public String catalogo(Model model) {
+		model.addAttribute("categorias", service.listarCategorias());
+		return "catalogo";
+	}
 
 	@GetMapping("/catalogo/ambiente/{slug}")
 	public String catalogoAmbiente(@PathVariable String slug, Model model) {
-		var categoria = service.listarCategorias().stream().filter(c -> c.getNome().equalsIgnoreCase(slug)).findFirst().orElse(null);
+		var categoria = service.listarCategorias().stream()
+			.filter(c -> c.getNome().equalsIgnoreCase(slug))
+			.findFirst()
+			.orElse(null);
+
 		if (categoria == null) return "redirect:/catalogo";
+
+		List<Midia> midias = service.listarMidiasPorCategoria(categoria.getId());
+
+		// Usa a mídia marcada como principal; se não houver, usa a primeira da lista
+		Midia midiaHero = service.buscarMidiaPrincipalDaCategoria(categoria.getId())
+			.orElse(midias.isEmpty() ? null : midias.get(0));
+
 		model.addAttribute("categoria", categoria);
-		model.addAttribute("midias", service.listarMidiasPorCategoria(categoria.getId()));
+		model.addAttribute("midias", midias);
+		model.addAttribute("midiaHero", midiaHero);
 		return "catalogo-ambiente";
 	}
 
 	@GetMapping("/pedido/confirmacao")
 	public String pedidoConfirmacao(@RequestParam(value = "nome", required = false) String nome, Model model) {
-    model.addAttribute("nomeCliente", nome);
-    return "pedido-confirmacao";
-}
+		model.addAttribute("nomeCliente", nome);
+		return "pedido-confirmacao";
+	}
 
 	// ── AUXILIARES ───────────────────────────────────────
 	private boolean isCPFValido(String cpf) {
@@ -456,7 +495,7 @@ public class SistemaController {
 	}
 
 	private void preencherCamposPedido(RedirectAttributes ra, String cliente, String telefone, String cpf,
-									   String material, String medidas, String descricao) {
+	                                   String material, String medidas, String descricao) {
 		ra.addFlashAttribute("clientePreenchido", cliente);
 		ra.addFlashAttribute("telefonePreenchido", telefone);
 		ra.addFlashAttribute("cpfPreenchido", cpf);

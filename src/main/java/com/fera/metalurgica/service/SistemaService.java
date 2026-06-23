@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.nio.file.*;
 import java.io.IOException;
@@ -585,6 +586,10 @@ public class SistemaService {
 		return midiaRepository.findByCategoriaId(id);
 	}
 
+	public Optional<Midia> buscarMidiaPrincipalDaCategoria(Long categoriaId) {
+		return midiaRepository.findByCategoriaIdAndPrincipalTrue(categoriaId);
+	}
+
 	public List<Midia> listarMidiasFavoritas() {
 		return midiaRepository.findByFavoritaTrueOrderByDataUploadDesc();
 	}
@@ -596,6 +601,38 @@ public class SistemaService {
 
 		midia.setFavorita(!midia.isFavorita());
 		return midiaRepository.save(midia);
+	}
+
+	@Transactional
+	public Midia definirMidiaPrincipal(Long midiaId) {
+		Midia midia = midiaRepository.findById(midiaId)
+			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + midiaId));
+
+		Long categoriaId = midia.getCategoria().getId();
+
+		// Se já é principal, desmarca (toggle)
+		if (midia.isPrincipal()) {
+			midia.setPrincipal(false);
+			return midiaRepository.save(midia);
+		}
+
+		// Desmarca qualquer outra principal da categoria e marca esta
+		midiaRepository.desmarcarPrincipalDaCategoria(categoriaId);
+		midia.setPrincipal(true);
+		return midiaRepository.save(midia);
+	}
+
+	@Transactional
+	public String deletarMidia(Long midiaId) {
+		Midia midia = midiaRepository.findById(midiaId)
+			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + midiaId));
+
+		String slugCategoria = midia.getCategoria() != null ? midia.getCategoria().getSlug() : null;
+
+		deletarArquivoMidia(midia.getCaminho());
+		midiaRepository.delete(midia);
+
+		return slugCategoria;
 	}
 
 	public void adicionarProduto(Produto produto) {
@@ -618,6 +655,7 @@ public class SistemaService {
 		midia.setCaminho(salvarArquivoMidia(arquivo));
 		midia.setTipo(arquivo.getContentType());
 		midia.setFavorita(false);
+		midia.setPrincipal(false);
 		midia.setCategoria(categoria);
 		midiaRepository.save(midia);
 	}
@@ -666,9 +704,7 @@ public class SistemaService {
 		midia.setDescricao(normalizarTexto(descricao));
 
 		if (arquivo != null && !arquivo.isEmpty()) {
-			// Deleta o arquivo antigo do disco antes de salvar o novo
 			deletarArquivoMidia(midia.getCaminho());
-
 			midia.setCaminho(salvarArquivoMidia(arquivo));
 			midia.setTipo(arquivo.getContentType());
 		}
@@ -682,16 +718,13 @@ public class SistemaService {
 		}
 
 		try {
-			// caminho salvo é "/imagens/nomeArquivo", o arquivo físico está em uploadDir/nomeArquivo
 			String nomeArquivo = Paths.get(caminho).getFileName().toString();
 			Path arquivo = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(nomeArquivo);
 
-			// Garante que o arquivo está dentro do uploadDir (segurança)
 			if (arquivo.startsWith(Paths.get(uploadDir).toAbsolutePath().normalize())) {
 				Files.deleteIfExists(arquivo);
 			}
 		} catch (IOException e) {
-			// Loga mas não interrompe o fluxo — o mais importante é salvar o novo arquivo
 			System.err.println("Aviso: não foi possível deletar o arquivo antigo de mídia: " + e.getMessage());
 		}
 	}

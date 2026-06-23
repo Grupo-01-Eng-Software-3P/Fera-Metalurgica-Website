@@ -391,8 +391,8 @@
             formCliente.elements['medidas'].value = pedidoData.medidas || '';
             formCliente.elements['descricao'].value = pedidoData.descricao || '';
             formOrcamento.elements['pedidoId'].value = pedidoData.id || '';
-            formOrcamento.elements['frete'].value = pedidoData.valorAdicionais || '';
-            formOrcamento.elements['maoObra'].value = '';
+            formOrcamento.elements['frete'].value = pedidoData.valorFrete || '';
+            formOrcamento.elements['maoObra'].value = pedidoData.valorMaoObra || '';
             formOrcamento.elements['observacoesAdmin'].value = pedidoData.observacoesAdmin || '';
 
             const quantidadeInputs = formOrcamento.querySelectorAll('input[name^="itens"][name$=".quantidade"]');

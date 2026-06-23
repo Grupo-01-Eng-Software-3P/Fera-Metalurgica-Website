@@ -214,8 +214,9 @@ public class SistemaService {
 			itens.add(item);
 		}
 
+		pedido.setValorFrete(parseMoeda(dto.getFrete()));
+		pedido.setValorMaoObra(parseMoeda(dto.getMaoObra()));
 		pedido.setItens(itens);
-		pedido.setValorAdicionais(parseMoeda(dto.getFrete()).add(parseMoeda(dto.getMaoObra())));
 		pedido.setObservacoesAdmin(dto.getObservacoesAdmin());
 		pedido.calcularTotais();
 

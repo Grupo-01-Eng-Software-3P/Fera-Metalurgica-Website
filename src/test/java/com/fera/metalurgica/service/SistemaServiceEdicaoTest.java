@@ -1,7 +1,11 @@
 package com.fera.metalurgica.service;
 
+import com.fera.metalurgica.dto.ItemPedidoDTO;
+import com.fera.metalurgica.dto.OrcamentoAdminDTO;
 import com.fera.metalurgica.model.Categoria;
+import com.fera.metalurgica.model.ItemPedido;
 import com.fera.metalurgica.model.Midia;
+import com.fera.metalurgica.model.Pedido;
 import com.fera.metalurgica.repository.AtividadeRepository;
 import com.fera.metalurgica.repository.CategoriaRepository;
 import com.fera.metalurgica.repository.MidiaRepository;
@@ -18,9 +22,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -142,5 +148,36 @@ class SistemaServiceEdicaoTest {
 		assertEquals("Descricao nova", atualizada.getDescricao());
 		assertTrue(atualizada.getCaminho().startsWith("/imagens/"));
 		assertTrue(Files.exists(tempDir.resolve(atualizada.getCaminho().replace("/imagens/", ""))));
+	}
+
+	@Test
+	void deveSalvarOrcamentoSeparandoFreteEMaoObra() {
+		OrcamentoAdminDTO dto = new OrcamentoAdminDTO();
+		dto.setCliente("Cliente Teste");
+		dto.setTelefone("(45) 99999-0000");
+		dto.setCpf("123.456.789-09");
+		dto.setMaterial("Ferro");
+		dto.setDescricao("Orcamento com adicionais separados");
+		dto.setFrete("R$ 50,00");
+		dto.setMaoObra("R$ 120,00");
+
+		ItemPedidoDTO itemDTO = new ItemPedidoDTO();
+		itemDTO.setNome("Estrutura");
+		itemDTO.setQuantidade("2");
+		itemDTO.setValorUnitario("100,00");
+		dto.setItens(List.of(itemDTO));
+
+		when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		Pedido salvo = service.salvarOrcamentoAdmin(dto);
+
+		assertEquals(new BigDecimal("50.00"), salvo.getValorFrete());
+		assertEquals(new BigDecimal("120.00"), salvo.getValorMaoObra());
+		assertEquals(new BigDecimal("170.00"), salvo.getValorAdicionais());
+		assertEquals(new BigDecimal("370.00"), salvo.getValorTotal());
+
+		List<ItemPedido> itens = salvo.getItens();
+		assertEquals(1, itens.size());
+		assertEquals(new BigDecimal("200.00"), itens.get(0).getSubtotal());
 	}
 }

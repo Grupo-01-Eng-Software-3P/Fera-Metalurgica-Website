@@ -66,17 +66,19 @@
 
 /* ---- INFO CARDS ---- */
 .confirmacao-info {
-    display: flex;
-    gap: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     background: var(--bg-beige);
 }
 
 .info-card {
-    flex: 1;
     padding: 48px 40px;
     text-align: center;
     background: var(--bg-beige);
     border-right: 3px solid var(--fera-orange); /* troca a cor */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .info-card:last-child {
@@ -84,9 +86,8 @@
 }
 
 .info-card.destaque {
-    flex: 2;
     background-color: var(--bg-beige);
-    border-left: 4px solid var(--fera-orange);
+    border-left: none;
 }
 
 .info-icone {
@@ -229,7 +230,7 @@
     }
 
     .confirmacao-info {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
 
     .info-card {
@@ -237,10 +238,14 @@
         border-bottom: 1px solid #e0d5cb;
     }
 
+    .info-card:last-child {
+        border-bottom: none;
+    }
+
     .confirmacao-cta {
         padding: 40px 24px;
     }
-    }
+}
 
     /* Nav laranja */
     .confirmacao-page .top-nav {

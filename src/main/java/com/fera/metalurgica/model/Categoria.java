@@ -12,6 +12,8 @@ public class Categoria {
 	private Long id;
 
 	private String nome;
+
+	@Column(columnDefinition = "TEXT")
 	private String descricao;
 	private String meta;
 

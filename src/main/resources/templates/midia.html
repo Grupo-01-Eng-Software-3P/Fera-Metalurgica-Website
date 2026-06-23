@@ -77,23 +77,34 @@
                 </div>
 
                 <div class="categoria-footer">
-                    <span class="categoria-nome">
-                        <span th:text="${categoria.nome}">Nome</span>
-                        <button type="button"
-                                class="btn-editar-icone"
-                                th:data-id="${categoria.id}"
-                                th:data-nome="${categoria.nome}"
-                                th:data-descricao="${categoria.descricao}"
-                                data-modo="lista"
-                                onclick="abrirModalEditarCategoria(event, this)"
-                                aria-label="Editar categoria"
-                                title="Editar categoria">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                    </span>
+
+                    <div class="categoria-info">
+                        <div class="categoria-titulo-linha">
+                            <span th:text="${categoria.nome}">Nome</span>
+
+                            <button type="button"
+                                    class="btn-editar-icone"
+                                    th:data-id="${categoria.id}"
+                                    th:data-nome="${categoria.nome}"
+                                    th:data-descricao="${categoria.descricao}"
+                                    data-modo="lista"
+                                    onclick="abrirModalEditarCategoria(event, this)"
+                                    aria-label="Editar categoria"
+                                    title="Editar categoria">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
+
+                        <div class="categoria-descricao"
+                             th:if="${categoria.descricao != null and !categoria.descricao.isEmpty()}"
+                             th:text="${categoria.descricao}">
+                        </div>
+                    </div>
+
                     <span class="categoria-meta"
                           th:text="${categoria.midias != null ? categoria.midias.size() + ' arquivo(s)' : '0 arquivo(s)'}">
                     </span>
+
                 </div>
             </a>
 
@@ -119,7 +130,7 @@
             </div>
             <div class="input-group">
                 <label>Descrição:</label>
-                <textarea name="descricao" class="input-field" rows="3" placeholder="Descreva esta categoria..."></textarea>
+                <textarea name="descricao" class="input-field" rows="3" maxlength="250" placeholder="Descreva esta categoria..."></textarea>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button type="button" class="btn-secondary-outline" onclick="fecharModalCategoria()">Cancelar</button>
@@ -143,7 +154,7 @@
             </div>
             <div class="input-group">
                 <label>Descrição:</label>
-                <textarea name="descricao" id="editarCategoriaDescricao" class="input-field" rows="3"
+                <textarea name="descricao" id="editarCategoriaDescricao" class="input-field" rows="3", maxlength="250"
                           placeholder="Descreva esta categoria..."></textarea>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">

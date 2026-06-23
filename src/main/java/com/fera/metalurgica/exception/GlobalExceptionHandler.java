@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
 	public String handleBusiness(BusinessException ex, RedirectAttributes redirectAttributes) {
 		redirectAttributes.addFlashAttribute("erro", ex.getMessage());
-		return "redirect:/dashboard";
+		return "error/400";
 	}
 
 	// STATUS 500 (FALLBACK)
@@ -39,6 +39,6 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleGeneric(Exception ex, Model model) {
 		model.addAttribute("mensagem", "Erro inesperado. Tente novamente mais tarde.");
-		return "error/404";
+		return "error/500";
 	}
 }

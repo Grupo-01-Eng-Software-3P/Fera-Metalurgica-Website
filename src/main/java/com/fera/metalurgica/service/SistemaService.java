@@ -41,13 +41,13 @@ public class SistemaService {
 	private final PasswordEncoder passwordEncoder;
 
 	public SistemaService(ProdutoRepository produtoRepository,
-						  PedidoRepository pedidoRepository,
-						  UsuarioRepository usuarioRepository,
-						  CategoriaRepository categoriaRepository,
-						  MidiaRepository midiaRepository,
-						  AtividadeRepository atividadeRepository,
-						  ZApiService zApiService,
-						  PasswordEncoder passwordEncoder) {
+	                      PedidoRepository pedidoRepository,
+	                      UsuarioRepository usuarioRepository,
+	                      CategoriaRepository categoriaRepository,
+	                      MidiaRepository midiaRepository,
+	                      AtividadeRepository atividadeRepository,
+	                      ZApiService zApiService,
+	                      PasswordEncoder passwordEncoder) {
 		this.produtoRepository = produtoRepository;
 		this.pedidoRepository = pedidoRepository;
 		this.usuarioRepository = usuarioRepository;
@@ -91,7 +91,7 @@ public class SistemaService {
 	}
 
 	@PostConstruct
-	public void removerAtividadesIniciaisAntigas() {
+	public void removerAtividadesIniciais() {
 		atividadeRepository.findAll().stream()
 			.filter(this::isAtividadeInicialAntiga)
 			.forEach(atividadeRepository::delete);
@@ -124,9 +124,8 @@ public class SistemaService {
 	}
 
 	public void adicionarUsuario(Usuario usuario) {
-
 		if (usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()).isPresent()) {
-			throw new BusinessException("E-mail jÃ¡ cadastrado: " + usuario.getEmail());
+			throw new BusinessException("E-mail já cadastrado: " + usuario.getEmail());
 		}
 		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 		usuarioRepository.save(usuario);
@@ -134,7 +133,7 @@ public class SistemaService {
 
 	public Usuario buscarUsuarioPorId(Long id) {
 		return usuarioRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("UsuÃ¡rio nÃ£o encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
 	}
 
 
@@ -146,7 +145,7 @@ public class SistemaService {
 
 	public Produto buscarProdutoPorId(Long id) {
 		return produtoRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Produto nÃ£o encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com id: " + id));
 	}
 
 
@@ -181,7 +180,7 @@ public class SistemaService {
 
 		Pedido pedido = (dto.getPedidoId() != null)
 			? pedidoRepository.findById(dto.getPedidoId())
-			.orElseThrow(() -> new IllegalArgumentException("Pedido nÃ£o encontrado"))
+			.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"))
 			: new Pedido();
 
 		pedido.setCliente(dto.getCliente());
@@ -253,7 +252,7 @@ public class SistemaService {
 
 	public Pedido buscarPedidoPorId(Long id) {
 		return pedidoRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("OrÃ§amento nÃ£o encontrado com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Orçamento não encontrado com id: " + id));
 	}
 
 
@@ -285,7 +284,7 @@ public class SistemaService {
 			if (atividade.getData().equals(hoje)) {
 				atividades.add(criarAtividadeRecente(
 					atividade.getTitulo(),
-					"Compromisso: " + valorOuPadrao(atividade.getTitulo(), "Sem tÃ­tulo"),
+					"Compromisso: " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
 					atividade.getEvento(),
 					atividade.getData(),
 					valorOuPadrao(atividade.getHorario(), "Hoje")
@@ -294,7 +293,7 @@ public class SistemaService {
 				atividades.add(criarAtividadeRecente(
 					atividade.getTitulo(),
 					"Compromisso criado para o dia " + DATA_BR.format(atividade.getData())
-						+ ": " + valorOuPadrao(atividade.getTitulo(), "Sem tÃ­tulo"),
+						+ ": " + valorOuPadrao(atividade.getTitulo(), "Sem título"),
 					atividade.getEvento(),
 					atividade.getData(),
 					DATA_BR.format(atividade.getData())
@@ -309,8 +308,8 @@ public class SistemaService {
 
 			String numero = pedido.getId() != null ? pedido.getId().toString() : "-";
 			String descricao = pedido.isOrcamentoGerado()
-				? "OrÃ§amento NÂº" + numero + " criado"
-				: "Pedido NÂº" + numero + " realizado";
+				? "Orçamento Nº" + numero + " criado"
+				: "Pedido Nº" + numero + " realizado";
 
 			atividades.add(criarAtividadeRecente(
 				descricao,
@@ -330,9 +329,8 @@ public class SistemaService {
 	}
 
 	public Atividade adicionarAtividade(Atividade atividade) {
-
 		if (atividade.getTitulo() == null || atividade.getTitulo().isBlank()) {
-			throw new BusinessException("O tÃ­tulo da atividade nÃ£o pode ser vazio.");
+			throw new BusinessException("O título da atividade não pode ser vazio.");
 		}
 		return atividadeRepository.save(atividade);
 	}
@@ -345,7 +343,7 @@ public class SistemaService {
 
 	private boolean isAtividadeInicialAntiga(Atividade atividade) {
 		return ("Alerta de Estoque".equals(atividade.getTitulo()) && "ALERTA".equals(atividade.getEvento()))
-			|| ("ReuniÃ£o".equals(atividade.getTitulo()) && "REUNIAO".equals(atividade.getEvento()));
+			|| ("Reunião".equals(atividade.getTitulo()) && "REUNIAO".equals(atividade.getEvento()));
 	}
 
 	private boolean foiCriadaNasUltimas24Horas(Atividade atividade, LocalDateTime agora) {
@@ -548,7 +546,7 @@ public class SistemaService {
 
 	public Path localizarArquivoAnexoPedido(Pedido pedido) {
 		if (pedido == null || !pedido.isTemAnexo()) {
-			throw new ResourceNotFoundException("Pedido nÃ£o possui anexo.");
+			throw new ResourceNotFoundException("Pedido não possui anexo.");
 		}
 
 		String nomeArquivo = Paths.get(pedido.getAnexoCaminho()).getFileName().toString();
@@ -556,7 +554,7 @@ public class SistemaService {
 		Path arquivo = baseDir.resolve(nomeArquivo).normalize();
 
 		if (!arquivo.startsWith(baseDir)) {
-			throw new BusinessException("Caminho de anexo invÃ¡lido.");
+			throw new BusinessException("Caminho de anexo inválido.");
 		}
 
 		return arquivo;
@@ -594,16 +592,15 @@ public class SistemaService {
 	@Transactional
 	public Midia alternarFavoritaMidia(Long midiaId) {
 		Midia midia = midiaRepository.findById(midiaId)
-			.orElseThrow(() -> new ResourceNotFoundException("MÃ­dia nÃ£o encontrada com id: " + midiaId));
+			.orElseThrow(() -> new ResourceNotFoundException("Mídia não encontrada com id: " + midiaId));
 
 		midia.setFavorita(!midia.isFavorita());
 		return midiaRepository.save(midia);
 	}
 
 	public void adicionarProduto(Produto produto) {
-
 		if (produto.getNome() == null || produto.getNome().isBlank()) {
-			throw new BusinessException("O nome do produto nÃ£o pode ser vazio.");
+			throw new BusinessException("O nome do produto não pode ser vazio.");
 		}
 		produtoRepository.save(produto);
 	}
@@ -627,7 +624,7 @@ public class SistemaService {
 
 	public Categoria buscarCategoriaPorId(Long id) {
 		return categoriaRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Categoria nÃ£o encontrada com id: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com id: " + id));
 	}
 
 	@Transactional
@@ -669,11 +666,34 @@ public class SistemaService {
 		midia.setDescricao(normalizarTexto(descricao));
 
 		if (arquivo != null && !arquivo.isEmpty()) {
+			// Deleta o arquivo antigo do disco antes de salvar o novo
+			deletarArquivoMidia(midia.getCaminho());
+
 			midia.setCaminho(salvarArquivoMidia(arquivo));
 			midia.setTipo(arquivo.getContentType());
 		}
 
 		return midiaRepository.save(midia);
+	}
+
+	private void deletarArquivoMidia(String caminho) {
+		if (caminho == null || caminho.isBlank()) {
+			return;
+		}
+
+		try {
+			// caminho salvo é "/imagens/nomeArquivo", o arquivo físico está em uploadDir/nomeArquivo
+			String nomeArquivo = Paths.get(caminho).getFileName().toString();
+			Path arquivo = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(nomeArquivo);
+
+			// Garante que o arquivo está dentro do uploadDir (segurança)
+			if (arquivo.startsWith(Paths.get(uploadDir).toAbsolutePath().normalize())) {
+				Files.deleteIfExists(arquivo);
+			}
+		} catch (IOException e) {
+			// Loga mas não interrompe o fluxo — o mais importante é salvar o novo arquivo
+			System.err.println("Aviso: não foi possível deletar o arquivo antigo de mídia: " + e.getMessage());
+		}
 	}
 
 	private String normalizarTexto(String valor) {
@@ -713,4 +733,3 @@ public class SistemaService {
 		return "/imagens/" + nomeArquivo;
 	}
 }
-

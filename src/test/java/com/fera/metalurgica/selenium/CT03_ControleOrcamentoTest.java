@@ -97,7 +97,31 @@ public class CT03_ControleOrcamentoTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("CT03.6 - Campos de itens do orçamento são editáveis")
+    @DisplayName("CT03.6 - Frete inicia vazio quando o pedido não tem valor informado")
+    void freteIniciaVazioSemValorInformado() {
+        loginComoAdmin();
+        abrirPagina("/orcamentos");
+
+        java.util.Map<String, Object> pedido = new java.util.HashMap<>();
+        pedido.put("id", 16);
+        pedido.put("cliente", "Cliente Sem Frete");
+        pedido.put("telefone", "(45) 99999-0000");
+        pedido.put("cpf", "123.456.789-09");
+        pedido.put("material", "Aço");
+        pedido.put("medidas", "1m x 1m");
+        pedido.put("descricao", "Orçamento sem frete informado");
+        pedido.put("criadoPor", "CLIENTE");
+        pedido.put("valorAdicionais", "0.00");
+
+        ((JavascriptExecutor) driver).executeScript("abrirModalNovoOrcamento(arguments[0]);", pedido);
+
+        assertEquals("", aguardarElemento(By.cssSelector("input[name='frete']")).getAttribute("value"));
+        assertEquals("", aguardarElemento(By.cssSelector("input[name='maoObra']")).getAttribute("value"));
+        assertEquals("R$\u00A00,00", aguardarElemento(By.id("valorTotalCalculado")).getAttribute("value"));
+    }
+
+    @Test
+    @DisplayName("CT03.7 - Campos de itens do orçamento são editáveis")
     void camposItensOrcamentoEditaveis() {
         loginComoAdmin();
         abrirPagina("/orcamentos");
@@ -114,7 +138,7 @@ public class CT03_ControleOrcamentoTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("CT03.7 - Lista de orçamentos existentes é exibida")
+    @DisplayName("CT03.8 - Lista de orçamentos existentes é exibida")
     void listaOrcamentosExibida() {
         loginComoAdmin();
         abrirPagina("/orcamentos");

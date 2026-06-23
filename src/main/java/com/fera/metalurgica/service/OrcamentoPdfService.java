@@ -60,6 +60,8 @@ public class OrcamentoPdfService {
 
                 writer.writeSection("Resumo financeiro");
                 writer.writeLinha("Valor dos materiais: " + formatarMoeda(pedido.getValorTotalMateriais()));
+                writer.writeLinha("Valor do frete: " + formatarMoeda(pedido.getValorFrete()));
+                writer.writeLinha("Valor da mao de obra: " + formatarMoeda(pedido.getValorMaoObra()));
                 writer.writeLinha("Valor dos adicionais: " + formatarMoeda(pedido.getValorAdicionais()));
                 writer.writeLinha("Valor total: " + formatarMoeda(pedido.getValorTotal()), true);
 

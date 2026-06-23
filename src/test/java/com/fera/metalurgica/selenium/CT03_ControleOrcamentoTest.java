@@ -3,6 +3,7 @@ package com.fera.metalurgica.selenium;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,7 +69,35 @@ public class CT03_ControleOrcamentoTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("CT03.5 - Campos de itens do orçamento são editáveis")
+    @DisplayName("CT03.5 - Modal preenche frete e mão de obra separadamente")
+    void modalPreencheAdicionaisSeparados() {
+        loginComoAdmin();
+        abrirPagina("/orcamentos");
+
+        java.util.Map<String, Object> pedido = new java.util.HashMap<>();
+        pedido.put("id", 15);
+        pedido.put("cliente", "Cliente Teste");
+        pedido.put("telefone", "(45) 99999-0000");
+        pedido.put("cpf", "123.456.789-09");
+        pedido.put("material", "Ferro");
+        pedido.put("medidas", "2m x 1m");
+        pedido.put("descricao", "Orçamento de teste");
+        pedido.put("criadoPor", "ADMIN");
+        pedido.put("valorFrete", "50.00");
+        pedido.put("valorMaoObra", "120.00");
+        pedido.put("item1Nome", "Estrutura");
+        pedido.put("item1Quantidade", "2");
+        pedido.put("item1ValorUnitario", "100.00");
+
+        ((JavascriptExecutor) driver).executeScript("abrirModalNovoOrcamento(arguments[0]);", pedido);
+
+        assertEquals("50.00", aguardarElemento(By.cssSelector("input[name='frete']")).getAttribute("value"));
+        assertEquals("120.00", aguardarElemento(By.cssSelector("input[name='maoObra']")).getAttribute("value"));
+        assertEquals("R$\u00A0370,00", aguardarElemento(By.id("valorTotalCalculado")).getAttribute("value"));
+    }
+
+    @Test
+    @DisplayName("CT03.6 - Campos de itens do orçamento são editáveis")
     void camposItensOrcamentoEditaveis() {
         loginComoAdmin();
         abrirPagina("/orcamentos");
@@ -77,7 +106,7 @@ public class CT03_ControleOrcamentoTest extends BaseTest {
         aguardarElemento(By.id("modalOrcamento"));
         aguardarElemento(By.cssSelector(".btn-flip")).click();
 
-        WebElement inputNomeItem = aguardarElemento(By.cssSelector("input[name='itemNome']"));
+        WebElement inputNomeItem = aguardarElemento(By.cssSelector("input[name='itens[0].nome']"));
         inputNomeItem.sendKeys("Estrutura Metálica");
 
         assertEquals("Estrutura Metálica", inputNomeItem.getAttribute("value"),
@@ -85,7 +114,7 @@ public class CT03_ControleOrcamentoTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("CT03.6 - Lista de orçamentos existentes é exibida")
+    @DisplayName("CT03.7 - Lista de orçamentos existentes é exibida")
     void listaOrcamentosExibida() {
         loginComoAdmin();
         abrirPagina("/orcamentos");

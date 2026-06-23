@@ -53,6 +53,8 @@ public class Pedido {
 	private List<ItemPedido> itens = new ArrayList<>();
 
 	private BigDecimal valorTotalMateriais;
+	private BigDecimal valorFrete;
+	private BigDecimal valorMaoObra;
 	private BigDecimal valorAdicionais;
 	private BigDecimal valorTotal;
 	private String observacoesAdmin;
@@ -131,6 +133,12 @@ public class Pedido {
 		this.valorTotalMateriais = valorTotalMateriais;
 	}
 
+	public BigDecimal getValorFrete() { return valorFrete; }
+	public void setValorFrete(BigDecimal valorFrete) { this.valorFrete = valorFrete; }
+
+	public BigDecimal getValorMaoObra() { return valorMaoObra; }
+	public void setValorMaoObra(BigDecimal valorMaoObra) { this.valorMaoObra = valorMaoObra; }
+
 	public BigDecimal getValorAdicionais() { return valorAdicionais; }
 	public void setValorAdicionais(BigDecimal valorAdicionais) { this.valorAdicionais = valorAdicionais; }
 
@@ -202,9 +210,17 @@ public class Pedido {
 				}
 			}
 		}
+
+		BigDecimal frete = valorFrete != null ? valorFrete : BigDecimal.ZERO;
+		BigDecimal maoObra = valorMaoObra != null ? valorMaoObra : BigDecimal.ZERO;
+
+		if (valorFrete != null || valorMaoObra != null) {
+			this.valorAdicionais = frete.add(maoObra);
+		} else {
+			this.valorAdicionais = valorAdicionais != null ? valorAdicionais : BigDecimal.ZERO;
+		}
+
 		this.valorTotalMateriais = totalMateriais;
-		this.valorTotal = (valorAdicionais != null)
-			? totalMateriais.add(valorAdicionais)
-			: totalMateriais;
+		this.valorTotal = totalMateriais.add(this.valorAdicionais != null ? this.valorAdicionais : BigDecimal.ZERO);
 	}
 }

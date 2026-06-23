@@ -193,21 +193,47 @@
 .categoria-footer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 10px 16px;
     border-top: 1px solid #f0ece8;
+    gap: 12px;
 }
 
-.categoria-nome {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fera-dark);
+.categoria-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.categoria-titulo-linha {
     display: flex;
     align-items: center;
     gap: 6px;
+
+    flex-wrap: wrap;
 }
-.categoria-nome i { font-size: 11px; color: currentColor; }
-.categoria-meta { font-size: 11px; color: #aaa; }
+
+.categoria-descricao {
+    font-size: 11px;
+    color: #888;
+    line-height: 1.3;
+
+    /* evita quebrar layout */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.categoria-meta {
+    font-size: 11px;
+    color: #aaa;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
 
 .btn-editar-icone {
     border: none;

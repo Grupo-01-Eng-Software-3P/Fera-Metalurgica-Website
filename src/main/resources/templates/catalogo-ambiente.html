@@ -21,7 +21,11 @@
 </nav>
 
 <header class="ca-hero">
-    <div class="ca-hero-bg" th:style="${midias != null and !#lists.isEmpty(midias)} ? 'background-image: url(' + ${midias[0].caminho} + ')' : 'background-color: #2a1f1a'"></div>
+    <div class="ca-hero-bg"
+         th:style="${midiaHero != null and midiaHero.caminho != null and midiaHero.caminho != ''}
+             ? 'background-image: url(' + ${midiaHero.caminho} + ')'
+             : 'background-color: #2a1f1a'">
+    </div>
     <div class="ca-hero-overlay"></div>
 
     <div class="ca-hero-content">
@@ -56,8 +60,10 @@
 
 <div th:if="${midias != null and midias.size() >= 2}" class="ca-cta">
     <div class="ca-cta-imgs">
-        <img th:src="${midias[midias.size() - 2].caminho}" alt="">
-        <img th:src="${midias[midias.size() - 1].caminho}" alt="">
+        <img th:if="${midias[midias.size() - 2].caminho != null and midias[midias.size() - 2].caminho != ''}"
+             th:src="${midias[midias.size() - 2].caminho}" alt="">
+        <img th:if="${midias[midias.size() - 1].caminho != null and midias[midias.size() - 1].caminho != ''}"
+             th:src="${midias[midias.size() - 1].caminho}" alt="">
     </div>
     <div class="ca-cta-overlay">
         <h2>Tudo para o seu lar</h2>
@@ -67,7 +73,8 @@
 
 <div th:if="${midias != null and midias.size() == 1}" class="ca-cta">
     <div class="ca-cta-single">
-        <img th:src="${midias[0].caminho}" alt="">
+        <img th:if="${midias[0].caminho != null and midias[0].caminho != ''}"
+             th:src="${midias[0].caminho}" alt="">
     </div>
     <div class="ca-cta-overlay">
         <h2>Tudo para o seu lar</h2>

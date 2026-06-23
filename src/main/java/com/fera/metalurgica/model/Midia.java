@@ -34,6 +34,9 @@ public class Midia {
 	@Column(nullable = false)
 	private boolean favorita;
 
+	@Column(nullable = false)
+	private boolean principal;
+
 	@PrePersist
 	public void prePersist() {
 		this.dataUpload = LocalDateTime.now();
@@ -67,4 +70,7 @@ public class Midia {
 
 	public boolean isFavorita() { return favorita; }
 	public void setFavorita(boolean favorita) { this.favorita = favorita; }
+
+	public boolean isPrincipal() { return principal; }
+	public void setPrincipal(boolean principal) { this.principal = principal; }
 }

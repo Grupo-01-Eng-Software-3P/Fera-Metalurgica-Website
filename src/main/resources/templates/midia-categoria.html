@@ -85,6 +85,8 @@
         <!-- Produto destaque -->
         <div class="produto-destaque" id="produtoDestaque">
             <div class="produto-destaque-img">
+
+                <!-- Botão favoritar -->
                 <button type="button"
                         id="btnFavoritarMidia"
                         class="btn-favoritar-midia"
@@ -94,6 +96,29 @@
                         hidden>
                     <i id="iconFavoritoMidia" class="fa-regular fa-star"></i>
                 </button>
+
+                <!-- Botão definir como principal -->
+                <button type="button"
+                        id="btnPrincipalMidia"
+                        class="btn-principal-midia"
+                        onclick="definirMidiaPrincipal(event)"
+                        aria-label="Definir como imagem principal"
+                        title="Definir como imagem principal do catálogo"
+                        hidden>
+                    <i id="iconPrincipalMidia" class="fa-regular fa-image"></i>
+                </button>
+
+                <!-- Botão deletar -->
+                <button type="button"
+                        id="btnDeletarMidia"
+                        class="btn-deletar-midia"
+                        onclick="confirmarDeletar(event)"
+                        aria-label="Remover imagem"
+                        title="Remover imagem"
+                        hidden>
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
                 <img id="imgDestaque"
                      th:src="${not #lists.isEmpty(midias)} ? ${midias[0].caminho} : ''"
                      alt="Produto">
@@ -134,6 +159,7 @@
                  th:data-descricao="${m.descricao}"
                  th:data-img="${m.caminho}"
                  th:data-favorita="${m.favorita}"
+                 th:data-principal="${m.principal}"
                  data-meta="—">
                 <div class="produto-card-img">
                     <img th:src="${m.caminho}" th:alt="${m.nome}">
@@ -277,6 +303,24 @@
     </div>
 </div>
 
+<!-- MODAL CONFIRMAR DELETAR -->
+<div id="modalDeletar" class="modal-form-overlay">
+    <div class="modal-form-content" style="max-width: 400px; text-align: center;">
+        <i class="fas fa-trash-alt" style="font-size: 36px; color: #e74c3c; margin-bottom: 16px;"></i>
+        <h3 style="margin-bottom: 8px;">Remover imagem?</h3>
+        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">
+            Esta ação não pode ser desfeita. A imagem será removida permanentemente.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button type="button" class="btn-secondary-outline" onclick="fecharModalDeletar()">Cancelar</button>
+            <form id="formDeletar" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn-primary" style="background: #e74c3c;">Remover</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     let cardSelecionado = null;
 
@@ -340,16 +384,16 @@
         }
 
         atualizarBotaoFavorito();
+        atualizarBotaoPrincipal();
+        atualizarBotaoDeletar();
     }
 
     function atualizarBotaoFavorito() {
-        const btn = document.getElementById('btnFavoritarMidia');
+        const btn  = document.getElementById('btnFavoritarMidia');
         const icon = document.getElementById('iconFavoritoMidia');
 
         if (!btn || !icon || !cardSelecionado || !cardSelecionado.dataset.id) {
-            if (btn) {
-                btn.hidden = true;
-            }
+            if (btn) btn.hidden = true;
             return;
         }
 
@@ -361,28 +405,48 @@
         btn.setAttribute('aria-label', btn.title);
     }
 
+    function atualizarBotaoPrincipal() {
+        const btn  = document.getElementById('btnPrincipalMidia');
+        const icon = document.getElementById('iconPrincipalMidia');
+
+        if (!btn || !icon || !cardSelecionado || !cardSelecionado.dataset.id) {
+            if (btn) btn.hidden = true;
+            return;
+        }
+
+        const principal = String(cardSelecionado.dataset.principal) === 'true';
+        btn.hidden = false;
+        btn.classList.toggle('is-principal', principal);
+        icon.className = principal ? 'fa-solid fa-image' : 'fa-regular fa-image';
+        btn.title = principal ? 'Remover como imagem principal' : 'Definir como imagem principal do catálogo';
+        btn.setAttribute('aria-label', btn.title);
+    }
+
+    function atualizarBotaoDeletar() {
+        const btn = document.getElementById('btnDeletarMidia');
+        if (!btn || !cardSelecionado || !cardSelecionado.dataset.id) {
+            if (btn) btn.hidden = true;
+            return;
+        }
+        btn.hidden = false;
+    }
+
     async function favoritarMidiaSelecionada(event) {
         event.preventDefault();
         event.stopPropagation();
 
-        if (!cardSelecionado || !cardSelecionado.dataset.id) {
-            return;
-        }
+        if (!cardSelecionado || !cardSelecionado.dataset.id) return;
 
         try {
-            const csrfToken = document.getElementById('csrfToken').value;
+            const csrfToken  = document.getElementById('csrfToken').value;
             const csrfHeader = document.getElementById('csrfHeader').value;
 
             const resposta = await fetch(`/midia/${cardSelecionado.dataset.id}/favoritar`, {
                 method: 'POST',
-                headers: {
-                    [csrfHeader]: csrfToken
-                }
+                headers: { [csrfHeader]: csrfToken }
             });
 
-            if (!resposta.ok) {
-                return;
-            }
+            if (!resposta.ok) return;
 
             const dados = await resposta.json();
             cardSelecionado.dataset.favorita = String(dados.favorita);
@@ -390,6 +454,51 @@
         } catch (erro) {
             console.error('Erro ao atualizar favorito da mídia:', erro);
         }
+    }
+
+    async function definirMidiaPrincipal(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!cardSelecionado || !cardSelecionado.dataset.id) return;
+
+        try {
+            const csrfToken  = document.getElementById('csrfToken').value;
+            const csrfHeader = document.getElementById('csrfHeader').value;
+
+            const resposta = await fetch(`/midia/${cardSelecionado.dataset.id}/principal`, {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            });
+
+            if (!resposta.ok) return;
+
+            const dados = await resposta.json();
+
+            // Desmarca todos os cards e marca apenas o atual se principal=true
+            document.querySelectorAll('.produto-card[data-id]').forEach(c => {
+                c.dataset.principal = 'false';
+            });
+            cardSelecionado.dataset.principal = String(dados.principal);
+            atualizarBotaoPrincipal();
+        } catch (erro) {
+            console.error('Erro ao definir mídia principal:', erro);
+        }
+    }
+
+    function confirmarDeletar(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!cardSelecionado || !cardSelecionado.dataset.id) return;
+
+        const form = document.getElementById('formDeletar');
+        form.action = `/midia/${cardSelecionado.dataset.id}/deletar`;
+        document.getElementById('modalDeletar').style.display = 'flex';
+    }
+
+    function fecharModalDeletar() {
+        document.getElementById('modalDeletar').style.display = 'none';
     }
 
     function abrirModalImagem() {
@@ -446,9 +555,7 @@
 
         const card = botao.closest('.produto-card[data-id]');
         const alvo = card || cardSelecionado;
-        if (!alvo || !alvo.dataset.id) {
-            return;
-        }
+        if (!alvo || !alvo.dataset.id) return;
 
         const form = document.getElementById('formEditarMidia');
         form.action = `/midia/${alvo.dataset.id}/editar`;
@@ -457,9 +564,7 @@
         document.getElementById('editarMidiaPreview').src = alvo.dataset.img || '';
         document.getElementById('modalEditarMidia').style.display = 'flex';
 
-        if (card) {
-            selecionarProduto(card);
-        }
+        if (card) selecionarProduto(card);
     }
 
     function fecharModalEditarMidia() {
@@ -467,7 +572,7 @@
     }
 
     window.addEventListener('click', function(e) {
-        ['modalImagem', 'modalDescricao', 'modalEditarCategoria', 'modalEditarMidia'].forEach(id => {
+        ['modalImagem', 'modalDescricao', 'modalEditarCategoria', 'modalEditarMidia', 'modalDeletar'].forEach(id => {
             const m = document.getElementById(id);
             if (e.target === m) m.style.display = 'none';
         });
@@ -492,10 +597,11 @@
             selecionarProduto(primeiroCard);
         } else {
             atualizarBotaoFavorito();
+            atualizarBotaoPrincipal();
+            atualizarBotaoDeletar();
         }
     });
 </script>
 
 </body>
 </html>
-

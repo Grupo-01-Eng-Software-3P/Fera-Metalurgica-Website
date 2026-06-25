@@ -1,0 +1,62 @@
+services:
+  metalurgica-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: metalurgica-app
+    ports:
+      - "8080:8080"
+    environment:
+      # ── Banco H2 (arquivo persistido no volume) ─────────────────────────
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/feradb
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: ${H2_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${H2_PASSWORD}
+
+      # ── JPA / Hibernate ──────────────────────────────────────────────────
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: "false"
+
+      # ── Console H2 ───────────────────────────────────────────────────────
+      SPRING_H2_CONSOLE_ENABLED: ${H2_CONSOLE_ENABLED:-false}
+      SPRING_H2_CONSOLE_PATH: /h2-console
+
+      # ── Servidor ─────────────────────────────────────────────────────────
+      SERVER_PORT: 8080
+
+      # ── Upload ───────────────────────────────────────────────────────────
+      UPLOAD_DIR: uploads/fera-metalurgica-website
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10MB
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10MB
+
+      # ── Init SQL ─────────────────────────────────────────────────────────
+      SPRING_SQL_INIT_MODE: always
+      SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION: "true"
+
+      # ── Z-API ────────────────────────────────────────────────────────────
+      ZAPI_INSTANCE_ID: ${ZAPI_INSTANCE_ID}
+      ZAPI_TOKEN: ${ZAPI_TOKEN}
+      ZAPI_CLIENT_TOKEN: ${ZAPI_CLIENT_TOKEN}
+      ZAPI_NUMERO_ADMIN: ${ZAPI_NUMERO_ADMIN}
+
+    volumes:
+      # Persiste o arquivo do banco H2 entre reinicializações do container
+      - h2-data:/app/data
+      # Persiste os uploads de arquivos
+      - uploads-data:/app/uploads
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  h2-data:
+    driver: local
+  uploads-data:
+    driver: local

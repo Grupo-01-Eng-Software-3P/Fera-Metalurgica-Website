@@ -10,7 +10,7 @@ O sistema foi desenhado com foco na **Experiência do Usuário (UX)**, permitind
 * **Autenticação (Interface):** Tela de login moderna com design em cards.
 * **Dashboard do Administrador:** Painel de controle responsivo com métricas de orçamentos e uma lista de atividades atualizada em tempo real.
 * **Gerenciamento de Usuários:** Cadastro e listagem de usuários administrativos.
-* **Persistência com PostgreSQL:** Dados armazenados em banco relacional utilizando Spring Data JPA.
+* **Persistência com H2 Database:** Dados armazenados em banco relacional utilizando Spring Data JPA.
 
 ## 🛠️ Tecnologias Utilizadas    
 Este projeto foi construído utilizando a arquitetura **MVC (Model-View-Controller)** com as seguintes tecnologias:
@@ -20,7 +20,6 @@ Este projeto foi construído utilizando a arquitetura **MVC (Model-View-Controll
 * [Spring Boot](https://spring.io/projects/spring-boot) (Framework base)
 * [Spring Security](https://spring.io/projects/spring-security) (Autenticação e Autorização)
 * [Spring Data JPA](https://spring.io/projects/spring-data-jpa) (Persistência de dados)
-* [PostgreSQL](https://www.postgresql.org/) (Banco de Dados)
 * [Thymeleaf](https://www.thymeleaf.org/) (Template Engine para renderização dinâmica)
 * [Hibernate ORM](https://hibernate.org/orm/) (Framework ORM)
 
@@ -38,23 +37,12 @@ Este projeto foi construído utilizando a arquitetura **MVC (Model-View-Controll
 **Pré Requisitos:**
 * Java 21+
 * Maven
-* Docker
+* Docker e Docker Compose
 
-**Subindo o banco PostgreSQL com Docker:**
-```bash
-docker run -d \
-  --name metalurgica-postgres \
-  -e POSTGRES_USER=fera \
-  -e POSTGRES_PASSWORD=fera123 \
-  -e POSTGRES_DB=metalurgicadb \
-  -p 5433:5432 \
-  --restart always \
-  postgres:16
-```
 
 **▶️ Executando a Aplicação:**
 ```bash
-mvn spring-boot:run
+docker compose up --build
 ```
 
 A aplicação estará disponível em:

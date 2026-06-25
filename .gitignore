@@ -1,10 +1,23 @@
+.env
 HELP.md
-target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-data/**
-uploads/**
+application.properties
+
+#Banco
+data/
+*.db
+*.mv.db
+*.trace.db
+
+#Uploads
+uploads/
+
+#Maven
+target/
+*.jar
+*.war
 
 ### STS ###
 .apt_generated
@@ -17,6 +30,7 @@ uploads/**
 
 ### IntelliJ IDEA ###
 .idea
+.idea/
 *.iws
 *.iml
 *.ipr

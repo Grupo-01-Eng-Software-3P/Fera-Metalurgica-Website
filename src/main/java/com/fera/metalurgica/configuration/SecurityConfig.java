@@ -26,7 +26,8 @@ public class SecurityConfig {
                                 "/orcamento",
                                 "/catalogo",
 								"/catalogo/**",
-                                "/pedido"
+                                "/pedido",
+							 	"/health"
                         ).permitAll()
                         .requestMatchers(
                                 "/dashboard",

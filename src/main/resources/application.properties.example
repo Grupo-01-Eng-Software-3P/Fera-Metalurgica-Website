@@ -9,7 +9,7 @@ spring.datasource.password=
 
 # Configuracoes JPA / Hibernate
 spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-# Para testes altere a linha abaixo para 'create' - para limpar o banco fantasma. Para produção 'update' ou 'validate'
+# Para testes altere a linha abaixo para 'create' - para limpar o banco fantasma. Para producao 'update' ou 'validate'
 spring.jpa.hibernate.ddl-auto=create
 spring.jpa.show-sql=true
 
@@ -37,7 +37,7 @@ spring.jpa.defer-datasource-initialization=true
 spring.mandatory-file-encoding=UTF-8
 
 # Credenciais Z-API
-zapi.instance-id=3F44D0B81CC1B1E17D5BFE743DE93AC5
-zapi.token=FC292ECA4C7B66FF7C0D2679
-zapi.client-token=Fe5dcb05195e64af1bc9eeb80200053a3S
-zapi.numero-admin=120363425141616950-group
+zapi.instance-id=SEU_INSTANCE_ID_AQUI
+zapi.token=SEU_TOKEN_AQUI
+zapi.client-token=SEU_CLIENT_TOKEN_AQUI
+zapi.numero-admin=SEU_NUMERO_ADMIN_AQUI

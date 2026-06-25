@@ -1,6 +1,5 @@
 package com.fera.metalurgica.selenium;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.By;
@@ -28,10 +27,8 @@ public abstract class BaseTest {
 
     @BeforeEach
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless=new"); // descomente para rodar sem abrir o browser
+         options.addArguments("--headless=new"); // descomente para rodar sem abrir o browser
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");

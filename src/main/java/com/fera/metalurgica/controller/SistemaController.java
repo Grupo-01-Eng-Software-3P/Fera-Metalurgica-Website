@@ -82,6 +82,11 @@ public class SistemaController {
 		return "dashboard";
 	}
 
+	@GetMapping("/health")
+	public ResponseEntity<Map<String, String>> health() {
+		return ResponseEntity.ok(Map.of("status", "ok"));
+	}
+
 	// ── ORÇAMENTOS ───────────────────────────────────────
 	@GetMapping("/orcamentos")
 	public String orcamentos(Model model) {

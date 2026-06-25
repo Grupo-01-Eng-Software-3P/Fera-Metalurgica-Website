@@ -8,12 +8,22 @@ on:
 
 jobs:
   trivy-scan:
-    name: Trivy - Vulnerabilidades e Secrets
+    name: Trivy - Vulnerabilidades e Segredos
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Popular cache do Maven
+        run: mvn dependency:resolve -q --no-transfer-progress
 
       - name: Escanear repositório com Trivy
         uses: aquasecurity/trivy-action@master
